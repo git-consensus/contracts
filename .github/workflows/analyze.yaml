@@ -1,0 +1,25 @@
+name: analyze
+"on":
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
+jobs:
+    analyze:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            security-events: write
+        steps:
+            - name: Check out the repo
+              uses: actions/checkout@v3
+              with:
+                  submodules: recursive
+            - name: Run Slither
+              uses: crytic/slither-action@v0.1.0
+              continue-on-error: true
+              id: slither
+              with:
+                  target: contracts/

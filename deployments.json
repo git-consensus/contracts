@@ -1,0 +1,21 @@
+{
+    "deployments": [
+        {
+            "network": "ropsten",
+            "contracts": [
+                {
+                    "name": "gitConsensus",
+                    "address": "0x5b629EF6b8057Cb19812AAE5692225d3074EA6E4"
+                },
+                {
+                    "name": "tokenFactory",
+                    "address": "0x737552F10E044a93D05C646089AD88D8D111DFf8"
+                },
+                {
+                    "name": "governorFactory",
+                    "address": "0x65F2722C7a4446Db94ab80bc84FAF6538245c381"
+                }
+            ]
+        }
+    ]
+}

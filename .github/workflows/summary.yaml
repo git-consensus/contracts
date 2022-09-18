@@ -1,0 +1,21 @@
+---
+name: slither-summary
+"on":
+    - push
+    - pull_request
+jobs:
+    summary:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out the repo
+              uses: actions/checkout@v3
+              with:
+                  submodules: recursive
+            - name: Run Slither
+              uses: crytic/slither-action@v0.1.0
+              continue-on-error: true
+              id: slither
+              with:
+                  target: contracts/
+                  slither-config: slither.config.json
+                  slither-args: "--filter-paths contracts/test --print contract-summary"

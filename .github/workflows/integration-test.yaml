@@ -1,0 +1,22 @@
+---
+name: integration-test
+"on":
+    - push
+    - pull_request
+jobs:
+    integration:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out the repo
+              uses: actions/checkout@v3
+              with:
+                  submodules: recursive
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  cache: yarn
+                  node-version: "16"
+            - name: Install the Node.js dependencies
+              run: yarn install --immutable
+            - name: Run Integration Tests
+              run: yarn test --logs

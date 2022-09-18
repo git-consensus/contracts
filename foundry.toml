@@ -1,0 +1,25 @@
+[profile.default]
+solc-version = "0.8.17"
+verbosity = 2
+optimizer = true
+optimizer_runs = 200
+# true for stack-too-deep error avoidance,
+# off for speedy builds (if it compiles)
+via_ir = true
+
+
+[profile.default.optimizer_details]
+constantOptimizer = true
+yul = true
+# this sets the `yulDetails` of the `optimizer_details` for the `default` profile
+# [profile.default.optimizer_details.yulDetails]
+# stackAllocation = true
+# optimizerSteps = 'dhfoDgvulfnTUtnIf'
+
+# remappings = [
+#  '@float-capital/ds-test=node_modules/@float-capital/ds-test/src',
+#  '@rari-capital/solmate=node_modules/@rari-capital/solmate',
+#  '@openzeppelin/contracts=node_modules/@openzeppelin/contracts'
+# ]
+
+# See more config options https://github.com/gakonst/foundry/tree/master/config

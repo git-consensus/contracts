@@ -1,0 +1,30 @@
+{
+    "_comment": "For use with the TypeScript Import Sorter VSCode Plugin (https://github.com/SoominHan/import-sorter) - please use to keep this repo beautiful!",
+    "editor.formatOnSave": true,
+    "importSorter.generalConfiguration": {
+        "sortOnBeforeSave": true,
+        "hasSemicolon": true,
+        "exclude": [
+            "./artifacts",
+            "./build",
+            "./cache",
+            "./contracts",
+            "./coverage",
+            "./dist",
+            "./media",
+            "./node_modules",
+            "./out",
+            "./vendor"
+        ]
+    },
+    "importSorter.importStringConfiguration": {
+        "maximumNumberOfImportExpressionsPerLine": {
+            "count": 80,
+            "type": "newLineEachExpressionAfterCountLimitExceptIfOnlyOne"
+        },
+        "tabSize": 4,
+        "qouteMark": "double"
+    },
+    "importSorter.sortConfiguration.removeUnusedImports": true,
+    "importSorter.sortConfiguration.removeUnusedDefaultImports": true
+}

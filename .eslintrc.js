@@ -1,0 +1,49 @@
+module.exports = {
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+        project: "tsconfig.json",
+    },
+    env: {
+        browser: false,
+        mocha: true,
+        node: true,
+    },
+    plugins: ["@typescript-eslint", "prettier"],
+    extends: [
+        // "standard",
+        "eslint:recommended",
+        "plugin:node/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:prettier/recommended", // prettier must be last
+    ],
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+        ecmaVersion: 12,
+        project: ["./tsconfig.json"],
+    },
+    root: true,
+    rules: {
+        "prettier/prettier": "error",
+        "arrow-body-style": "off",
+        "prefer-arrow-callback": "off",
+        quotes: ["error", "backtick"],
+        "node/no-unsupported-features/es-syntax": "off",
+        "@typescript-eslint/explicit-function-return-type": "error",
+        "@typescript-eslint/no-floating-promises": [
+            "error",
+            {
+                ignoreIIFE: true,
+                ignoreVoid: true,
+            },
+        ],
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                argsIgnorePattern: "_",
+                varsIgnorePattern: "_",
+            },
+        ],
+    },
+};
