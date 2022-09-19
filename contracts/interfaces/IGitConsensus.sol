@@ -110,35 +110,34 @@ interface IGitConsensusTypes {
 ////        unit testing purposes.
 interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
     /// @notice Notarizes a commit on-chain, building the hash trustlessly from the commit data.
-    ///     Then, the commit hash is stored on-chain and with the associated owner address.
-    ///     Emits a `IGitConsensusEvents.CommitAdded` event.
+    ///     Stores the commit such that `commitExists()` returns true for this commit hash, and
+    ///     `commitAddr()` returns the owner address. Emits a `IGitConsensusEvents.CommitAdded`
     /// @param commitData The data of the commit (tree, parents, author, message, etc).
     ///     `commitData.message` MUST include an address, which determines where the tokens are sent
-    ///     when/if the corresponding commit embedded in a future `addRelease()` call.
+    ///     when/if the corresponding commit is embedded in a future `addRelease()` call.
+    /// @return commitHash The SHA-1 built from the commit data.
     /// @dev msg.sender does not need to be validated, since malicious attacks (e.g. adding a commit
     ///     hash that does not exist in the repo main branch) will have no downside for anyone other
     ///     than the attacker (who pays for gas). This decouples the sender of the `addCommit()`
     ///     call from the actual owner of the commit themselves, which adds massive flexibility.
     ///
-    ///     Instead of encoding both ownerAddr and tokenAddr in commit message, this limit expected
-    ///     # of addresses in commit message to 1. This keeps the usage simple (one address per
-    ///     message consistency) and less error prone (parsing n addresses rather than one).
+    ///     Instead of encoding both ownerAddr and tokenAddr in commit message, this limits the
+    ///     expected # of addresses in a commit message to 1. This keeps the usage simple (1
+    ///     address per message rule) and less error prone (parsing 1 is far easier than n many).
     function addCommit(CommitData calldata commitData) external returns (bytes20 commitHash);
 
     /// @notice Notarizes a tag on-chain, building the hash trustlessly from the tag data. Then,
-    ///     rewards tokens to the contributers, and stores the release such that `releaseExists()`
-    ///     returns true for this tag hash. Distributes token rewards to commits
-    ///     Emits a `IGitConsensusEvents.ReleaseAdded` event.
+    ///     mints tokens for the owners of each commit hash. Stores the tag such that
+    ///     `tagExists()` returns true for this tag hash, and `tagAddr()` returns the token
+    ///     address. Emits a `IGitConsensusEvents.ReleaseAdded` event.
     /// @param tagData The data of the tag (object, type, tag, tagger, message, etc).
     ///     `tagData.message` MUST include an address, which needs to be the msg.sender.
     /// @param hashes Array of git commit hashes to receive tokens. This hash will be used to
     ///     look up the address that was embedded in the commit data's message. MUST equal
-    ///     length of `values`.
-    /// @param values Array of amounts of tokens to be given to each commit owner (in wei). MUST
-    ///     equal length of `hashes`.
-    /// @return tagHash The SHA-1 hash of the tag data.
-    /// @dev Just having the parameters be arrays for commit hashes and values would have also been
-    ///     a choice, but any implementation is going to get stack-too-deep error just from input.
+    ///     length of `values`. hashes[i]'s owner will be rewarded with values[i] tokens.
+    /// @param values Array of amounts of tokens to be given to each commit owner. MUST
+    ///     equal length of `hashes`. values[i] is the amount minted for hashes[i]'s owner.
+    /// @return tagHash The SHA-1 built from the tag data.
     /// @dev The usual case here is that hashes refers to all the git commits included from the last
     ///     release tag (vX.Y.Z-1) to the newest release tag (vX.Y.Z) being added. All of the commit
     ///     hashes SHOULD have already been added previously via `addCommit()`,

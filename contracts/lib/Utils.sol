@@ -92,7 +92,7 @@ library Utils {
     }
 
     /// @notice Extracts the part of a string based on the desired length and offset.
-    ///     The offset and length must not exceed the lenth of the base string.
+    ///     The offset and length must not exceed the length of the base string.
     /// @param _base When being used for a data type this is the extended object
     ///     otherwise this is the string that will be used for extracting the substring.
     /// @param _offset The starting point to extract the substring from.
