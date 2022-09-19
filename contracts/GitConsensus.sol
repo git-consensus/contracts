@@ -34,7 +34,7 @@ contract GitConsensus is IGitConsensus {
 
         // parse the owner's address that is embedded in the message
         if (bytes(_commitData.message).length < ADDR_BYTES_LENGTH) {
-            revert MsgNeedsAddr();
+            revert CommitMsgNeedsAddr(_commitData.message);
         }
         uint256 ownerAddrOffset = Utils.indexOfAddr(_commitData.message);
         string memory ownerAddrStr = Utils.substring(
@@ -56,7 +56,7 @@ contract GitConsensus is IGitConsensus {
         uint256[] calldata _values
     ) external returns (bytes20 tagHash_) {
         if (_hashes.length != _values.length) {
-            revert DistributionLengthMismatch();
+            revert DistributionLengthMismatch(_hashes.length, _values.length);
         }
 
         // build SHA-1 hash based on tag data: sha1("tag " + datasize + "\0" + data)
@@ -77,7 +77,7 @@ contract GitConsensus is IGitConsensus {
 
         // parse the token's address that is embedded in the message
         if (bytes(_tagData.message).length < ADDR_BYTES_LENGTH) {
-            revert MsgNeedsAddr();
+            revert TagMsgNeedsAddr(_tagData.message);
         }
         uint256 tokenAddrOffset = Utils.indexOfAddr(_tagData.message);
         string memory tokenAddrStr = Utils.substring(

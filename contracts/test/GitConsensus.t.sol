@@ -65,7 +65,7 @@ contract WhenCallingGitConsensus is BaseSetup {
     function testOk_commitEmptyFailed(address _ownerAddr) public {
         vm.assume(_ownerAddr != address(0));
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("CommitMsgNeedsAddr(string)", ""));
         aGitConsensus.addCommit(commitDataEmpty);
     }
 
@@ -81,7 +81,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             signature: "\n"
         });
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("CommitMsgNeedsAddr(string)", commit.message));
         aGitConsensus.addCommit(commit);
     }
 
@@ -123,7 +123,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             signature: signature
         });
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("CommitMsgNeedsAddr(string)", commit.message));
         aGitConsensus.addCommit(commit);
     }
 
@@ -135,7 +135,9 @@ contract WhenCallingGitConsensus is BaseSetup {
             Strings.slice(bytes(Strings.toAsciiString(_ownerAddr)), 0, 21)
         );
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(
+            abi.encodeWithSignature("CommitMsgNeedsAddr(string)", commitDataEmpty.message)
+        );
         aGitConsensus.addCommit(commitDataEmpty);
     }
 
@@ -408,7 +410,7 @@ contract WhenCallingGitConsensus is BaseSetup {
         bytes20[] memory hashes;
         uint256[] memory values;
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("TagMsgNeedsAddr(string)", ""));
         aGitConsensus.addRelease(tagDataEmpty, hashes, values);
     }
 
@@ -427,7 +429,7 @@ contract WhenCallingGitConsensus is BaseSetup {
         bytes20[] memory hashes;
         uint256[] memory values;
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("TagMsgNeedsAddr(string)", tagData.message));
         aGitConsensus.addRelease(tagData, hashes, values);
     }
 
@@ -472,7 +474,7 @@ contract WhenCallingGitConsensus is BaseSetup {
         bytes20[] memory hashes;
         uint256[] memory values;
 
-        vm.expectRevert(abi.encodeWithSignature("MsgNeedsAddr()"));
+        vm.expectRevert(abi.encodeWithSignature("TagMsgNeedsAddr(string)", tagData.message));
         aGitConsensus.addRelease(tagData, hashes, values);
     }
 

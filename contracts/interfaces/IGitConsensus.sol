@@ -5,17 +5,26 @@ pragma solidity >=0.8.17;
 /// @author Matt Stam (@mattstam)
 /// @notice The interface for the errors that may be thrown from Git Consensus.
 interface IGitConsensusErrors {
-    /// @notice When commit or tag message does not contain a valid address.
+    /// @notice When commit message does not contain a valid address.
+    /// @param message The commit message string.
     /// @dev More specifically, when the message does not contain 0x followed by enough
-    ///    length for an address (40 hex characters). Can occur with either `addCommit()` or
-    ///    `addRelease()`.
-    error MsgNeedsAddr();
+    ///    length for an address (40 hex characters). Can occur with `addCommit()`.
+    error CommitMsgNeedsAddr(string message);
+    /// @notice When tag message does not contain a valid address.
+    /// @param message The tag message string.
+    /// @dev More specifically, when the message does not contain 0x followed by enough
+    ///    length for an address (40 hex characters). Can occur with `addRelease()`.
+    error TagMsgNeedsAddr(string message);
     /// @notice When distribution hashes/owner array length and values array length do not match.
-    /// @dev Can occur with `addRelease()` only.
-    error DistributionLengthMismatch();
+    /// @param hashesLen The length of the hashes array.
+    /// @param valuesLen The length of the values array.
+    /// @dev Can occur with `addRelease()`.
+    error DistributionLengthMismatch(uint256 hashesLen, uint256 valuesLen);
     /// @notice When a release attempt occurs from a sender other than the project's governor.
-    /// @dev Can occur with `addRelease()` only.
-    error UnauthorizedRelease();
+    /// @param senderAddr The address of the unathorized sender.
+    /// @param expectedAddr The expected address, which should be the governor.
+    /// @dev Can occur with `addRelease()`.
+    error UnauthorizedRelease(address senderAddr, address expectedAddr);
 }
 
 /// @title  IGitConsensusEvents
