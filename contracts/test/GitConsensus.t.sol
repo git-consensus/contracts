@@ -3,7 +3,7 @@ pragma solidity >=0.8.17;
 import {IGitConsensus, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes} from "../interfaces/IGitConsensus.sol";
 import {GitConsensus} from "../GitConsensus.sol";
 import {Test} from "./utils/Test.sol";
-import {Utils} from "./utils/Utils.sol"
+import {Utils} from "./utils/Utils.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
@@ -254,10 +254,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\nfoo", bytes(Strings.toHexString(_ownerAddr))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\nfoo", bytes(Strings.toHexString(_ownerAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -267,10 +264,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\nbar", bytes(Strings.toHexString(_ownerAddr))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\nbar", bytes(Strings.toHexString(_ownerAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -306,10 +300,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))), "\n")
             ),
             signature: "\n"
         });
@@ -320,10 +311,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))), "\n")
             ),
             signature: "\n"
         });
@@ -360,10 +348,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))), "\n")
             ),
             signature: "\n"
         });
@@ -374,10 +359,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))), "\n")
             ),
             signature: "\n"
         });
@@ -581,10 +563,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\nhello", bytes(Strings.toHexString(_tokenAddr))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\nhello", bytes(Strings.toHexString(_tokenAddr))), "\n")
             ),
             signature: "\n"
         });

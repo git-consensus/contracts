@@ -46,9 +46,10 @@ library Utils {
     ) internal pure returns (string memory result_) {
         bytes memory _baseBytes = bytes(_base);
 
+        // TODO: Test scenario to hit this with new error messages
         (bool success, uint256 endIdx) = SafeMath.tryAdd(_offset, _length);
         require(success, "Utils: substring overflow");
-        require(endIdx <= _baseBytes.length , "Utils: substring out of bounds");
+        require(endIdx <= _baseBytes.length, "Utils: substring out of bounds");
 
         string memory _tmp = new string(_length);
         bytes memory _tmpBytes = bytes(_tmp);

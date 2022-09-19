@@ -10,7 +10,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 /// @notice A Git Consensus Protocol implementation.
 contract GitConsensus is IGitConsensus {
     /// @dev To parse address in commit/tag message, look for 0x followed by 40 hex characters
-    uint256 constant ADDR_BYTES_LENGTH = 42;
+    uint8 constant ADDR_BYTES_LENGTH = 42;
 
     mapping(bytes20 => address) private commitToOwnerAddr;
     mapping(bytes20 => address) private tagToTokenAddr;
