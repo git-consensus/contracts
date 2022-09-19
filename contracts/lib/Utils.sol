@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /// @title  Utils
 /// @notice A collection of utility functions for Git Consensus.
@@ -8,66 +9,6 @@ pragma solidity >=0.8.17;
 ///         not necessarily optimized for readability. Improvements to gas efficiency
 ///         are always welcome.
 library Utils {
-    /// @notice Converts uint256 type to string type.
-    /// @param _value The uint256 value to convert to a string.
-    /// @return str_ The string representation of the uint256 value.
-    /// @dev Converts a `uint256` to its ASCII `string` decimal representation. Most gas efficent
-    ///     from a thorough search of all possible ways to do this. src: https://
-    ///     github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol
-    function uintToStr(uint256 _value) internal pure returns (string memory str_) {
-        unchecked {
-            uint256 length = 1;
-
-            // compute log10(value), and add it to length
-            uint256 valueCopy = _value;
-            if (valueCopy >= 10**64) {
-                valueCopy /= 10**64;
-                length += 64;
-            }
-            if (valueCopy >= 10**32) {
-                valueCopy /= 10**32;
-                length += 32;
-            }
-            if (valueCopy >= 10**16) {
-                valueCopy /= 10**16;
-                length += 16;
-            }
-            if (valueCopy >= 10**8) {
-                valueCopy /= 10**8;
-                length += 8;
-            }
-            if (valueCopy >= 10**4) {
-                valueCopy /= 10**4;
-                length += 4;
-            }
-            if (valueCopy >= 10**2) {
-                valueCopy /= 10**2;
-                length += 2;
-            }
-            if (valueCopy >= 10**1) {
-                length += 1;
-            }
-            // now, length is log10(value) + 1
-
-            string memory buffer = new string(length);
-            uint256 ptr;
-            /// @solidity memory-safe-assembly
-            assembly {
-                ptr := add(buffer, add(32, length))
-            }
-            while (true) {
-                ptr--;
-                /// @solidity memory-safe-assembly
-                assembly {
-                    mstore8(ptr, byte(mod(_value, 10), "0123456789abcdef"))
-                }
-                _value /= 10;
-                if (_value == 0) break;
-            }
-            return buffer;
-        }
-    }
-
     /// @notice Locates and returns the char position of the first "0x" within a string.
     /// @param _base String to search through.
     /// @return pos_ The position of the first "0x". Failure to find "0x" will return 0,
@@ -105,13 +46,15 @@ library Utils {
     ) internal pure returns (string memory result_) {
         bytes memory _baseBytes = bytes(_base);
 
-        assert(uint256(_offset + _length) <= _baseBytes.length);
+        (bool success, uint256 endIdx) = SafeMath.tryAdd(_offset, _length);
+        require(success, "Utils: substring overflow");
+        require(endIdx <= _baseBytes.length , "Utils: substring out of bounds");
 
         string memory _tmp = new string(_length);
         bytes memory _tmpBytes = bytes(_tmp);
 
         uint256 j = 0;
-        for (uint256 i = _offset; i < uint256(_offset + _length); i++) {
+        for (uint256 i = _offset; i < endIdx; i++) {
             _tmpBytes[j++] = _baseBytes[i];
         }
 

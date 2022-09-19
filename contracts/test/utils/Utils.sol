@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
 
-/// @title Strings
-/// @notice Utility functions for working with Strings.
-library Strings {
+/// @title Utils
+/// @notice Utility functions for tests.
+library Utils {
     /// @notice Slice bytes into into a subset, from a start index to an end index.
     /// @dev src: https://github.com/Uniswap/v3-periphery/blob/
     ///     5bcdd9f67f9394f3159dad80d0dd01d37ca08c66/contracts/libraries/BytesLib.sol#L12
@@ -147,25 +147,5 @@ library Strings {
         }
 
         return resultBytes_;
-    }
-
-    /// @notice Converts an address to a string.
-    /// @dev src: https://ethereum.stackexchange.com/a/8447
-    function toAsciiString(address _addr) internal pure returns (string memory str_) {
-        bytes memory s = new bytes(40);
-        for (uint256 i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint256(uint160(_addr)) / (2**(8 * (19 - i)))));
-            bytes1 hi = bytes1(uint8(b) / 16);
-            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2 * i] = char(hi);
-            s[2 * i + 1] = char(lo);
-        }
-        return string(Strings.concat(bytes("0x"), s));
-    }
-
-    /// @dev src: https://ethereum.stackexchange.com/a/8447
-    function char(bytes1 _b) internal pure returns (bytes1 res_) {
-        if (uint8(_b) < 10) return bytes1(uint8(_b) + 0x30);
-        else return bytes1(uint8(_b) + 0x57);
     }
 }

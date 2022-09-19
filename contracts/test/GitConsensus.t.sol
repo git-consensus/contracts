@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
-
-import {Test} from "./utils/Test.sol";
-import {Strings} from "./utils/Strings.sol";
 import {IGitConsensus, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes} from "../interfaces/IGitConsensus.sol";
 import {GitConsensus} from "../GitConsensus.sol";
+import {Test} from "./utils/Test.sol";
+import {Utils} from "./utils/Utils.sol"
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
     /// @dev actual GitConsensus contract that contains state changes
@@ -132,7 +132,7 @@ contract WhenCallingGitConsensus is BaseSetup {
 
         // second half of address is missing
         commitDataEmpty.message = string(
-            Strings.slice(bytes(Strings.toAsciiString(_ownerAddr)), 0, 21)
+            Utils.slice(bytes(Strings.toHexString(_ownerAddr)), 0, 21)
         );
 
         vm.expectRevert(
@@ -144,7 +144,7 @@ contract WhenCallingGitConsensus is BaseSetup {
     function testOk_commitEmptyMsgAddr(address _ownerAddr) public {
         vm.assume(_ownerAddr != address(0));
 
-        commitDataEmpty.message = Strings.toAsciiString(_ownerAddr);
+        commitDataEmpty.message = Strings.toHexString(_ownerAddr);
 
         bytes20 commitHashExpected = mGitConsensus.addCommit(commitDataEmpty);
         assertFalse(aGitConsensus.commitExists(commitHashExpected));
@@ -169,7 +169,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(Strings.concat("\n", bytes(Strings.toAsciiString(_ownerAddr))), "\n")
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -223,8 +223,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author Satoshi Nakamoto <satoshi@bitcoin.org> 1208691178 -0400\n",
             committer: "commiter Satoshi Nakamoto <satoshi@bitcoin.org> 1208691178 -0400\n\n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\nhello world", bytes(Strings.toAsciiString(_ownerAddr))),
+                Utils.concat(
+                    Utils.concat("\nhello world", bytes(Strings.toHexString(_ownerAddr))),
                     "\n"
                 )
             ),
@@ -254,8 +254,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\nfoo", bytes(Strings.toAsciiString(_ownerAddr))),
+                Utils.concat(
+                    Utils.concat("\nfoo", bytes(Strings.toHexString(_ownerAddr))),
                     "\n"
                 )
             ),
@@ -267,8 +267,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\nbar", bytes(Strings.toAsciiString(_ownerAddr))),
+                Utils.concat(
+                    Utils.concat("\nbar", bytes(Strings.toHexString(_ownerAddr))),
                     "\n"
                 )
             ),
@@ -306,8 +306,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\n", bytes(Strings.toAsciiString(_ownerAddr1))),
+                Utils.concat(
+                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))),
                     "\n"
                 )
             ),
@@ -320,8 +320,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\n", bytes(Strings.toAsciiString(_ownerAddr2))),
+                Utils.concat(
+                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))),
                     "\n"
                 )
             ),
@@ -360,8 +360,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\n", bytes(Strings.toAsciiString(_ownerAddr1))),
+                Utils.concat(
+                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr1))),
                     "\n"
                 )
             ),
@@ -374,8 +374,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             author: "author \n",
             committer: "commiter \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\n", bytes(Strings.toAsciiString(_ownerAddr2))),
+                Utils.concat(
+                    Utils.concat("\n", bytes(Strings.toHexString(_ownerAddr2))),
                     "\n"
                 )
             ),
@@ -481,7 +481,7 @@ contract WhenCallingGitConsensus is BaseSetup {
     function testOk_releaseEmptyMsgAddr(address _tokenAddr) public {
         vm.assume(_tokenAddr != address(0));
 
-        tagDataEmpty.message = string(Strings.concat("", bytes(Strings.toAsciiString(_tokenAddr))));
+        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(_tokenAddr))));
 
         bytes20[] memory hashes;
         uint256[] memory values;
@@ -503,7 +503,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Strings.concat(Strings.concat("\n", bytes(Strings.toAsciiString(_tokenAddr))), "\n")
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_tokenAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -554,8 +554,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag v1.0.0\n\n",
             tagger: "tagger Satoshi Nakamoto <satoshi@bitcoin.org> 1208691178 -0400\n\n",
             message: string(
-                Strings.concat(
-                    Strings.concat("release v1.0.0", bytes(Strings.toAsciiString(_tokenAddr))),
+                Utils.concat(
+                    Utils.concat("release v1.0.0", bytes(Strings.toHexString(_tokenAddr))),
                     "\n"
                 )
             ),
@@ -581,8 +581,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\nhello", bytes(Strings.toAsciiString(_tokenAddr))),
+                Utils.concat(
+                    Utils.concat("\nhello", bytes(Strings.toHexString(_tokenAddr))),
                     "\n"
                 )
             ),
@@ -597,8 +597,8 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Strings.concat(
-                    Strings.concat("\ngoodbye", bytes(Strings.toAsciiString(_tokenAddr))),
+                Utils.concat(
+                    Utils.concat("\ngoodbye", bytes(Strings.toHexString(_tokenAddr))),
                     "\n"
                 )
             ),
@@ -634,10 +634,10 @@ contract GasBenchmark is BaseSetup {
 
     function testGas_commit() public {
         string memory message = string(
-            Strings.concat(
-                Strings.concat(
+            Utils.concat(
+                Utils.concat(
                     "\nblahblahblahblahblahblahblahblahblahblahblahblah ",
-                    bytes(Strings.toAsciiString(alice))
+                    bytes(Strings.toHexString(alice))
                 ),
                 "\n"
             )
@@ -659,10 +659,10 @@ contract GasBenchmark is BaseSetup {
 
     function testGas_release() public {
         string memory message = string(
-            Strings.concat(
-                Strings.concat(
+            Utils.concat(
+                Utils.concat(
                     "\nblahblahblahblahblahblahblahblahblahblahblahblah",
-                    bytes(Strings.toAsciiString(tokenAddr))
+                    bytes(Strings.toHexString(tokenAddr))
                 ),
                 "\n"
             )

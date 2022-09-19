@@ -3,6 +3,7 @@ pragma solidity >=0.8.17;
 
 import {IGitConsensus} from "./interfaces/IGitConsensus.sol";
 import {Utils} from "./lib/Utils.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @title  GitConsensus
 /// @author Matt Stam (@mattstam)
@@ -29,7 +30,7 @@ contract GitConsensus is IGitConsensus {
             )
         );
         commitHash_ = Utils.sha1(
-            abi.encodePacked("commit ", Utils.uintToStr(bytes(data).length), bytes1(0), data)
+            abi.encodePacked("commit ", Strings.toString(bytes(data).length), bytes1(0), data)
         );
 
         // parse the owner's address that is embedded in the message
@@ -72,7 +73,7 @@ contract GitConsensus is IGitConsensus {
             )
         );
         tagHash_ = Utils.sha1(
-            abi.encodePacked("tag ", Utils.uintToStr(bytes(data).length), bytes1(0), data)
+            abi.encodePacked("tag ", Strings.toString(bytes(data).length), bytes1(0), data)
         );
 
         // parse the token's address that is embedded in the message
