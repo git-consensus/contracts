@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {IGitConsensusErrors} from "../interfaces/IGitConsensus.sol";
 
 /// @title  Utils
 /// @notice A collection of utility functions for Git Consensus.
@@ -23,12 +24,11 @@ library Utils {
     function indexOfAddr(string memory _base) internal pure returns (uint256 pos_) {
         bytes memory _baseBytes = bytes(_base);
 
-        for (uint256 i = _baseBytes.length - 2; i >= 0; --i) {
-            if (_baseBytes[i] == "0" && _baseBytes[i + 1] == "x") {
-                return i;
+        for (uint256 i = _baseBytes.length - 1; i > 0; --i) {
+            if (_baseBytes[i - 1] == "0" && _baseBytes[i] == "x") {
+                return i - 1;
             }
         }
-
         return 0;
     }
 
@@ -46,15 +46,15 @@ library Utils {
     ) internal pure returns (string memory result_) {
         bytes memory _baseBytes = bytes(_base);
 
-        // TODO: Test scenario to hit this with new error messages
         (bool success, uint256 endIdx) = SafeMath.tryAdd(_offset, _length);
-        require(success, "Utils: substring overflow");
-        require(endIdx <= _baseBytes.length, "Utils: substring out of bounds");
+        if (!success || endIdx > _baseBytes.length) {
+            revert IGitConsensusErrors.SubstringOutOfBounds(_offset, _length, _baseBytes.length);
+        }
 
         string memory _tmp = new string(_length);
         bytes memory _tmpBytes = bytes(_tmp);
 
-        for (uint256 i = _offset; i < endIdx; i++) {
+        for (uint256 i = _offset; i < endIdx; ++i) {
             _tmpBytes[i - _offset] = _baseBytes[i];
         }
 
@@ -69,7 +69,6 @@ library Utils {
     ///     "reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside
     ///     of an unchecked block)"
     ///     TODO: Try and catch this error and return a more meaningful error message
-    ///     TODO: Regex checking invalid character (i.e., not in the set [0-9A-Fa-f])
     ///     src: https://github.com/provable-things/ethereum-api/
     ///          blob/94b49f1b65ec4c0465b0e9f49f00415e5ed001a1/contracts/
     ///          solc-v0.8.x/provableAPI.sol#L631
@@ -105,7 +104,7 @@ library Utils {
     /// @param _data The data to hash.
     /// @return hash_ The hash of the data.
     /// @dev src: https://github.com/ensdomains/solsha1/blob/master/contracts/SHA1.sol
-    ///     by by Nick Johnson (Arachnid)
+    ///     by Nick Johnson (Arachnid)
     function sha1(bytes memory _data) internal pure returns (bytes20 hash_) {
         assembly {
             // Get a safe scratch location
