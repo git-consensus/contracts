@@ -94,14 +94,6 @@ contract GitConsensus is IGitConsensus {
             address owner = commitToOwnerAddr[commitHash];
             uint256 value = _values[i];
 
-            // Could choose to check if `commitToOwnerAddr[commitHash] != address(0)` to
-            // enforce that ALL commit hashes in the release MUST be in the distribution hashes.
-            // Instead, we skip over any commits that aren't saved on-chain.
-            // Rationale is that this makes it easier to go from tag(n-1) to tag(n)
-            // without having to worry about commits that haven't included an address or
-            // called the contract, but it would still be nice to have somehow inform people
-            // that "this commit's value is being ignored due to not having a valid address".
-
             if (value == 0 || owner == address(0)) {
                 continue;
             }
