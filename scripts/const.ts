@@ -19,7 +19,8 @@ export const EXAMPLE_VALUES = [100, 50];
 /// --- ERRORS ---
 
 export enum GitConsensusErrors {
-    MSG_NEEDS_ADDR = `MsgNeedsAddr`,
+    COMMIT_MSG_NEEDS_ADDR = `CommitMsgNeedsAddr`,
+    TAG_MSG_NEEDS_ADDR = `TagMsgNeedsAddr`,
     DISTRIBUTION_LENGTH_MISMATCH = `DistributionLengthMismatch`,
     UNAUTHORIZED_RELEASE = `UnauthorizedRelease`,
 }

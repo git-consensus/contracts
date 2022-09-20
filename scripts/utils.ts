@@ -39,7 +39,11 @@ export async function submitTxFail(
 }
 
 // Expect a transaction to fail. Throws an error if it succeeds.
-export async function expectTxFail<T>(tx: Promise<T>, expectedCause?: string): Promise<void> {
+export async function expectTxFail<T>(
+    tx: Promise<T>,
+    expectedCause?: string,
+    expectedParams?: string,
+): Promise<void> {
     try {
         await tx;
     } catch (error) {

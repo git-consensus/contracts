@@ -76,6 +76,11 @@ describe(`Git Consensus tests`, () => {
         // TODO: look into weird node error - it definitely fails / reverts so just
         // skipping for now, most likely fails when trying to parse the address but
         // a real error we could throw would be better.
+        // This test will succeed, but the other tests will get blocked with:
+        //
+        //     return new SolidityCallSite(sourceReference.sourceName, sourceReference.contract, sourceReference.function !== undefined
+        //      TypeError: Cannot read properties of undefined (reading 'sourceName')
+        //      (Use `node --trace-uncaught ...` to show where the exception was thrown)
         it.skip(`should fail all commit that have partial address`, async () => {
             const commitData: IGitConsensusTypes.CommitDataStruct = {
                 tree: `tree 01b2a2f9aa2d1d1df4299fad6ed02bb20841b1fd\n`,
@@ -112,7 +117,7 @@ describe(`Git Consensus tests`, () => {
             for (const commit of commitsNoAddr) {
                 await submitTxFail(
                     gitConsensus.addCommit(commit.data),
-                    GitConsensusErrors.MSG_NEEDS_ADDR,
+                    `${GitConsensusErrors.COMMIT_MSG_NEEDS_ADDR}("${commit.data.message}")`,
                 );
 
                 expect(await gitConsensus.commitExists(`0x` + commit.hash)).to.equal(false);
@@ -131,7 +136,7 @@ describe(`Git Consensus tests`, () => {
             const values: BigNumber[] = [BigNumber.from(10)];
             await submitTxFail(
                 gitConsensus.addRelease(tag.data, hashes, values),
-                GitConsensusErrors.DISTRIBUTION_LENGTH_MISMATCH,
+                `${GitConsensusErrors.DISTRIBUTION_LENGTH_MISMATCH}(${hashes.length}, ${values.length})`,
             );
         });
 
@@ -145,7 +150,7 @@ describe(`Git Consensus tests`, () => {
             for (const tag of tagsNoAddr) {
                 await submitTxFail(
                     gitConsensus.addRelease(tag.data, hashes, values),
-                    GitConsensusErrors.MSG_NEEDS_ADDR,
+                    `${GitConsensusErrors.TAG_MSG_NEEDS_ADDR}("${tag.data.message}")`,
                 );
 
                 expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
