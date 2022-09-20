@@ -20,8 +20,8 @@ contract TokenImpl is
     ERC20PermitUpgradeable,
     ERC20VotesUpgradeable
 {
-    address private minterAddr;
     address private governorAddr;
+    address private minterAddr;
 
     /// @inheritdoc IToken
     function initialize(
@@ -56,6 +56,11 @@ contract TokenImpl is
     /// @inheritdoc IToken
     function governor() external view returns (address governorAddr_) {
         return governorAddr;
+    }
+
+    /// @inheritdoc IToken
+    function minter() external view returns (address minterAddr_) {
+        return minterAddr;
     }
 
     /// @inheritdoc IToken

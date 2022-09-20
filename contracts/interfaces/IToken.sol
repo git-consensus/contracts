@@ -79,8 +79,14 @@ interface IToken {
     ///     with the Git Consensus Protocol.
     function governor() external returns (address governorAddr);
 
+    /// @notice Returns the minter corresponding to this token.
+    /// @return minterAddr The minter address, who can execute `mint()`.
+    function minter() external returns (address minterAddr);
+
     /// @notice Creates `amount` tokens and assigns them to `account`, increasing the total supply.
     /// @param account The address to assign the newly minted tokens to.
     /// @param amount The amount of tokens to be minted.
+    /// @dev This function is SHOULD only be callable by the minter() address,
+    ///     which should be the GitConsensus
     function mint(address account, uint256 amount) external;
 }

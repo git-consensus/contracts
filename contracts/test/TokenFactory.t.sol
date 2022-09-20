@@ -18,6 +18,8 @@ contract BaseSetup is Test, IGitConsensusTypes, ITokenFactoryEvents, IERC20Event
     }
 }
 
+// TODO: Check created token and ensure params
+
 contract WhenCreatingNewToken is BaseSetup {
     function testOk_createTokenEmptyDistribution(
         address _creatorAddr,
