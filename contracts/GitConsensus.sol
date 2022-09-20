@@ -2,6 +2,7 @@
 pragma solidity >=0.8.17;
 
 import {IGitConsensus} from "./interfaces/IGitConsensus.sol";
+import {IToken} from "./interfaces/IToken.sol";
 import {Utils} from "./lib/Utils.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -80,10 +81,27 @@ contract GitConsensus is IGitConsensus {
         string memory addrStr = Utils.substring(_tagData.message, addrOffset, ADDR_BYTES_LENGTH);
         address tokenAddr = Utils.parseAddr(addrStr);
 
-        tagToTokenAddr[tagHash_] = tokenAddr;
+        IToken token = IToken(tokenAddr);
 
-        // TODO: check msg.sender is governor, get reference to token, and mint tokens
-        // for each hash in _hashes.
+        // ensure that the caller of the function is the token's governor
+        if (token.governor() != msg.sender) {
+            revert UnauthorizedRelease(msg.sender, token.governor());
+        }
+
+        // mint new tokens for each commit owner
+        for (uint256 i = 0; i < _hashes.length; ++i) {
+            bytes20 commitHash = _hashes[i];
+            address owner = commitToOwnerAddr[commitHash];
+            uint256 value = _values[i];
+
+            if (value == 0 || owner == address(0)) {
+                continue;
+            }
+
+            token.mint(owner, value);
+        }
+
+        tagToTokenAddr[tagHash_] = tokenAddr;
 
         emit ReleaseAdded(tokenAddr, tagHash_);
     }

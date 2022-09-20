@@ -4,6 +4,11 @@ import {IGitConsensus, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTy
 import {GitConsensus} from "../GitConsensus.sol";
 import {Test} from "./utils/Test.sol";
 import {Utils} from "./utils/Utils.sol";
+import {Distibution} from "./utils/Distribution.sol";
+import {TokenFactory} from "../clones/TokenFactory.sol";
+import {TokenImpl} from "../clones/TokenImpl.sol";
+import {GovernorFactory} from "../clones/GovernorFactory.sol";
+import {GovernorImpl} from "../clones/GovernorImpl.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
@@ -12,11 +17,18 @@ contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsen
     /// @dev copy of GitConsensus for generating expected hashes against
     GitConsensus internal mGitConsensus;
 
+    TokenFactory internal tokenFactory;
+    GovernorFactory internal govFactory;
+
     address internal alice;
     address internal bob;
 
     TagData tagDataEmpty;
     CommitData commitDataEmpty;
+
+    // for initial distribution
+    address[] owners;
+    uint256[] values;
 
     function setUp() public virtual {
         // Actual GitConsensus contract to test against
@@ -57,6 +69,55 @@ contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsen
             message: "",
             signature: ""
         });
+
+        tokenFactory = new TokenFactory(new TokenImpl());
+        govFactory = new GovernorFactory(new GovernorImpl());
+        (owners, values) = Distibution.newStaticInitialDistribution(5000, 10);
+    }
+
+    // Some static params for Token<->Governor pair.
+    // The governor voting params don't matter as will immediately
+    // spoof calls from the governor's address to GitConsensus anyway.
+    string internal tokenName = "TestToken";
+    string internal tokenSymbol = "TTT";
+    string internal govName = "TestGovernor";
+    uint256 internal votingDelay = 10; // 10 blocks before voting begins
+    uint256 internal votingPeriod = 100800; // 2 weeks (assumes 12/s per block)
+    uint256 internal proposalThreshold = 100; // 100 votes needed to propose
+    uint256 internal quorumNumerator = 5; // 5% of total votes needed to reach quorum
+
+    /// @notice Helper function to create new Token<->Governor pairs on-demand. Emulates the usual
+    ///     flow a new project would go through to set these up (predicting governor address first,
+    ///     then creating each).
+    /// @dev Testing `addCommit()` would work fine on it's own, but `addRelease()` actually needs
+    ///     a Token set up with a backing governor, otherwise checking the governor as the msg.sender
+    ///     would fail, as would the actual minting of new tokens.
+    function createTokenGovPair(bytes32 _tokenSalt, bytes32 _govSalt)
+        public
+        virtual
+        returns (address tokenAddr_, address govAddr_)
+    {
+        govAddr_ = govFactory.predictAddress(_govSalt);
+
+        tokenAddr_ = tokenFactory.createToken(
+            govAddr_,
+            address(aGitConsensus),
+            tokenName,
+            tokenSymbol,
+            owners,
+            values,
+            _tokenSalt
+        );
+
+        govFactory.createGovernor(
+            tokenAddr_,
+            govName,
+            votingDelay,
+            votingPeriod,
+            proposalThreshold,
+            quorumNumerator,
+            _govSalt
+        );
     }
 }
 
@@ -386,8 +447,10 @@ contract WhenCallingGitConsensus is BaseSetup {
 
     // --- Releases ---
 
-    function testOk_releaseEmptyFailed(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releaseEmptyFailed(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         bytes20[] memory hashes;
         uint256[] memory values;
@@ -396,8 +459,10 @@ contract WhenCallingGitConsensus is BaseSetup {
         aGitConsensus.addRelease(tagDataEmpty, hashes, values);
     }
 
-    function testOk_releasePartialFailed(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releasePartialFailed(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         TagData memory tagData = TagData({
             object: "object \n",
@@ -415,8 +480,10 @@ contract WhenCallingGitConsensus is BaseSetup {
         aGitConsensus.addRelease(tagData, hashes, values);
     }
 
-    function testOk_releaseFilledFailed(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releaseFilledFailed(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         string memory signature = "-----BEGIN PGP SIGNATURE-----"
         ""
@@ -460,24 +527,28 @@ contract WhenCallingGitConsensus is BaseSetup {
         aGitConsensus.addRelease(tagData, hashes, values);
     }
 
-    function testOk_releaseEmptyMsgAddr(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releaseEmptyMsgAddr(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
-        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(_tokenAddr))));
+        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(tokenAddr))));
 
         bytes20[] memory hashes;
         uint256[] memory values;
 
         bytes20 tagHashExpected = mGitConsensus.addRelease(tagDataEmpty, hashes, values);
         vm.expectEmit(true, false, false, false);
-        emit ReleaseAdded(_tokenAddr, tagHashExpected);
+        emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
-        assertEq(_tokenAddr, aGitConsensus.tagAddr(tagHash));
+        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
         assertTrue(aGitConsensus.tagExists(tagHash));
     }
 
-    function testOk_releasePartialMsgAddr(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releasePartialMsgAddr(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         TagData memory tagData = TagData({
             object: "object \n",
@@ -485,7 +556,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(_tokenAddr))), "\n")
+                Utils.concat(Utils.concat("\n", bytes(Strings.toHexString(tokenAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -495,14 +566,16 @@ contract WhenCallingGitConsensus is BaseSetup {
 
         bytes20 tagHashExpected = mGitConsensus.addRelease(tagData, hashes, values);
         vm.expectEmit(true, false, false, false);
-        emit ReleaseAdded(_tokenAddr, tagHashExpected);
+        emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagData, hashes, values);
-        assertEq(_tokenAddr, aGitConsensus.tagAddr(tagHash));
+        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
         assertTrue(aGitConsensus.tagExists(tagHash));
     }
 
-    function testOk_releaseFilledMsgAddr(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releaseFilledMsgAddr(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         string memory signature = "-----BEGIN PGP SIGNATURE-----"
         ""
@@ -537,7 +610,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagger: "tagger Satoshi Nakamoto <satoshi@bitcoin.org> 1208691178 -0400\n\n",
             message: string(
                 Utils.concat(
-                    Utils.concat("release v1.0.0", bytes(Strings.toHexString(_tokenAddr))),
+                    Utils.concat("release v1.0.0", bytes(Strings.toHexString(tokenAddr))),
                     "\n"
                 )
             ),
@@ -548,14 +621,16 @@ contract WhenCallingGitConsensus is BaseSetup {
         uint256[] memory values;
         bytes20 tagHashExpected = mGitConsensus.addRelease(tagData, hashes, values);
         vm.expectEmit(true, false, false, false);
-        emit ReleaseAdded(_tokenAddr, tagHashExpected);
+        emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagData, hashes, values);
-        assertEq(_tokenAddr, aGitConsensus.tagAddr(tagHash));
+        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
         assertTrue(aGitConsensus.tagExists(tagHash));
     }
 
-    function testOk_releaseTwoHashDiffMsgStrNotMatch(address _tokenAddr) public {
-        vm.assume(_tokenAddr != address(0));
+    function testOk_releaseTwoHashDiffMsgStrNotMatch(bytes32 _tokenSalt, bytes32 _govSalt) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
 
         TagData memory tagData1 = TagData({
             object: "object hello\n",
@@ -563,7 +638,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Utils.concat(Utils.concat("\nhello", bytes(Strings.toHexString(_tokenAddr))), "\n")
+                Utils.concat(Utils.concat("\nhello", bytes(Strings.toHexString(tokenAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -576,10 +651,7 @@ contract WhenCallingGitConsensus is BaseSetup {
             tagName: "tag \n",
             tagger: "tagger \n",
             message: string(
-                Utils.concat(
-                    Utils.concat("\ngoodbye", bytes(Strings.toHexString(_tokenAddr))),
-                    "\n"
-                )
+                Utils.concat(Utils.concat("\ngoodbye", bytes(Strings.toHexString(tokenAddr))), "\n")
             ),
             signature: "\n"
         });
@@ -591,11 +663,11 @@ contract WhenCallingGitConsensus is BaseSetup {
         bytes20 tagHashExpected2 = mGitConsensus.addRelease(tagData2, hashes2, values2);
 
         vm.expectEmit(true, false, false, false);
-        emit ReleaseAdded(_tokenAddr, tagHashExpected1);
+        emit ReleaseAdded(tokenAddr, tagHashExpected1);
         bytes20 commitHash1 = aGitConsensus.addRelease(tagData1, hashes1, values1);
 
         vm.expectEmit(true, false, false, false);
-        emit ReleaseAdded(_tokenAddr, tagHashExpected2);
+        emit ReleaseAdded(tokenAddr, tagHashExpected2);
         bytes20 commitHash2 = aGitConsensus.addRelease(tagData2, hashes2, values2);
 
         assertTrue(aGitConsensus.tagExists(commitHash1));
@@ -603,13 +675,95 @@ contract WhenCallingGitConsensus is BaseSetup {
 
         assertFalse(commitHash2 == commitHash1);
     }
+
+    function testOk_releaseDistributionSizeDiffFails(
+        bytes32 _tokenSalt,
+        bytes32 _govSalt,
+        bytes20 _randHash
+    ) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
+
+        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(tokenAddr))));
+        bytes20[] memory hashes = new bytes20[](1);
+        uint256[] memory values = new uint256[](0);
+        hashes[0] = _randHash;
+
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "DistributionLengthMismatch(uint256,uint256)",
+                hashes.length,
+                values.length
+            )
+        );
+        mGitConsensus.addRelease(tagDataEmpty, hashes, values);
+    }
+
+    function testOk_releaseStaticDistribution(
+        bytes32 _tokenSalt,
+        bytes32 _govSalt,
+        uint256 _distributionValue,
+        uint256 _distributionLength
+    ) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
+        vm.assume(_distributionValue < type(uint224).max);
+        vm.assume(_distributionLength < 10000);
+
+        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(tokenAddr))));
+        (bytes20[] memory hashes, uint256[] memory values) = Distibution
+            .newStaticReleaseDistribution(_distributionValue, _distributionLength);
+
+        bytes20 tagHashExpected = mGitConsensus.addRelease(tagDataEmpty, hashes, values);
+        vm.expectEmit(true, false, false, false);
+        emit ReleaseAdded(tokenAddr, tagHashExpected);
+        bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
+        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
+        assertTrue(aGitConsensus.tagExists(tagHash));
+    }
+
+    function testOk_releaseRandomDistribution(
+        bytes32 _tokenSalt,
+        bytes32 _govSalt,
+        uint256 _distributionValue,
+        uint256 _distributionLength,
+        bytes32 _distributionSalt
+    ) public {
+        (address tokenAddr, address govAddr) = createTokenGovPair(_tokenSalt, _govSalt);
+        vm.assume(tokenAddr != address(0));
+        vm.startPrank(govAddr);
+        vm.assume(_distributionValue < type(uint224).max);
+        vm.assume(_distributionLength < 10000);
+
+        tagDataEmpty.message = string(Utils.concat("", bytes(Strings.toHexString(tokenAddr))));
+        (bytes20[] memory hashes, uint256[] memory values) = Distibution
+            .newRandomReleaseDistribution(
+                _distributionValue,
+                _distributionLength,
+                _distributionSalt
+            );
+
+        bytes20 tagHashExpected = mGitConsensus.addRelease(tagDataEmpty, hashes, values);
+        vm.expectEmit(true, false, false, false);
+        emit ReleaseAdded(tokenAddr, tagHashExpected);
+        bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
+        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
+        assertTrue(aGitConsensus.tagExists(tagHash));
+    }
 }
 
-/// @dev Tests without any input parameters will get a static gas cost, which is useful for
-///      benchmarking how a particular change in the tested contract affects the gas cost.
 contract GasBenchmark is BaseSetup {
-    address payable tokenAddr =
-        payable(address(uint160(uint256(keccak256(abi.encodePacked("token"))))));
+    // A real token<->address pair needs to be set up, otherwise the addRelease() call
+    // will recieve an UnauthorizedRelease() error.
+    address tokenAddr;
+    address govAddr;
+
+    function setUp() public virtual override {
+        super.setUp();
+        (tokenAddr, govAddr) = createTokenGovPair("foo", "bar");
+    }
 
     function testGas_commit() public {
         string memory message = string(
@@ -637,6 +791,7 @@ contract GasBenchmark is BaseSetup {
     }
 
     function testGas_release() public {
+        vm.startPrank(govAddr);
         string memory message = string(
             Utils.concat(
                 Utils.concat(
