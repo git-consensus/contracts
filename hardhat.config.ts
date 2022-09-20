@@ -187,12 +187,14 @@ const config: HardhatUserConfig = {
         outDir: `types`,
     },
     dodoc: {
-        // Ensure 'docs' repo is checked out and is in this path!
+        // Ensure 'git-consensus/docs' repo is forked and in this path
         outputDir: `../docs/api`,
-        include: [`./contracts/`], // idk why this includes imports but it do
-        exclude: [`./contracts/test/`],
-        templatePath: `./docusaurus.sqrl`,
         runOnCompile: false,
+        debugMode: false,
+        keepFileStructure: true,
+        freshOutput: true,
+        include: [`contracts/`], // idk why this includes imports but it do
+        exclude: [`contracts/lib/`,`contracts/test/`],
     },
     contractSizer: {
         alphaSort: true,
