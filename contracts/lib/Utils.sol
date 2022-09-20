@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {IGitConsensusErrors} from "../interfaces/IGitConsensus.sol";
 
 /// @title  Utils
 /// @notice A collection of utility functions for Git Consensus.
@@ -23,7 +24,7 @@ library Utils {
     function indexOfAddr(string memory _base) internal pure returns (uint256 pos_) {
         bytes memory _baseBytes = bytes(_base);
 
-        for (uint256 i = _baseBytes.length - 1; i > 0; i--) {
+        for (uint256 i = _baseBytes.length - 1; i > 0; --i) {
             if (_baseBytes[i - 1] == "0" && _baseBytes[i] == "x") {
                 return i - 1;
             }
@@ -46,12 +47,14 @@ library Utils {
         bytes memory _baseBytes = bytes(_base);
 
         (bool success, uint256 endIdx) = SafeMath.tryAdd(_offset, _length);
-        require(success && endIdx <= _baseBytes.length, "Utils: substring out of bounds");
+        if (!success || endIdx > _baseBytes.length) {
+            revert IGitConsensusErrors.SubstringOutOfBounds(_offset, _length, _baseBytes.length);
+        }
 
         string memory _tmp = new string(_length);
         bytes memory _tmpBytes = bytes(_tmp);
 
-        for (uint256 i = _offset; i < endIdx; i++) {
+        for (uint256 i = _offset; i < endIdx; ++i) {
             _tmpBytes[i - _offset] = _baseBytes[i];
         }
 

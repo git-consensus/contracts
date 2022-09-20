@@ -2,8 +2,9 @@
 pragma solidity >=0.8.17;
 import {Test} from "./utils/Test.sol";
 import {Utils as LibUtils} from "../lib/Utils.sol";
+import {IGitConsensusErrors} from "../interfaces/IGitConsensus.sol";
 
-contract UtilsTest is Test {
+contract UtilsTest is Test, IGitConsensusErrors {
     string private constant ADDR_STR = "0xC257274276a4E539741Ca11b590B9447B26A8051";
     address private constant ADDR = 0xC257274276a4E539741Ca11b590B9447B26A8051;
     string private constant COMMIT_MSG_BASE = "Lorem ipsum dolor sit amet.";
@@ -40,13 +41,18 @@ contract UtilsTest is Test {
     }
 
     function testOk_substringOutOfBoundsNoOverflow() public {
-        vm.expectRevert(bytes("Utils: substring out of bounds"));
+        vm.expectRevert(
+            abi.encodeWithSelector(SubstringOutOfBounds.selector, bytes(COMMIT_MSG).length,
+            bytes(COMMIT_MSG).length, bytes(COMMIT_MSG).length)
+        );
         LibUtils.substring(COMMIT_MSG, bytes(COMMIT_MSG).length, bytes(COMMIT_MSG).length);
     }
 
     function testOk_substringOutOfBoundsOverflow() public {
-        vm.expectRevert(bytes("Utils: substring out of bounds"));
-
+          vm.expectRevert(
+            abi.encodeWithSelector(SubstringOutOfBounds.selector, 1,
+            MAX_UINT256, bytes(COMMIT_MSG).length)
+        );
         LibUtils.substring(COMMIT_MSG, 1, MAX_UINT256);
     }
 
@@ -54,4 +60,3 @@ contract UtilsTest is Test {
         assertEq(LibUtils.parseAddr(ADDR_STR), ADDR);
     }
 }
-

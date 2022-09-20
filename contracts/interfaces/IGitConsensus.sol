@@ -21,10 +21,17 @@ interface IGitConsensusErrors {
     /// @dev Can occur with `addRelease()`.
     error DistributionLengthMismatch(uint256 hashesLen, uint256 valuesLen);
     /// @notice When a release attempt occurs from a sender other than the project's governor.
-    /// @param senderAddr The address of the unathorized sender.
+    /// @param senderAddr The address of the unauthorized sender.
     /// @param expectedAddr The expected address, which should be the governor.
     /// @dev Can occur with `addRelease()`.
     error UnauthorizedRelease(address senderAddr, address expectedAddr);
+    /// @notice When the sender attempts to extract a substring that is out of bounds in a
+    /// string.
+    /// @param offset The index of the substring to extract.
+    /// @param substringLen The length of the substring to extract.
+    /// @param stringLen The length of the string from which to extract the substring.
+    /// @dev Can occur with `addCommit()` or `addRelease()`.
+    error SubstringOutOfBounds(uint256 offset, uint256 substringLen, uint256 stringLen);
 }
 
 /// @title  IGitConsensusEvents
