@@ -51,7 +51,7 @@ interface IGitConsensusEvents {
 interface IGitConsensusTypes {
     /// @notice CommitData is all of the contents of a git commit, which is equivalent to
     ///     `git cat-file -p <commit hash>`. Address of the entity that should recieve token
-    ////     rewards MUST be included in the message.
+    ///     rewards MUST be included in the message.
     /// @dev Struct ordering differs from structure because signature last gets some
     ///     gas-efficency gains, (notice on commits it comes *before* the message), because
     ///     that field is most likely to take up multiple bytes32 storage slots since it will
