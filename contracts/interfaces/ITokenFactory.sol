@@ -28,6 +28,17 @@ interface ITokenFactory is ITokenFactoryEvents {
     /// @notice Creates an `IToken` with an optional initial distribution.
     ///   Uses CREATE2 so that the token's address can be computed deterministically
     ///   using predictAddress().
+    /// @param govAddr Address of the corresponding governor contract. Recommended usage is
+    ///    use address prediction to create the Token first, then create the Governor with
+    ///    this Token's address as the `tokenAddr` parameter.
+    /// @param minterAddr Address of the contract that will be able to mint new tokens. Should
+    ///    always be set to the Git Consensus contract's address.
+    /// @param name Name of the token (e.g. "MyToken").
+    /// @param symbol Symbol of the token (e.g. "MTK").
+    /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
+    ///     equal length of `values`.
+    /// @param values Array of amounts of tokens to be given to each owner (in wei). The initial
+    ///     token supply will be equal to the sum of all `values`. MUST equal length of `owners`.
     /// @param salt The salt value used by CREATE2.
     /// @return instanceAddr The address of the newly created token clone.
     function createToken(

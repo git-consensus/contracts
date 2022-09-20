@@ -19,28 +19,29 @@ pragma solidity >=0.8.17;
 ///         [2] The `governor()` must refer to the intended caller to the GitConsensus contract,
 ///         which should be the Governor that handles proposals and executions for the token. If
 ///         the token implementation only allows this at initialization time (the case with
-///         TokenImpl) then this governor address must be know ahead of time using address
+///         TokenImpl) then this governor address must be known ahead of time using address
 ///         prediction (e.g. CREATE2 usage such as in GovernorFactory).
 ///
 ///         The rationale behind [1] should be obvious, but [2] is a bit more subtle. Imagine the
 ///         scenario in which GitConsensus does NOT require `token.governor()` to be the caller:
-//
-///         Step 1: Badguy deploys a governor with it's `governor.token()` pointing to an already
-///         existing real token. This governor implementation will also disregard a normal proposal
-///         system (e.g. it executes functions immediately if Badguy calls `governor.execute()`).
 ///
-///         Step 2: Badguy calls `addCommit()` with some commit messages that include Badguy's
+///         Step 1: Badguy deploys a governor with its `governor.token()` pointing to an already
+///         existing real token. This governor implementation will also disregard a normal proposal
+///         system (e.g. it executes functions immediately if Badguy calls `governor.execute(...)`,
+///         regardless of any `governor.propose(...)` being called first).
+///
+///         Step 2: Badguy calls `addCommit(...)` with some commit messages that include Badguy's
 ///         wallet address.
 ///
-///         Step 3: Badguy calls `governor.execute()` to `addRelease()` with a tag message that
-///         includes to Badguy's governor address, and with a distribution that includes the
-///         commit hashes from Step 2.
+///         Step 3: Badguy calls `governor.execute(gitConsensus.addRelease(...))`
+///         with a tag message that includes to Badguy's governor address, and with a hashes &
+///         values distribution that includes the commit hashes from Step 2.
 ///
 ///         The GitConsensus contract would mint these tokens to Badguy's wallet address.
 ///
-///         **Solution**: The IToken's govAddr can only be the caller to `addRelease()`, therefor
-///         when Badguy creates a new Governor in Step 2, his new governor will have the
-///         transaction reverted.
+///         **Solution**: The IToken's govAddr can only be the caller to `addRelease(...)`,
+///         therefore when Badguy creates a new Governor in Step 2, his new governor will have
+///         the transaction reverted.
 interface IToken {
     /// @notice Initializes the ERC20 Token contract.
     /// @param govAddr Address of the corresponding governor contract. Recommended usage is
@@ -52,7 +53,7 @@ interface IToken {
     /// @param symbol Symbol of the token (e.g. "MTK").
     /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
     ///     equal length of `values`.
-    /// @param values Array of amounts of tokens to be given to each owner (in wei). The initial
+    /// @param values Array of amounts of tokens to be given to each owner. The initial
     ///     token supply will be equal to the sum of all `values`. MUST equal length of `owners`.
     /// @dev The `owners` and `values` array input is similar in format and usage to IGitConsensus
     ///     `addRelease()`, with the difference being that the git commit hash -> address mapping
@@ -71,12 +72,12 @@ interface IToken {
         uint256[] calldata values
     ) external;
 
-    /// @notice Returns the governor that is corresponds with this token.
-    /// @return govAddr The governor address.
+    /// @notice Returns the governor corresponding to this token.
+    /// @return governorAddr The governor address.
     /// @dev Assumes a 1:1 mapping between governor and token, which is not always the case with
     ///     typical DAO usage. However, this is essential for tokens that want to be compatible
-    ///     the Git Consensus Protocol.
-    function govAddr() external returns (address govAddr);
+    ///     with the Git Consensus Protocol.
+    function governor() external returns (address governorAddr);
 
     /// @notice Creates `amount` tokens and assigns them to `account`, increasing the total supply.
     /// @param account The address to assign the newly minted tokens to.

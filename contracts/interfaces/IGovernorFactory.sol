@@ -33,8 +33,18 @@ interface IGovernorFactoryEvents {
 ///         3. Deploy the governor using GovernorFactory.createGovernor(..., tokenAddr, ...)
 interface IGovernorFactory is IGovernorFactoryEvents {
     /// @notice Creates an `IGovernor` with an optional initial distribution.
-    ///     Uses CREATE2 so that the governor's sddress can be computed deterministically
+    ///     Uses CREATE2 so that the governor's address can be computed deterministically
     ///     using predictAddress().
+    /// @param tokenAddr The ERC20 token that will be used for voting.
+    /// @param name Name of the governor (e.g. "ExampleGovernor").
+    /// @param votingDelay The number of blocks that must pass between a proposal being
+    ///     proposed and when it becomes executable (e.g. 1 = 1 block).
+    /// @param votingPeriod The number of blocks that voting is open for a proposal
+    ///     (e.g. 100800 = 2 weeks = 12/s per block).
+    /// @param proposalThreshold The minimum number of votes required for an account to
+    //      create a proposal (e.g. 0 = anyone can create a proposal).
+    /// @param quorumNumerator The quorumNumerator/100 to give a percentage representing
+    ///     minimum number of votes out of the supply required to pass a proposal (e.g. 5 = 5%).
     /// @param salt The salt value used by CREATE2.
     /// @return instanceAddr The address of the newly created governor clone.
     function createGovernor(

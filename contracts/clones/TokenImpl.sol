@@ -20,8 +20,8 @@ contract TokenImpl is
     ERC20PermitUpgradeable,
     ERC20VotesUpgradeable
 {
-    address private minter;
-    address private governor;
+    address private minterAddr;
+    address private governorAddr;
 
     /// @inheritdoc IToken
     function initialize(
@@ -34,8 +34,8 @@ contract TokenImpl is
     ) external initializer {
         require(_owners.length == _values.length, "Token: owner and value array length mismatch");
 
-        governor = _govAddr;
-        minter = _minterAddr;
+        governorAddr = _govAddr;
+        minterAddr = _minterAddr;
 
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
@@ -54,13 +54,13 @@ contract TokenImpl is
     }
 
     /// @inheritdoc IToken
-    function govAddr() external view returns (address govAddr_) {
-        return governor;
+    function governor() external view returns (address governorAddr_) {
+        return governorAddr;
     }
 
     /// @inheritdoc IToken
     function mint(address _to, uint256 _amount) external {
-        require(minter == msg.sender, "Token: caller not the minter");
+        require(minterAddr == msg.sender, "Token: caller not the minter");
 
         _mint(_to, _amount);
     }
