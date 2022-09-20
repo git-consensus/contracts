@@ -69,6 +69,7 @@ library Utils {
     ///     "reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside
     ///     of an unchecked block)"
     ///     TODO: Try and catch this error and return a more meaningful error message
+    ///     TODO: Regex checking invalid character (i.e., not in the set [0-9A-Fa-f])
     ///     src: https://github.com/provable-things/ethereum-api/
     ///          blob/94b49f1b65ec4c0465b0e9f49f00415e5ed001a1/contracts/
     ///          solc-v0.8.x/provableAPI.sol#L631

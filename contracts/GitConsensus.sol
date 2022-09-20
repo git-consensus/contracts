@@ -37,13 +37,9 @@ contract GitConsensus is IGitConsensus {
         if (bytes(_commitData.message).length < ADDR_BYTES_LENGTH) {
             revert CommitMsgNeedsAddr(_commitData.message);
         }
-        uint256 ownerAddrOffset = Utils.indexOfAddr(_commitData.message);
-        string memory ownerAddrStr = Utils.substring(
-            _commitData.message,
-            ownerAddrOffset,
-            ADDR_BYTES_LENGTH
-        );
-        address ownerAddr = Utils.parseAddr(ownerAddrStr);
+        uint256 addrOffset = Utils.indexOfAddr(_commitData.message);
+        string memory addrStr = Utils.substring(_commitData.message, addrOffset, ADDR_BYTES_LENGTH);
+        address ownerAddr = Utils.parseAddr(addrStr);
 
         commitToOwnerAddr[commitHash_] = ownerAddr;
 
@@ -80,13 +76,9 @@ contract GitConsensus is IGitConsensus {
         if (bytes(_tagData.message).length < ADDR_BYTES_LENGTH) {
             revert TagMsgNeedsAddr(_tagData.message);
         }
-        uint256 tokenAddrOffset = Utils.indexOfAddr(_tagData.message);
-        string memory tokenAddrStr = Utils.substring(
-            _tagData.message,
-            tokenAddrOffset,
-            ADDR_BYTES_LENGTH
-        );
-        address tokenAddr = Utils.parseAddr(tokenAddrStr);
+        uint256 addrOffset = Utils.indexOfAddr(_tagData.message);
+        string memory addrStr = Utils.substring(_tagData.message, addrOffset, ADDR_BYTES_LENGTH);
+        address tokenAddr = Utils.parseAddr(addrStr);
 
         tagToTokenAddr[tagHash_] = tokenAddr;
 
