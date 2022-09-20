@@ -54,9 +54,8 @@ library Utils {
         string memory _tmp = new string(_length);
         bytes memory _tmpBytes = bytes(_tmp);
 
-        uint256 j = 0;
         for (uint256 i = _offset; i < endIdx; i++) {
-            _tmpBytes[j++] = _baseBytes[i];
+            _tmpBytes[i - _offset] = _baseBytes[i];
         }
 
         return string(_tmpBytes);
@@ -65,8 +64,8 @@ library Utils {
     /// @notice Converts a string representation of an address (e.g. "0x...123" to an address).
     /// @param _addrStr The string representation of the address to be converted.
     /// @return _addr The address represented by the string.
-    /// @dev If user passes in '0x' but not a full address, we will interpret the next 20 bytes
-    ///     as a real address, and it will fail in this function with a ambigious error message:
+    /// @dev If user passes in '0x' but not a full address, we will still interpret the next 20
+    ///     bytes as a real address, and it will fail in this function with a ambigious error message:
     ///     "reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside
     ///     of an unchecked block)"
     ///     TODO: Try and catch this error and return a more meaningful error message
