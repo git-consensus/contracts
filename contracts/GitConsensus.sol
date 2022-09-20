@@ -88,8 +88,6 @@ contract GitConsensus is IGitConsensus {
             revert UnauthorizedRelease(msg.sender, token.governor());
         }
 
-        tagToTokenAddr[tagHash_] = tokenAddr;
-
         // mint new tokens for each commit owner
         for (uint256 i = 0; i < _hashes.length; ++i) {
             bytes20 commitHash = _hashes[i];
