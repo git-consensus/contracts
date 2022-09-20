@@ -194,7 +194,7 @@ const config: HardhatUserConfig = {
         keepFileStructure: true,
         freshOutput: true,
         include: [`contracts/`], // idk why this includes imports but it do
-        exclude: [`contracts/lib/`,`contracts/test/`],
+        exclude: [`contracts/lib/`, `contracts/test/`],
     },
     contractSizer: {
         alphaSort: true,
