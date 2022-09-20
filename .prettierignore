@@ -12,6 +12,7 @@
 **/types
 **/vendor
 
+*.md
 *.env
 *.log
 *.sqrl
