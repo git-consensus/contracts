@@ -76,7 +76,6 @@ async function main(signer?: SignerWithAddress) {
     }
 }
 
-
 export async function gitConsensus(signer: SignerWithAddress): Promise<void> {
     await deploy(GIT_CONSENSUS, () => deployGitConsensus(signer));
 }
@@ -96,10 +95,10 @@ export async function createClones(
 ): Promise<string[]> {
     console.log(
         `\nTo create your new Token & Governor, you will be asked to enter the address of the ` +
-`already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
-`be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
-`in the git-consensus/contracts deployments.json. Developers may also wish to deploy their own versions of ` +
-`these contracts, in which case you want to enter the address of those instead.\n`,
+            `already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
+            `be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
+            `in the git-consensus/contracts deployments.json. Developers may also wish to deploy their own versions of ` +
+            `these contracts, in which case you want to enter the address of those instead.\n`,
     );
     const gitConsensusAddr = askForAddress(
         `the address of the GitConsensus contract`,
@@ -127,22 +126,25 @@ export async function createClones(
         const tokenName: string = askFor(`token name`, EXAMPLE_TOKEN_NAME);
         const tokenSymbol: string = askFor(`token symbol`, EXAMPLE_TOKEN_SYMBOL);
         const maxMintablePerHash: BigNumberish = askForNumber(`max mintable per hash`);
-        const buildDistribution: boolean = askYesNo(`Do you want to add an initial distribution?`);
+        const buildDistribution: boolean = askYesNo(`Do you want to add an Initial Distribution?`);
 
         const owners: string[] = [];
         const values: BigNumberish[] = [];
         if (buildDistribution) {
             for (let i = 1; ; i++) {
-                const ownerAddr = askForAddress(`owner address #${i} in initial distribution`);
+                const ownerAddr = askForAddress(`owner address #${i} in Initial Distribution`);
                 owners.push(ownerAddr);
                 values.push(askForNumber(`initial token balance of address #${i} (${ownerAddr})`));
-                console.log(`Current distribution:\n owners: ${owners}\n values: ${values}\n`);
+
+                console.log(`\nCurrent Initial Distribution:\n`);
                 printDistribution(owners, values);
+
                 if (!askYesNo(`add more?`)) {
                     break;
                 }
             }
-            console.log(`Final distribution:\n owners: ${owners}\n values: ${values}\n`);
+            console.log(`\nFinal Initial Distribution:\n`);
+            printDistribution(owners, values);
         }
 
         // TODO: getting incorrect values this (only the final one is correct), and they should match
@@ -416,12 +418,15 @@ function printInvalidInput(inputType: string): void {
     console.log(`This is not a valid`, inputType);
 }
 
-function printDistribution() {
-console.log(
-`owners   |      values`+
-`-------------------------`+
-`<owner1> |     <value1>`+
-`<owner2> |     <value2>`+
+function printDistribution(owners: string[], values: BigNumberish[]) {
+    console.log(
+        `                   owners                    |   values   \n` +
+            `---------------------------------------------|-------------`,
+    );
+    for (let i = 0; i < owners.length; i++) {
+        console.log(`${owners[i]}   | ${values[i]}`);
+    }
+    console.log(`\n`);
 }
 
 main().catch(error => {
