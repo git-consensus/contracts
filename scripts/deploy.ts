@@ -23,7 +23,7 @@ import { deployWait, parseEvent, submitTxWait } from "./utils";
 // Also adds them to hardhat-tracer nameTags, which gives them a trackable name
 // when `npx hardhat test --logs` is used.
 
-// deployGitConsensus deploys the GitConsensus contract.
+// DeployGitConsensus deploys the GitConsensus contract.
 export async function deployGitConsensus(deployer: SignerWithAddress): Promise<GitConsensus> {
     const gitConsensus: GitConsensus__factory = await hre.ethers.getContractFactory(
         `GitConsensus`,
