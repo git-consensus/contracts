@@ -137,6 +137,7 @@ export async function createClones(
                 owners.push(ownerAddr);
                 values.push(askForNumber(`initial token balance of address #${i} (${ownerAddr})`));
                 console.log(`Current distribution:\n owners: ${owners}\n values: ${values}\n`);
+                printDistribution(owners, values);
                 if (!askYesNo(`add more?`)) {
                     break;
                 }
@@ -413,6 +414,14 @@ function askFor(query: string, defaultInput?: string, hideInput = false): string
 
 function printInvalidInput(inputType: string): void {
     console.log(`This is not a valid`, inputType);
+}
+
+function printDistribution() {
+console.log(
+`owners   |      values`+
+`-------------------------`+
+`<owner1> |     <value1>`+
+`<owner2> |     <value2>`+
 }
 
 main().catch(error => {
