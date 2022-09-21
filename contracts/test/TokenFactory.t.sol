@@ -27,6 +27,7 @@ contract WhenCreatingNewToken is BaseSetup {
         address _minterAddr,
         string memory _name,
         string memory _symbol,
+        uint256 _maxMintablePerHash,
         bytes32 _createSalt
     ) public {
         address[] memory owners = new address[](1);
@@ -36,10 +37,27 @@ contract WhenCreatingNewToken is BaseSetup {
 
         address expectedAddr = factory.predictAddress(_createSalt);
         vm.expectEmit(true, false, false, true);
-        emit TokenCreated(expectedAddr, _creatorAddr, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
 
         vm.prank(_creatorAddr);
-        factory.createToken(_govAddr, _minterAddr, _name, _symbol, owners, values, _createSalt);
+        factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
     }
 
     function testOk_createTokenStaticDistribution(
@@ -48,6 +66,7 @@ contract WhenCreatingNewToken is BaseSetup {
         address _minterAddr,
         string memory _name,
         string memory _symbol,
+        uint256 _maxMintablePerHash,
         uint256 _distributionValue,
         uint256 _distributionLength,
         bytes32 _createSalt
@@ -67,10 +86,27 @@ contract WhenCreatingNewToken is BaseSetup {
         }
         address expectedAddr = factory.predictAddress(_createSalt);
         vm.expectEmit(true, false, false, true);
-        emit TokenCreated(expectedAddr, _creatorAddr, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
 
         vm.prank(_creatorAddr);
-        factory.createToken(_govAddr, _minterAddr, _name, _symbol, owners, values, _createSalt);
+        factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
     }
 
     function testOk_createTokenRandomDistribution(
@@ -79,6 +115,7 @@ contract WhenCreatingNewToken is BaseSetup {
         address _minterAddr,
         string memory _name,
         string memory _symbol,
+        uint256 _maxMintablePerHash,
         uint256 _distributionValue,
         uint256 _distributionLength,
         bytes32 _distributionSalt,
@@ -103,10 +140,27 @@ contract WhenCreatingNewToken is BaseSetup {
         }
         address expectedAddr = factory.predictAddress(_createSalt);
         vm.expectEmit(true, false, false, true);
-        emit TokenCreated(expectedAddr, _creatorAddr, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
 
         vm.prank(_creatorAddr);
-        factory.createToken(_govAddr, _minterAddr, _name, _symbol, owners, values, _createSalt);
+        factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
     }
 
     function testOk_createTokenDeterministicStaticDistribution(
@@ -115,6 +169,7 @@ contract WhenCreatingNewToken is BaseSetup {
         address _minterAddr,
         string memory _name,
         string memory _symbol,
+        uint256 _maxMintablePerHash,
         uint256 _distributionValue,
         uint256 _distributionLength,
         bytes32 _createSalt
@@ -134,10 +189,27 @@ contract WhenCreatingNewToken is BaseSetup {
         }
         address expectedAddr = factory.predictAddress(_createSalt);
         vm.expectEmit(true, false, false, true);
-        emit TokenCreated(expectedAddr, _creatorAddr, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
 
         vm.prank(_creatorAddr);
-        factory.createToken(_govAddr, _minterAddr, _name, _symbol, owners, values, _createSalt);
+        factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
     }
 
     function testOk_createTokenDeterministicRandomDistribution(
@@ -146,6 +218,7 @@ contract WhenCreatingNewToken is BaseSetup {
         address _minterAddr,
         string memory _name,
         string memory _symbol,
+        uint256 _maxMintablePerHash,
         uint256 _distributionValue,
         uint256 _distributionLength,
         bytes32 _distributionSalt,
@@ -170,10 +243,27 @@ contract WhenCreatingNewToken is BaseSetup {
         }
         address expectedAddr = factory.predictAddress(_createSalt);
         vm.expectEmit(true, false, false, true);
-        emit TokenCreated(expectedAddr, _creatorAddr, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
 
         vm.prank(_creatorAddr);
-        factory.createToken(_govAddr, _minterAddr, _name, _symbol, owners, values, _createSalt);
+        factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
     }
 
     function testOk_predictTokenAddress(bytes32 _createSalt) public view {
@@ -186,6 +276,7 @@ contract GasBenchmark is BaseSetup {
     address internal minterAddr = address(uint160(uint256(keccak256("bar"))));
     string internal name = "TestToken";
     string internal symbol = "TTT";
+    uint256 internal maxMintablePerHash = 10000000; // 10,000,000
     uint256 internal distributionValue = 300;
     uint256 internal distributionLength = 9;
     bytes32 internal distributionSalt = "";
@@ -195,13 +286,31 @@ contract GasBenchmark is BaseSetup {
         (address[] memory owners, uint256[] memory values) = Distibution
             .newStaticInitialDistribution(distributionValue, distributionLength);
 
-        factory.createToken(govAddr, minterAddr, name, symbol, owners, values, createSalt);
+        factory.createToken(
+            govAddr,
+            minterAddr,
+            name,
+            symbol,
+            maxMintablePerHash,
+            owners,
+            values,
+            createSalt
+        );
     }
 
     function testGas_createTokenRandom() public {
         (address[] memory owners, uint256[] memory values) = Distibution
             .newRandomInitialDistribution(distributionValue, distributionLength, distributionSalt);
 
-        factory.createToken(govAddr, minterAddr, name, symbol, owners, values, createSalt);
+        factory.createToken(
+            govAddr,
+            minterAddr,
+            name,
+            symbol,
+            maxMintablePerHash,
+            owners,
+            values,
+            createSalt
+        );
     }
 }

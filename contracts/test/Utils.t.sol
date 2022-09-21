@@ -8,7 +8,8 @@ contract UtilsTest is Test, IGitConsensusErrors {
     string private constant ADDR_STR = "0xC257274276a4E539741Ca11b590B9447B26A8051";
     address private constant ADDR = 0xC257274276a4E539741Ca11b590B9447B26A8051;
     string private constant COMMIT_MSG_BASE = "Lorem ipsum dolor sit amet.";
-    string private constant COMMIT_MSG = "Lorem ipsum dolor sit amet.0xC257274276a4E539741Ca11b590B9447B26A8051";
+    string private constant COMMIT_MSG =
+        "Lorem ipsum dolor sit amet.0xC257274276a4E539741Ca11b590B9447B26A8051";
     uint256 private constant MAX_UINT256 = 2**256 - 1;
     uint8 private constant ADDR_STR_LENGTH = 42;
 
@@ -29,7 +30,10 @@ contract UtilsTest is Test, IGitConsensusErrors {
     }
 
     function testOk_substringGeneralCase() public {
-        assertEq(ADDR_STR, LibUtils.substring(COMMIT_MSG, LibUtils.indexOfAddr(COMMIT_MSG), ADDR_STR_LENGTH));
+        assertEq(
+            ADDR_STR,
+            LibUtils.substring(COMMIT_MSG, LibUtils.indexOfAddr(COMMIT_MSG), ADDR_STR_LENGTH)
+        );
     }
 
     function testOk_substringEntireString() public {
@@ -42,16 +46,24 @@ contract UtilsTest is Test, IGitConsensusErrors {
 
     function testOk_substringOutOfBoundsNoOverflow() public {
         vm.expectRevert(
-            abi.encodeWithSelector(SubstringOutOfBounds.selector, bytes(COMMIT_MSG).length,
-            bytes(COMMIT_MSG).length, bytes(COMMIT_MSG).length)
+            abi.encodeWithSelector(
+                SubstringOutOfBounds.selector,
+                bytes(COMMIT_MSG).length,
+                bytes(COMMIT_MSG).length,
+                bytes(COMMIT_MSG).length
+            )
         );
         LibUtils.substring(COMMIT_MSG, bytes(COMMIT_MSG).length, bytes(COMMIT_MSG).length);
     }
 
     function testOk_substringOutOfBoundsOverflow() public {
-          vm.expectRevert(
-            abi.encodeWithSelector(SubstringOutOfBounds.selector, 1,
-            MAX_UINT256, bytes(COMMIT_MSG).length)
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SubstringOutOfBounds.selector,
+                1,
+                MAX_UINT256,
+                bytes(COMMIT_MSG).length
+            )
         );
         LibUtils.substring(COMMIT_MSG, 1, MAX_UINT256);
     }

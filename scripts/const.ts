@@ -23,6 +23,7 @@ export const DAVE_ADDR = `0x6E503a5c6C41b5A68cD3Bfff98d8B04bc45CAf93`;
 
 export const EXAMPLE_TOKEN_NAME = `ExampleToken`;
 export const EXAMPLE_TOKEN_SYMBOL = `EXT`;
+export const EXAMPLE_MAX_MINTABLE_PER_HASH = 1e15;
 // used for giving Alice and Bob initial ownership distribution
 export const EXAMPLE_OWNERS = [ALICE_ADDR, BOB_ADDR];
 export const EXAMPLE_VALUES = [200, 100];
@@ -46,6 +47,12 @@ export enum GitConsensusErrors {
     TAG_MSG_NEEDS_ADDR = `TagMsgNeedsAddr`,
     DISTRIBUTION_LENGTH_MISMATCH = `DistributionLengthMismatch`,
     UNAUTHORIZED_RELEASE = `UnauthorizedRelease`,
+}
+
+export enum ITokenErrors {
+    INITIAL_DISTRIBUTION_LENGTH_MISMATCH = `InitialDistributionLengthMismatch`,
+    UNAUTHORIZED_MINTER = `UnauthorizedMinter`,
+    MAx_MINTABLE_PER_HASH_EXCEEDED = `MaxMintablePerHashExceeded`,
 }
 
 /// --- GOVERNOR TYPES ---

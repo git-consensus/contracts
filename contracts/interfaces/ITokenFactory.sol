@@ -14,7 +14,8 @@ interface ITokenFactoryEvents {
         address govAddr,
         address minterAddr,
         string name,
-        string symbol
+        string symbol,
+        uint256 maxMintablePerHash
     );
 }
 
@@ -46,6 +47,7 @@ interface ITokenFactory is ITokenFactoryEvents {
         address minterAddr,
         string calldata name,
         string calldata symbol,
+        uint256 _maxMintablePerHash,
         address[] calldata owners,
         uint256[] calldata values,
         bytes32 salt

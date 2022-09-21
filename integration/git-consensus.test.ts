@@ -11,6 +11,7 @@ import {
     CHARLIE_ADDR,
     DAVE_ADDR,
     EXAMPLE_GOVERNOR_NAME,
+    EXAMPLE_MAX_MINTABLE_PER_HASH,
     EXAMPLE_OWNERS,
     EXAMPLE_TOKEN_NAME,
     EXAMPLE_TOKEN_SYMBOL,
@@ -35,6 +36,7 @@ import {
     parseEvent,
     randomAvoidRepeats,
     randomBigNumber,
+    randomBigNumberAbove,
     randomNumber,
     submitTxFail,
     submitTxWait,
@@ -390,6 +392,7 @@ describe(`Git Consensus integration tests`, () => {
             alice, // can be anyone
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
+            ethers.constants.MaxUint256, // to avoid a randomly generated value going past max.
             EXAMPLE_OWNERS,
             EXAMPLE_VALUES,
             ZERO_HASH,
