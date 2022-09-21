@@ -22,7 +22,7 @@ contract TokenImpl is
 {
     address private governorAddr;
     address private minterAddr;
-    uint256 private maxMintablePerHashValue;
+    uint256 private maxMintableTokensPerHash;
 
     /// @inheritdoc IToken
     function initialize(
@@ -40,7 +40,7 @@ contract TokenImpl is
 
         governorAddr = _govAddr;
         minterAddr = _minterAddr;
-        maxMintablePerHashValue = _maxMintablePerHash;
+        maxMintableTokensPerHash = _maxMintablePerHash;
 
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
@@ -70,7 +70,7 @@ contract TokenImpl is
 
     /// @inheritdoc IToken
     function maxMintablePerHash() external view returns (uint256 max_) {
-        return maxMintablePerHashValue;
+        return maxMintableTokensPerHash;
     }
 
     /// @inheritdoc IToken
@@ -79,8 +79,8 @@ contract TokenImpl is
             revert UnauthorizedMinter(msg.sender, minterAddr);
         }
 
-        if (_amount > maxMintablePerHashValue) {
-            revert MaxMintablePerHashExceeded(_amount, maxMintablePerHashValue);
+        if (_amount > maxMintableTokensPerHash) {
+            revert MaxMintablePerHashExceeded(_amount, maxMintableTokensPerHash);
         }
 
         _mint(_to, _amount);
