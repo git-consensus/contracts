@@ -1,6 +1,6 @@
 {
     "name": "@git-consensus/contracts",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Official Git Consensus contracts, written in Solidity.",
     "type": "commonjs",
     "main": "build/contracts/index.js",
@@ -19,7 +19,6 @@
     ],
     "author": "Git Consensus Contributors",
     "license": "GPL-3.0-only",
-    "private": true,
     "homepage": "https://github.com/git-consensus",
     "repository": {
         "type": "git",
