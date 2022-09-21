@@ -23,11 +23,13 @@ import {
 } from "./deploy";
 import { saltToHex } from "./utils";
 
+// --- Provides a CLI to deploy the possible contracts ---
+
 // TODO: Hardware Wallet support:
 // https://docs.ethers.io/v5/api/other/hardware/
 
-const CLONE_USAGE = `user: onboard a project to GitConsensus (create a Token & Governor)`;
-const DEV_USAGE = `dev: deploy GitConsensus, TokenFactory, or GovernorFactory`;
+const CLONE_USAGE = `USER - onboard a project to GitConsensus (create a Token & Governor)`;
+const DEV_USAGE = `DEV - deploy GitConsensus, TokenFactory, or GovernorFactory`;
 
 const BOTH_CLONE = `Token & Governor`;
 const TOKEN_CLONE = `Token`;
@@ -36,39 +38,44 @@ const GIT_CONSENSUS = `GitConsensus`;
 const TOKEN_FACTORY = `TokenFactory`;
 const GOVERNOR_FACTORY = `GovernorFactory`;
 
-async function main() {
-    const signer: SignerWithAddress = await askForSigner();
-
-    const usage = askForUsage();
-    switch (usage) {
+async function main(signer?: SignerWithAddress) {
+    if (signer == undefined) {
+        signer = await askForSigner();
+    }
+    switch (askForUsage()) {
         case CLONE_USAGE:
             switch (askForCloneContracts()) {
                 case BOTH_CLONE:
-                    createClones(signer, true, true);
+                    await createClones(signer, true, true);
+                    main(signer);
                     return;
                 case TOKEN_CLONE:
-                    createClones(signer, true, false);
+                    await createClones(signer, true, false);
+                    main(signer);
                     return;
                 case GOVERNOR_CLONE:
-                    createClones(signer, false, true);
+                    await createClones(signer, false, true);
+                    main(signer);
                     return;
             }
         case DEV_USAGE:
             switch (askForDevContracts()) {
                 case GIT_CONSENSUS:
-                    gitConsensus(signer);
+                    await gitConsensus(signer);
+                    main(signer);
                     return;
                 case TOKEN_FACTORY:
-                    tokenFactory(signer);
+                    await tokenFactory(signer);
+                    main(signer);
                     return;
                 case GOVERNOR_FACTORY:
-                    governorFactory(signer);
+                    await governorFactory(signer);
+                    main(signer);
                     return;
             }
-        default:
-            main();
     }
 }
+
 
 export async function gitConsensus(signer: SignerWithAddress): Promise<void> {
     await deploy(GIT_CONSENSUS, () => deployGitConsensus(signer));
@@ -88,11 +95,11 @@ export async function createClones(
     withGovernor?: boolean,
 ): Promise<string[]> {
     console.log(
-        `To create your new Token & Governor, you will also be asked to enter the address of the
-        GitConsensus and Factory contracts that you want to use on this network (${network}) which
-        will be defaulted from the list of the official deployed contracts on this network. Developers
-        may  also wish to deploy their own versions of these contracts, in which case you want to
-        enter the address of those instead.`,
+        `\nTo create your new Token & Governor, you will be asked to enter the address of the ` +
+`already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
+`be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
+`in the git-consensus/contracts deployments.json. Developers may also wish to deploy their own versions of ` +
+`these contracts, in which case you want to enter the address of those instead.\n`,
     );
     const gitConsensusAddr = askForAddress(
         `the address of the GitConsensus contract`,
@@ -138,7 +145,7 @@ export async function createClones(
         }
 
         // TODO: getting incorrect values this (only the final one is correct), and they should match
-        console.log(`Your predicted Token address ${etherscanAddress(network.name, tokenAddr)}]\n`);
+        console.log(`Your predicted Token address ${etherscanAddress(network.name, tokenAddr)}\n`);
 
         const token = await createTokenClone(
             tokenFactoryAddr,
@@ -154,13 +161,14 @@ export async function createClones(
         );
 
         console.log(`Your Token has been deployed with address ${token.address}`);
+        // TODO: link to a doc that goes in details about token address in tag usage
         console.log(
-            `Always include this address your Git annotated tag message for it to be valid for Git Consensus addRelease`,
+            `Always include this address in your Git annotated tag message for it to be valid in Git Consensus addRelease()`,
         );
 
-        const update = askYesNo(
-            `NOT IMPLEMENTED YET - Update deployments.json with new TokenFactory address ${token.address}?`,
-        );
+        // const update = askYesNo(
+        //     `NOT IMPLEMENTED YET - Update deployments.json with new TokenFactory address ${token.address}?`,
+        // );
     }
 
     if (withGovernor) {
@@ -200,6 +208,10 @@ export async function createClones(
         );
 
         console.log(`Your Governor has been deployed with address ${governor.address}`);
+
+        // const update = askYesNo(
+        //     `NOT IMPLEMENTED YET - Update deployments.json with new GovernorFactory address ${governor.address}?`,
+        // );
     }
 
     return [tokenAddr, governorAddr];
@@ -229,32 +241,32 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
             }
             console.log(`Deployer address:`, contract.deployTransaction.from, `\n`);
 
-            const update = askYesNo(
-                `TODO - Update deployments.json with new ${name} address ${contract.address}?`,
-            );
-            if (update) {
-                console.log(deployments);
-                const locations: Array<string> = JSON.parse(JSON.stringify(deployments)).location;
+            // TODO: update deployments.json with new address
+            // something like:
 
-                // TODO: update deployments.json with new address
-                // something like:
+            // const update = askYesNo(
+            //     `TODO - Update deployments.json with new ${name} address ${contract.address}?`,
+            // );
+            // if (update) {
+            //     console.log(deployments);
+            //     const locations: Array<string> = JSON.parse(JSON.stringify(deployments)).location;
 
-                // var network: string[] = deployments.ropsten;
-                // const dayKey: keyof Schedule = 'monday';
-                // let values2 = deployments.reduce((acc: { [key: string]: number}, deployments) => {
-                //     acc[product] = 1; //No more error
-                //     return acc;
-                // }, {})
-                // Object.keys(deployments).forEach(key => {
-                //     console.log(deployments[key as keyof string]);
-                // });
+            //     var network: string[] = deployments.ropsten;
+            //     const dayKey: keyof Schedule = 'monday';
+            //     let values2 = deployments.reduce((acc: { [key: string]: number}, deployments) => {
+            //         acc[product] = 1; //No more error
+            //         return acc;
+            //     }, {})
+            //     Object.keys(deployments).forEach(key => {
+            //         console.log(deployments[key as keyof string]);
+            //     });
 
-                // deployments.deployments[network.name][name] = contract.address;
-                // fs.writeFileSync(
-                //     path.join(__dirname, "..", "deployments.json"),
-                //     JSON.stringify(deployments, null, 2),
-                // );
-            }
+            //     deployments.deployments[network.name][name] = contract.address;
+            //     fs.writeFileSync(
+            //         path.join(__dirname, "..", "deployments.json"),
+            //         JSON.stringify(deployments, null, 2),
+            //     );
+            // }
 
             return contract;
         } catch (e) {
@@ -282,7 +294,7 @@ function etherscanTx(net: string, txHash: string): string {
 
 function askForUsage(): string {
     const usage = [CLONE_USAGE, DEV_USAGE];
-    const network = keyInSelect(usage, `Please enter your intended usage`, { cancel: false });
+    const network = keyInSelect(usage, `Please enter your intended usage`, { cancel: true });
     return usage[network];
 }
 
