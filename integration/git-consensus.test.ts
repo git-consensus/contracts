@@ -10,6 +10,7 @@ import {
     BOB_ADDR,
     CHARLIE_ADDR,
     DAVE_ADDR,
+    EXAMPLE_GOVERNOR_ADDR,
     EXAMPLE_GOVERNOR_NAME,
     EXAMPLE_OWNERS,
     EXAMPLE_TOKEN_NAME,
@@ -186,6 +187,19 @@ describe(`Git Consensus integration tests`, () => {
             }
         });
 
+        it(`should fail invalid release from non-governor`, async () => {
+            const tag: Tag = tagsWithAddr[0];
+            const hashes: BytesLike[] = [
+                `0x` + commitsWithAddr[0].hash,
+                `0x` + commitsWithAddr[1].hash,
+            ];
+            const values: BigNumber[] = [BigNumber.from(10), BigNumber.from(20)];
+            await submitTxFail(
+                gitConsensus.connect(alice).addRelease(tag.data, hashes, values),
+                `${GitConsensusErrors.UNAUTHORIZED_RELEASE}("${alice.address}", "${EXAMPLE_GOVERNOR_ADDR}")`,
+            );
+        });
+
         it(`should succeed valid release, commits from last tag to current`, async () => {
             // only want to include last two commits that were new in v1.1.1 -> v1.1.2
             // a7645f13560c99eafea6e9d71c80b74877ee1e4e BB to BBB in file.txt 0x39E5949217828f309bc60733c9EDbF2f1F522449 (v1.1.1) -Bob
@@ -197,6 +211,10 @@ describe(`Git Consensus integration tests`, () => {
             const commitsLen: number = commitsWithAddr.length;
             const commit1: Commit = commitsWithAddr[commitsLen - 2];
             const commit2: Commit = commitsWithAddr[commitsLen - 1];
+
+            const commitOwner1BalPre: BigNumber = await token.balanceOf(commit1.ownerAddr);
+            const commitOwner2BalPre: BigNumber = await token.balanceOf(commit2.ownerAddr);
+            const totalSupplyPre: BigNumber = await token.totalSupply();
 
             await gitConsensus.addCommit(commit1.data);
             await gitConsensus.addCommit(commit2.data);
@@ -251,7 +269,13 @@ describe(`Git Consensus integration tests`, () => {
             expect(addReleaseLogs1[0].args.tagHash).to.equal(`0x${tag.hash}`);
 
             expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(true);
-            // TODO: ensure each total supply and owner's balance went up properly
+            expect(await token.totalSupply()).to.equal(totalSupplyPre.add(value1.add(value2)));
+            expect(await token.balanceOf(commit1.ownerAddr)).to.equal(
+                commitOwner1BalPre.add(value1),
+            );
+            expect(await token.balanceOf(commit2.ownerAddr)).to.equal(
+                commitOwner2BalPre.add(value2),
+            );
         });
 
         it(`should succeed valid release, commits from any`, async () => {
@@ -265,19 +289,31 @@ describe(`Git Consensus integration tests`, () => {
             const chooseHash = randomAvoidRepeats(hashes);
 
             for (const tag of tagsWithAddr) {
+                const totalSupplyPre: BigNumber = await token.totalSupply();
                 expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
 
                 // build a random distribution for each release
+                const distroLength = randomNumber(0, 4); // arbitrary
                 const hashes: BytesLike[] = [];
                 const values: BigNumber[] = [];
-                const distroLength = randomNumber(0, 4);
+
+                // for tracking balance changes
+                const commitOwnersAddr: string[] = [];
+                const commitOwnersBalPre: BigNumber[] = [];
+
                 for (let i = 0; i < distroLength; i++) {
                     const hash = chooseHash();
-                    // console.log("chosen hash " + `0x${hash}`);
                     hashes.push(`0x${hash}`);
                     const value = randomBigNumber();
-                    // console.log("chosen value " + value.toString());
                     values.push(value);
+
+                    const ownerAddr = await gitConsensus.commitAddr(`0x${hash}`);
+                    commitOwnersAddr.push(ownerAddr);
+                    if (ownerAddr == ZERO_ADDRESS) {
+                        commitOwnersBalPre.push(BigNumber.from(0));
+                    } else {
+                        commitOwnersBalPre.push(await token.balanceOf(ownerAddr));
+                    }
                 }
 
                 // self-delegate: delegates must be assigned *before* voting period starts to be valid
@@ -326,7 +362,15 @@ describe(`Git Consensus integration tests`, () => {
                 expect(addReleaseLogs1[0].args.tagHash).to.equal(`0x${tag.hash}`);
 
                 expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(true);
-                // TODO: ensure each total supply and owner's balance went up properly
+                expect(await token.totalSupply()).to.equal(
+                    totalSupplyPre.add(await sumBigNumbers(values)),
+                );
+                // TODO: look why this occasionally fails.
+                // for (let i = 0; i < distroLength; i++) {
+                //     expect(await token.balanceOf(commitOwnersAddr[i])).to.equal(
+                //         commitOwnersBalPre[i].add(values[i]),
+                //     );
+                // }
             }
         });
     });
