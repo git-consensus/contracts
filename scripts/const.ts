@@ -47,6 +47,7 @@ export enum GitConsensusErrors {
     TAG_MSG_NEEDS_ADDR = `TagMsgNeedsAddr`,
     DISTRIBUTION_LENGTH_MISMATCH = `DistributionLengthMismatch`,
     UNAUTHORIZED_RELEASE = `UnauthorizedRelease`,
+    SUBSTRING_OUT_OF_BOUNDS = `SubstringOutOfBounds`,
 }
 
 export enum ITokenErrors {
