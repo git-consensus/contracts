@@ -21,6 +21,7 @@ import {
     EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
     EXAMPLE_VOTING_QUORUM_PERCENT,
     GitConsensusErrors,
+    TokenErrors,
     VoteType,
     ZERO_ADDRESS,
     ZERO_HASH,
@@ -55,6 +56,9 @@ import {
 
 chai.use(solidity);
 const { expect } = chai;
+
+// randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
+const MAX_MINTABLE_PER_HASH = ethers.constants.MaxUint256.sub(1);
 
 describe(`Git Consensus integration tests`, () => {
     let gitConsensus: GitConsensus;
@@ -374,12 +378,7 @@ describe(`Git Consensus integration tests`, () => {
             }
         });
 
-        // TODO: This test, even when provided the current reversion message, mysteriously
-        // fails with the error message:
-        // Uncaught RuntimeError: abort(AssertionError: Expected transaction NOT to be reverted). Build with -s ASSERTIONS=1 for more info.
-        //
-        // Might be a memory-related issue -- investigate later.
-        it.skip(`should fail to mint tokens above maxMintablePerHash`, async() => {
+        it(`should fail to mint tokens above maxMintablePerHash`, async () => {
             const tagsLen: number = tagsWithAddr.length;
             const tag: Tag = tagsWithAddr[tagsLen - 1];
             const commitsLen: number = commitsWithAddr.length;
@@ -422,7 +421,8 @@ describe(`Git Consensus integration tests`, () => {
             await waitBlocks(EXAMPLE_VOTING_DELAY_BLOCKS);
             await governor.connect(alice).castVote(proposalId1, VoteType.FOR);
             await waitBlocks(EXAMPLE_VOTING_PERIOD_BLOCKS);
-            await expect(submitTxWait(
+
+            await submitTxFail(
                 governor
                     .connect(alice)
                     .execute(
@@ -430,15 +430,16 @@ describe(`Git Consensus integration tests`, () => {
                         [0],
                         [calldata1],
                         ethers.utils.id(await tag.data.message),
-                    )
-            )).to.be.revertedWith('MaxMintablePerHashExceeded(115792089237316195423570985008687907853269984665640564039457584007913129639935, 115792089237316195423570985008687907853269984665640564039457584007913129639934)');
-            
+                    ),
+                `${TokenErrors.MAX_MINTABLE_PER_HASH_EXCEEDED}(${value2}, ${MAX_MINTABLE_PER_HASH})`,
+            );
+
             // No data should have changed since the transaction was reverted.
             expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
             expect(await token.totalSupply()).to.equal(totalSupplyPre);
-            expect(await token.balanceOf(commit1.ownerAddr)).to.equal(commitOwner1BalPre.add(value1));
+            expect(await token.balanceOf(commit1.ownerAddr)).to.equal(commitOwner1BalPre);
             expect(await token.balanceOf(commit2.ownerAddr)).to.equal(commitOwner2BalPre);
-        })
+        });
     });
 
     context(`clones`, async () => {
@@ -500,7 +501,7 @@ describe(`Git Consensus integration tests`, () => {
             alice, // can be anyone
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
-            ethers.constants.MaxUint256.sub(1), // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
+            MAX_MINTABLE_PER_HASH, // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
             EXAMPLE_OWNERS,
             EXAMPLE_VALUES,
             ZERO_HASH,
