@@ -74,7 +74,7 @@ interface IToken is ITokenErrors {
     /// @param name Name of the token (e.g. "MyToken").
     /// @param symbol Symbol of the token (e.g. "MTK").
     /// @param maxMintablePerHash The maximum value that can be minted for a single hash in
-    ///     of the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`.
+    ///     the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`.
     /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
     ///     equal length of `values`.
     /// @param values Array of amounts of tokens to be given to each owner. The initial
@@ -109,8 +109,12 @@ interface IToken is ITokenErrors {
     function minter() external returns (address minterAddr);
 
     /// @notice Returns maximum value that a commit hash can recieve.
-    /// @return max The maximum value for single commit hash can during the execution
-    ///     of `GitConsensus.addRelease()`.
+    /// @return max The maximum value a single commit hash can receive from the execution of
+    ///     `GitConsensus.addRelease()`.
+    /// @dev Aside from limiting the final distribution that is sent to `GitConsensus.addRelease()`,
+    ///     this value also gives clients a reference for the maximum that a voter should be able
+    ///     assign to a single commit during the pre-proposal stage. This pre-proposal stage allows
+    ///     all the voters' preferred distributions to be aggregated into the final one proposed.
     function maxMintablePerHash() external returns (uint256 max);
 
     /// @notice Creates `amount` tokens and assigns them to `account`, increasing the total supply.
