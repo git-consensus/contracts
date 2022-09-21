@@ -21,6 +21,7 @@ import {
     EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
     EXAMPLE_VOTING_QUORUM_PERCENT,
     GitConsensusErrors,
+    TokenErrors,
     VoteType,
     ZERO_ADDRESS,
     ZERO_HASH,
@@ -36,7 +37,6 @@ import {
     parseEvent,
     randomAvoidRepeats,
     randomBigNumber,
-    randomBigNumberAbove,
     randomNumber,
     submitTxFail,
     submitTxWait,
@@ -56,6 +56,9 @@ import {
 
 chai.use(solidity);
 const { expect } = chai;
+
+// randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
+const MAX_MINTABLE_PER_HASH = ethers.constants.MaxUint256.sub(1);
 
 describe(`Git Consensus integration tests`, () => {
     let gitConsensus: GitConsensus;
@@ -374,6 +377,69 @@ describe(`Git Consensus integration tests`, () => {
                 // }
             }
         });
+
+        it(`should fail to mint tokens above maxMintablePerHash`, async () => {
+            const tagsLen: number = tagsWithAddr.length;
+            const tag: Tag = tagsWithAddr[tagsLen - 1];
+            const commitsLen: number = commitsWithAddr.length;
+            const commit1: Commit = commitsWithAddr[commitsLen - 2];
+            const commit2: Commit = commitsWithAddr[commitsLen - 1];
+
+            const commitOwner1BalPre: BigNumber = await token.balanceOf(commit1.ownerAddr);
+            const commitOwner2BalPre: BigNumber = await token.balanceOf(commit2.ownerAddr);
+            const totalSupplyPre: BigNumber = await token.totalSupply();
+
+            await gitConsensus.addCommit(commit1.data);
+            await gitConsensus.addCommit(commit2.data);
+
+            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+
+            // build a distribution to reward these two commits
+            const value1: BigNumber = randomBigNumber();
+            const value2: BigNumber = ethers.constants.MaxUint256; // == 1 + maxMintablePerHash
+            const hashes: BytesLike[] = [`0x${commit1.hash}`, `0x${commit2.hash}`];
+            const values: BigNumber[] = [value1, value2];
+
+            // self-delegate: delegates must be assigned *before* voting period starts to be valid
+            await token.connect(alice).delegate(alice.address);
+
+            // create proposal to execute `addRelease(tag.data, d)`
+            const calldata1 = gitConsensus.interface.encodeFunctionData(`addRelease`, [
+                tag.data,
+                hashes,
+                values,
+            ]);
+            const proposalTxReceipt1 = await submitTxWait(
+                governor
+                    .connect(alice)
+                    .propose([gitConsensus.address], [0], [calldata1], tag.data.message),
+            );
+            const proposalId1 = parseEvent(proposalTxReceipt1, governor.interface)[0].args
+                .proposalId;
+
+            // // voting starts
+            await waitBlocks(EXAMPLE_VOTING_DELAY_BLOCKS);
+            await governor.connect(alice).castVote(proposalId1, VoteType.FOR);
+            await waitBlocks(EXAMPLE_VOTING_PERIOD_BLOCKS);
+
+            await submitTxFail(
+                governor
+                    .connect(alice)
+                    .execute(
+                        [gitConsensus.address],
+                        [0],
+                        [calldata1],
+                        ethers.utils.id(await tag.data.message),
+                    ),
+                `${TokenErrors.MAX_MINTABLE_PER_HASH_EXCEEDED}(${value2}, ${MAX_MINTABLE_PER_HASH})`,
+            );
+
+            // No data should have changed since the transaction was reverted.
+            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+            expect(await token.totalSupply()).to.equal(totalSupplyPre);
+            expect(await token.balanceOf(commit1.ownerAddr)).to.equal(commitOwner1BalPre);
+            expect(await token.balanceOf(commit2.ownerAddr)).to.equal(commitOwner2BalPre);
+        });
     });
 
     context(`clones`, async () => {
@@ -435,7 +501,7 @@ describe(`Git Consensus integration tests`, () => {
             alice, // can be anyone
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
-            ethers.constants.MaxUint256, // to avoid a randomly generated value going past max.
+            MAX_MINTABLE_PER_HASH, // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
             EXAMPLE_OWNERS,
             EXAMPLE_VALUES,
             ZERO_HASH,
