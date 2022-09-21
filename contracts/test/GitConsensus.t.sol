@@ -81,6 +81,7 @@ contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsen
     string internal tokenName = "TestToken";
     string internal tokenSymbol = "TTT";
     string internal govName = "TestGovernor";
+    uint256 internal maxMintablePerHash = 10000000; // 10,000,000
     uint256 internal votingDelay = 10; // 10 blocks before voting begins
     uint256 internal votingPeriod = 100800; // 2 weeks (assumes 12/s per block)
     uint256 internal proposalThreshold = 100; // 100 votes needed to propose
@@ -104,6 +105,7 @@ contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsen
             address(aGitConsensus),
             tokenName,
             tokenSymbol,
+            maxMintablePerHash,
             owners,
             values,
             _tokenSalt

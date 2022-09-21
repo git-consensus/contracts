@@ -49,6 +49,12 @@ export enum GitConsensusErrors {
     SUBSTRING_OUT_OF_BOUNDS = `SubstringOutOfBounds`,
 }
 
+export enum ITokenErrors {
+    INITIAL_DISTRIBUTION_LENGTH_MISMATCH = `InitialDistributionLengthMismatch`,
+    UNAUTHORIZED_MINTER = `UnauthorizedMinter`,
+    MAx_MINTABLE_PER_HASH_EXCEEDED = `MaxMintablePerHashExceeded`,
+}
+
 /// --- GOVERNOR TYPES ---
 
 export enum VoteType {

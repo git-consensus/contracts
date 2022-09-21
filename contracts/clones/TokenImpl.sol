@@ -22,6 +22,7 @@ contract TokenImpl is
 {
     address private governorAddr;
     address private minterAddr;
+    uint256 private maxMintableTokensPerHash;
 
     /// @inheritdoc IToken
     function initialize(
@@ -29,13 +30,17 @@ contract TokenImpl is
         address _minterAddr,
         string calldata _name,
         string calldata _symbol,
+        uint256 _maxMintablePerHash,
         address[] calldata _owners,
         uint256[] calldata _values
     ) external initializer {
-        require(_owners.length == _values.length, "Token: owner and value array length mismatch");
+        if (_owners.length != _values.length) {
+            revert InitialDistributionLengthMismatch(_owners.length, _values.length);
+        }
 
         governorAddr = _govAddr;
         minterAddr = _minterAddr;
+        maxMintableTokensPerHash = _maxMintablePerHash;
 
         __ERC20_init(_name, _symbol);
         __ERC20Permit_init(_name);
@@ -64,8 +69,19 @@ contract TokenImpl is
     }
 
     /// @inheritdoc IToken
+    function maxMintablePerHash() external view returns (uint256 max_) {
+        return maxMintableTokensPerHash;
+    }
+
+    /// @inheritdoc IToken
     function mint(address _to, uint256 _amount) external {
-        require(minterAddr == msg.sender, "Token: caller not the minter");
+        if (minterAddr != msg.sender) {
+            revert UnauthorizedMinter(msg.sender, minterAddr);
+        }
+
+        if (_amount > maxMintableTokensPerHash) {
+            revert MaxMintablePerHashExceeded(_amount, maxMintableTokensPerHash);
+        }
 
         _mint(_to, _amount);
     }

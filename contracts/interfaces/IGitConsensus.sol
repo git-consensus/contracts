@@ -7,14 +7,21 @@ pragma solidity >=0.8.17;
 interface IGitConsensusErrors {
     /// @notice When commit message does not contain a valid address.
     /// @param message The commit message string.
-    /// @dev More specifically, when the message does not contain 0x followed by enough
-    ///    length for an address (40 hex characters). Can occur with `addCommit()`.
+    /// @dev Can occur with `addCommit()`. Specifically occurs when the message does not
+    ///    contain 0x followed by enough length for an address (40 hex characters).
     error CommitMsgNeedsAddr(string message);
     /// @notice When tag message does not contain a valid address.
     /// @param message The tag message string.
-    /// @dev More specifically, when the message does not contain 0x followed by enough
-    ///    length for an address (40 hex characters). Can occur with `addRelease()`.
+    /// @dev Can occur with `addRelease()`. Specifically occurs when the message does not
+    ///    contain 0x followed by enough length for an address (40 hex characters).
     error TagMsgNeedsAddr(string message);
+    /// @notice When the sender attempts to extract a substring that is out of bounds in a
+    ///    string.
+    /// @param offset The index of the substring to extract.
+    /// @param substringLen The length of the substring to extract.
+    /// @param stringLen The length of the string from which to extract the substring.
+    /// @dev Can occur with `addCommit()` or `addRelease()`.
+    error SubstringOutOfBounds(uint256 offset, uint256 substringLen, uint256 stringLen);
     /// @notice When distribution hashes/owner array length and values array length do not match.
     /// @param hashesLen The length of the hashes array.
     /// @param valuesLen The length of the values array.
@@ -25,13 +32,6 @@ interface IGitConsensusErrors {
     /// @param expectedAddr The expected address, which should be the governor.
     /// @dev Can occur with `addRelease()`.
     error UnauthorizedRelease(address senderAddr, address expectedAddr);
-    /// @notice When the sender attempts to extract a substring that is out of bounds in a
-    /// string.
-    /// @param offset The index of the substring to extract.
-    /// @param substringLen The length of the substring to extract.
-    /// @param stringLen The length of the string from which to extract the substring.
-    /// @dev Can occur with `addCommit()` or `addRelease()`.
-    error SubstringOutOfBounds(uint256 offset, uint256 substringLen, uint256 stringLen);
 }
 
 /// @title  IGitConsensusEvents

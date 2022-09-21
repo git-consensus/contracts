@@ -1,6 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.8.17;
 
+/// @title  ITokenErrors
+/// @author Matt Stam (@mattstam)
+/// @notice The interface for the errors that may be thrown from IToken.
+interface ITokenErrors {
+    /// @notice When distribution owner array length and values array length do not match.
+    /// @param ownersLen The length of the owners array.
+    /// @param valuesLen The length of the values array.
+    /// @dev Can occur with `initialize()`.
+    error InitialDistributionLengthMismatch(uint256 ownersLen, uint256 valuesLen);
+    /// @notice When a mint attempt occurs from a sender other than the token's minter().
+    /// @param senderAddr The address of the unauthorized sender.
+    /// @param expectedAddr The expected address, which should be the minter.
+    /// @dev Can occur with `mint()`.
+    error UnauthorizedMinter(address senderAddr, address expectedAddr);
+    /// @notice When an mint attempt occurs that exceeds the token's `maxMintablePerHash()`.
+    /// @param value The value attempting to be minted.
+    /// @param maxMintableValue The token's `maxMintablePerHash()` value.
+    /// @dev Can occur with `addRelease()`. Specifically occurs when a values[i] exists
+    ///    the values array that is greater than the token's `maxMintablePerHash()`.
+    error MaxMintablePerHashExceeded(uint256 value, uint256 maxMintableValue);
+}
+
 /// @title  IToken
 /// @author Matt Stam (@mattstam)
 /// @notice An ERC20 token that maps to a Git project. Allows for:
@@ -42,7 +64,7 @@ pragma solidity >=0.8.17;
 ///         **Solution**: The IToken's govAddr can only be the caller to `addRelease(...)`,
 ///         therefore when Badguy creates a new Governor in Step 2, his new governor will have
 ///         the transaction reverted.
-interface IToken {
+interface IToken is ITokenErrors {
     /// @notice Initializes the ERC20 Token contract.
     /// @param govAddr Address of the corresponding governor contract. Recommended usage is
     ///    use address prediction to create the Token first, then create the Governor with
@@ -51,6 +73,8 @@ interface IToken {
     ///    always be set to the Git Consensus contract's address.
     /// @param name Name of the token (e.g. "MyToken").
     /// @param symbol Symbol of the token (e.g. "MTK").
+    /// @param maxMintablePerHash The maximum value that can be minted for a single hash in
+    ///     the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`.
     /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
     ///     equal length of `values`.
     /// @param values Array of amounts of tokens to be given to each owner. The initial
@@ -68,6 +92,7 @@ interface IToken {
         address minterAddr,
         string calldata name,
         string calldata symbol,
+        uint256 maxMintablePerHash,
         address[] calldata owners,
         uint256[] calldata values
     ) external;
@@ -82,6 +107,15 @@ interface IToken {
     /// @notice Returns the minter corresponding to this token.
     /// @return minterAddr The minter address, who can execute `mint()`.
     function minter() external returns (address minterAddr);
+
+    /// @notice Returns maximum value that a commit hash can recieve.
+    /// @return max The maximum value a single commit hash can receive from the execution of
+    ///     `GitConsensus.addRelease()`.
+    /// @dev Aside from limiting the final distribution that is sent to `GitConsensus.addRelease()`,
+    ///     this value also gives clients a reference for the maximum that a voter should be able
+    ///     assign to a single commit during the pre-proposal stage. This pre-proposal stage allows
+    ///     all the voters' preferred distributions to be aggregated into the final one proposed.
+    function maxMintablePerHash() external returns (uint256 max);
 
     /// @notice Creates `amount` tokens and assigns them to `account`, increasing the total supply.
     /// @param account The address to assign the newly minted tokens to.

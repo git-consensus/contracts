@@ -97,6 +97,7 @@ export async function createTokenClone(
     creator: SignerWithAddress,
     name: string,
     symbol: string,
+    maxMintablePerHash: BigNumberish,
     owners: string[],
     values: BigNumberish[],
     salt: BytesLike,
@@ -113,15 +114,34 @@ export async function createTokenClone(
         txReceipt = await submitTxWait(
             tokenFactory
                 .connect(creator)
-                .createToken(governorAddr, gitConsensusAddr, name, symbol, owners, values, salt, {
-                    gasLimit: gasLimit,
-                }),
+                .createToken(
+                    governorAddr,
+                    gitConsensusAddr,
+                    name,
+                    symbol,
+                    maxMintablePerHash,
+                    owners,
+                    values,
+                    salt,
+                    {
+                        gasLimit: gasLimit,
+                    },
+                ),
         );
     } else {
         txReceipt = await submitTxWait(
             tokenFactory
                 .connect(creator)
-                .createToken(governorAddr, gitConsensusAddr, name, symbol, owners, values, salt),
+                .createToken(
+                    governorAddr,
+                    gitConsensusAddr,
+                    name,
+                    symbol,
+                    maxMintablePerHash,
+                    owners,
+                    values,
+                    salt,
+                ),
         );
     }
 

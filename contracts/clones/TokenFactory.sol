@@ -25,14 +25,31 @@ contract TokenFactory is ITokenFactory {
         address _minterAddr,
         string calldata _name,
         string calldata _symbol,
+        uint256 _maxMintablePerHash,
         address[] calldata _owners,
         uint256[] calldata _values,
         bytes32 _salt
     ) external returns (address instanceAddr_) {
         instanceAddr_ = address(tokenTemplate).cloneDeterministic(_salt);
-        IToken(instanceAddr_).initialize(_govAddr, _minterAddr, _name, _symbol, _owners, _values);
+        IToken(instanceAddr_).initialize(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash,
+            _owners,
+            _values
+        );
 
-        emit TokenCreated(instanceAddr_, msg.sender, _govAddr, _minterAddr, _name, _symbol);
+        emit TokenCreated(
+            instanceAddr_,
+            msg.sender,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            _maxMintablePerHash
+        );
     }
 
     /// @inheritdoc ITokenFactory
