@@ -21,11 +21,11 @@ contract UtilsTest is Test, IGitConsensusErrors {
         assertEq(LibUtils.indexOfAddr(COMMIT_MSG), bytes(COMMIT_MSG_BASE).length);
     }
 
-    function testOk_indexOfAddressNonexistentADDR_STREmptyMsg() public {
+    function testOk_indexOfAddressNonexistentAddrEmptyMsg() public {
         assertEq("", 0);
     }
 
-    function testOk_indexOfAddrNonexistentADDR_STRNonemptyMsg() public {
+    function testOk_indexOfAddrNonexistentAddrNonemptyMsg() public {
         assertEq(LibUtils.indexOfAddr(COMMIT_MSG_BASE), 0);
     }
 
