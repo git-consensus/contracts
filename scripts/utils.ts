@@ -131,6 +131,8 @@ export async function waitBlocks(count: number, seconds: number = 12): Promise<v
 
 // --- Math helpers ---
 
+export const saltToHex = (salt: string | number) => ethers.utils.id(salt.toString());
+
 // Choosing items randomly until all are taken and only then repeating
 // https://stackoverflow.com/a/17891411/15757416
 export function randomAvoidRepeats(array: any[]) {

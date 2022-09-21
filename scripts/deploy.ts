@@ -92,8 +92,8 @@ export async function deployGovernorFactory(deployer: SignerWithAddress): Promis
 // createTokenClone Creates a Token Clone and returns a type declaration for that contract instance.
 export async function createTokenClone(
     tokenFactoryAddr: string,
-    governorAddr: string,
     gitConsensusAddr: string,
+    governorAddr: string,
     creator: SignerWithAddress,
     name: string,
     symbol: string,

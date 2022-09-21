@@ -430,8 +430,8 @@ describe(`Git Consensus integration tests`, () => {
 
         token = await createTokenClone(
             tokenFactory.address,
-            governorAddr,
             gitConsensus.address,
+            governorAddr,
             alice, // can be anyone
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
