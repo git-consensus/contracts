@@ -6,6 +6,9 @@ name: integration-test
 jobs:
     integration:
         runs-on: ubuntu-latest
+        env:
+            MNEMONIC: ${{secrets.MNEMONIC}}
+            INFURA_API_KEY: ${{secrets.INFURA_API_KEY}}
         steps:
             - name: Check out the repo
               uses: actions/checkout@v3

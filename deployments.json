@@ -4,15 +4,15 @@
             "network": "ropsten",
             "contracts": [
                 {
-                    "name": "gitConsensus",
+                    "name": "GitConsensus",
                     "address": "0xE559bc7d69c751718C57f8181BebD0E65ed60A3f"
                 },
                 {
-                    "name": "tokenFactory",
+                    "name": "TokenFactory",
                     "address": "0xf825fCCf5D9cC7F27C6e0908Caf468402F5aF7D5"
                 },
                 {
-                    "name": "governorFactory",
+                    "name": "GovernorFactory",
                     "address": "0x95146F88A3129263C6dd3E73e439af19DE5C184B"
                 }
             ]

@@ -56,5 +56,5 @@ interface ITokenFactory is ITokenFactoryEvents {
     /// @notice Predicts the address of an `IToken` deployed using CREATE2 + salt value.
     /// @param salt The salt value used by CREATE2.
     /// @return instanceAddr The address of the newly created token clone.
-    function predictAddress(bytes32 salt) external returns (address instanceAddr);
+    function predictAddress(bytes32 salt) external view returns (address instanceAddr);
 }
