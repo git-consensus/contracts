@@ -99,24 +99,34 @@ export async function createClones(
         `\nTo create your new Token & Governor, you will be asked to enter the address of the ` +
             `already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
             `be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
-            `in the git-consensus/contracts deployments.json. Developers may also wish to deploy their own versions of ` +
+            `in the git-consensus/contracts/deployments.json. Developers may also wish to deploy their own versions of ` +
             `these contracts, in which case you want to enter the address of those instead.\n`,
     );
+    const defaultGitConsensusAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.GIT_CONSENSUS)?.address;
+
     const gitConsensusAddr = askForAddress(
-        `the address of the GitConsensus contract`,
-        `0xE559bc7d69c751718C57f8181BebD0E65ed60A3f`,
+        `of the ${DevContracts.GIT_CONSENSUS} contract`,
+        defaultGitConsensusAddr,
     );
+    const defaultTokenFactoryAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.TOKEN_FACTORY)?.address;
     const tokenFactoryAddr = askForAddress(
-        `the address of the TokenFactory contract`,
-        `0xf825fCCf5D9cC7F27C6e0908Caf468402F5aF7D5`,
+        `of the ${DevContracts.TOKEN_FACTORY} contract`,
+        defaultTokenFactoryAddr,
     );
+    const defaultGovernorFactoryAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.GOVERNOR_FACTORY)?.address;
     const governorFactoryAddr = askForAddress(
-        `the address of the GovernorFactory contract`,
-        `0x95146F88A3129263C6dd3E73e439af19DE5C184B`,
+        `of the ${DevContracts.GOVERNOR_FACTORY} contract`,
+        defaultGovernorFactoryAddr,
     );
 
-    const tokenFactory = await ethers.getContractAt(`TokenFactory`, governorFactoryAddr);
-    const governorFactory = await ethers.getContractAt(`GovernorFactory`, governorFactoryAddr);
+    const tokenFactory = await ethers.getContractAt(DevContracts.TOKEN_FACTORY, governorFactoryAddr);
+    const governorFactory = await ethers.getContractAt(DevContracts.GOVERNOR_FACTORY, governorFactoryAddr);
 
     const tokenSalt: string = saltToHex(askFor(`token salt`));
     const govSalt: string = saltToHex(askFor(`governor salt`));
@@ -469,7 +479,7 @@ function askForAddress(addressUsage: string, defaultInput?: string): string {
 }
 
 function askFor(query: string, defaultInput?: string, hideInput = false): string {
-    const questionDefault = defaultInput === undefined ? `` : ` (default: ` + defaultInput + `)`;
+    const questionDefault = defaultInput == null ? `` : ` (default: ` + defaultInput + `)`;
     const options = {
         hideEchoBack: hideInput,
         limit: /./,
