@@ -125,7 +125,7 @@ export async function createClones(
         defaultGovernorFactoryAddr,
     );
 
-    const tokenFactory = await ethers.getContractAt(DevContracts.TOKEN_FACTORY, governorFactoryAddr);
+    const tokenFactory = await ethers.getContractAt(DevContracts.TOKEN_FACTORY, tokenFactoryAddr);
     const governorFactory = await ethers.getContractAt(DevContracts.GOVERNOR_FACTORY, governorFactoryAddr);
 
     const tokenSalt: string = saltToHex(askFor(`token salt`));
@@ -159,7 +159,6 @@ export async function createClones(
             printDistribution(owners, values);
         }
 
-        // TODO: getting incorrect values this (only the final one is correct), and they should match
         console.log(`Your predicted Token address ${etherscanAddress(network.name, tokenAddr)}\n`);
 
         console.log(`Creating token...`);
@@ -214,7 +213,6 @@ export async function createClones(
             EXAMPLE_VOTING_QUORUM_PERCENT.toString(),
         );
 
-        // TODO: getting incorrect values this (only the final one is correct), and they should match
         console.log(
             `Your predicted Governor address ${etherscanAddress(network.name, governorAddr)}`,
         );
