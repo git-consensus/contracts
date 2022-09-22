@@ -1,6 +1,6 @@
 {
     "name": "@git-consensus/contracts",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "description": "Official Git Consensus contracts, written in Solidity.",
     "type": "commonjs",
     "main": "build/contracts/index.js",
@@ -25,6 +25,7 @@
         "url": "git+https://github.com/git-consensus/contracts.git"
     },
     "files": [
+        "deployments.json",
         "build/**",
         "scripts/**",
         "contracts/**",
