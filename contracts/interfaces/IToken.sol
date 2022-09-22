@@ -74,7 +74,8 @@ interface IToken is ITokenErrors {
     /// @param name Name of the token (e.g. "MyToken").
     /// @param symbol Symbol of the token (e.g. "MTK").
     /// @param maxMintablePerHash The maximum value that can be minted for a single hash in
-    ///     the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`.
+    ///     the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`. If no
+    ///     maximum is desired, set to 0.
     /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
     ///     equal length of `values`.
     /// @param values Array of amounts of tokens to be given to each owner. The initial
@@ -110,7 +111,7 @@ interface IToken is ITokenErrors {
 
     /// @notice Returns maximum value that a commit hash can recieve.
     /// @return max The maximum value a single commit hash can receive from the execution of
-    ///     `GitConsensus.addRelease()`.
+    ///     `GitConsensus.addRelease()`. A value of 0 means there is no maximum.
     /// @dev Aside from limiting the final distribution that is sent to `GitConsensus.addRelease()`,
     ///     this value also gives clients a reference for the maximum that a voter should be able
     ///     assign to a single commit during the pre-proposal stage. This pre-proposal stage allows
