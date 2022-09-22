@@ -417,7 +417,7 @@ describe(`Git Consensus integration tests`, () => {
             const proposalId1 = parseEvent(proposalTxReceipt1, governor.interface)[0].args
                 .proposalId;
 
-            // // voting starts
+            // voting starts
             await waitBlocks(EXAMPLE_VOTING_DELAY_BLOCKS);
             await governor.connect(alice).castVote(proposalId1, VoteType.FOR);
             await waitBlocks(EXAMPLE_VOTING_PERIOD_BLOCKS);
@@ -496,8 +496,8 @@ describe(`Git Consensus integration tests`, () => {
 
         token = await createTokenClone(
             tokenFactory.address,
-            governorAddr,
             gitConsensus.address,
+            governorAddr,
             alice, // can be anyone
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
