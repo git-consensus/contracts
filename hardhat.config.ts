@@ -63,11 +63,6 @@ if (!INFURA_API_KEY) {
     throw new Error(`Please set your INFURA_API_KEY in a .env file`);
 }
 
-const CMC_API_KEY: string | undefined = process.env.COINMARKETCAP_API_KEY;
-if (!CMC_API_KEY) {
-    throw new Error(`Please set your COINMARKETCAP_API_KEY in a .env file`);
-}
-
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;
     switch (chain) {
@@ -161,8 +156,8 @@ const config: HardhatUserConfig = {
     },
     gasReporter: {
         currency: `USD`,
-        enabled: process.env.REPORT_GAS ? true : false,
-        coinmarketcap: CMC_API_KEY,
+        enabled: REPORT_GAS,
+        coinmarketcap: process.env.CMC_API_KEY,
         excludeContracts: [`./contracts/test`],
         src: `./contracts`,
     },
