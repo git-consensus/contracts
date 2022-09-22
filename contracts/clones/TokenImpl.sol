@@ -79,7 +79,7 @@ contract TokenImpl is
             revert UnauthorizedMinter(msg.sender, minterAddr);
         }
 
-        if (_amount > maxMintableTokensPerHash) {
+        if (maxMintableTokensPerHash != 0 && _amount > maxMintableTokensPerHash) {
             revert MaxMintablePerHashExceeded(_amount, maxMintableTokensPerHash);
         }
 

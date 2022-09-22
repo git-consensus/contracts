@@ -137,7 +137,7 @@ export async function createClones(
     if (withToken) {
         const tokenName: string = askFor(`token name`, EXAMPLE_TOKEN_NAME);
         const tokenSymbol: string = askFor(`token symbol`, EXAMPLE_TOKEN_SYMBOL);
-        const maxMintablePerHash: BigNumberish = askForNumber(`max mintable per hash`);
+        const maxMintablePerHash: BigNumberish = askForNumber(`max mintable per hash (0 indicates no max)`, "0");
         const buildDistribution: boolean = askYesNo(`Do you want to add an Initial Distribution?`);
 
         const owners: string[] = [];

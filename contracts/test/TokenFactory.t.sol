@@ -3,11 +3,13 @@ pragma solidity >=0.8.17;
 
 import {IGitConsensusTypes} from "../interfaces/IGitConsensus.sol";
 import {ITokenFactoryEvents} from "../interfaces/ITokenFactory.sol";
+import {IToken} from "../interfaces/IToken.sol";
 import {IERC20Events} from "./utils/Events.sol";
 import {Test} from "./utils/Test.sol";
 import {Distibution} from "./utils/Distribution.sol";
 import {TokenFactory} from "../clones/TokenFactory.sol";
 import {TokenImpl} from "../clones/TokenImpl.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract BaseSetup is Test, IGitConsensusTypes, ITokenFactoryEvents, IERC20Events {
     TokenFactory internal factory;
@@ -268,6 +270,112 @@ contract WhenCreatingNewToken is BaseSetup {
 
     function testOk_predictTokenAddress(bytes32 _createSalt) public view {
         factory.predictAddress(_createSalt);
+    }
+}
+
+contract WhenAfterTokenCreated is BaseSetup {
+    function testOk_createdTokenZeroMaxMintablePerHash(
+        address _creatorAddr,
+        address _govAddr,
+        address _minterAddr,
+        string memory _name,
+        string memory _symbol,
+        bytes32 _createSalt
+    ) public {
+        vm.assume(_creatorAddr != address(0));
+        address[] memory owners = new address[](1);
+        uint256[] memory values = new uint256[](1);
+        owners[0] = address(0);
+        values[0] = 0;
+
+        // zero values should be treated as no maximum
+        uint256 maxMintablePerHash = 0;
+
+        address expectedAddr = factory.predictAddress(_createSalt);
+        vm.expectEmit(true, false, false, true);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            maxMintablePerHash
+        );
+
+        vm.prank(_creatorAddr);
+        address tokenAddr = factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
+
+        IToken token = IToken(tokenAddr);
+        assertEq(0, token.maxMintablePerHash());
+
+        vm.prank(_minterAddr);
+        token.mint(_creatorAddr, type(uint224).max); // maximum token supply for ERC20Votes
+        IERC20 tokenERC20 = IERC20(tokenAddr);
+        assertEq(type(uint224).max, tokenERC20.balanceOf(_creatorAddr));
+    }
+
+    function testOk_createdTokenAboveMaxMintablePerHashFailed(
+        address _creatorAddr,
+        address _govAddr,
+        address _minterAddr,
+        string memory _name,
+        string memory _symbol,
+        bytes32 _createSalt
+    ) public {
+        vm.assume(_creatorAddr != address(0));
+        address[] memory owners = new address[](1);
+        uint256[] memory values = new uint256[](1);
+        owners[0] = address(0);
+        values[0] = 0;
+
+        uint256 maxMintablePerHash = 1000;
+
+        address expectedAddr = factory.predictAddress(_createSalt);
+        vm.expectEmit(true, false, false, true);
+        emit TokenCreated(
+            expectedAddr,
+            _creatorAddr,
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            maxMintablePerHash
+        );
+
+        vm.prank(_creatorAddr);
+        address tokenAddr = factory.createToken(
+            _govAddr,
+            _minterAddr,
+            _name,
+            _symbol,
+            maxMintablePerHash,
+            owners,
+            values,
+            _createSalt
+        );
+
+        IToken token = IToken(tokenAddr);
+        assertEq(maxMintablePerHash, token.maxMintablePerHash());
+
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "MaxMintablePerHashExceeded(uint256,uint256)",
+                maxMintablePerHash + 1,
+                maxMintablePerHash
+            )
+        );
+        vm.prank(_minterAddr);
+        token.mint(_creatorAddr, maxMintablePerHash + 1);
     }
 }
 
