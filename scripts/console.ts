@@ -1,10 +1,12 @@
 import { BigNumber, BigNumberish, Contract, utils } from "ethers";
 import { ethers, network } from "hardhat";
 import { keyInSelect, keyInYNStrict, question } from "readline-sync";
+import { Deployments, Deployment, DeploymentContract, DevContracts } from "./console-types/devcontracts"
+import * as path from 'path';
+import * as fs from 'fs';
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import deployments from "../deployments.json";
 import {
     EXAMPLE_GOVERNOR_NAME,
     EXAMPLE_TOKEN_NAME,
@@ -23,6 +25,8 @@ import {
 } from "./deploy";
 import { saltToHex } from "./utils";
 
+let deployments: Deployments = require("../deployments.json")
+
 // --- Provides a CLI to deploy the possible contracts ---
 
 // TODO: Hardware Wallet support:
@@ -34,9 +38,7 @@ const DEV_USAGE = `DEV - deploy GitConsensus, TokenFactory, or GovernorFactory`;
 const BOTH_CLONE = `Token & Governor`;
 const TOKEN_CLONE = `Token`;
 const GOVERNOR_CLONE = `Governor`;
-const GIT_CONSENSUS = `GitConsensus`;
-const TOKEN_FACTORY = `TokenFactory`;
-const GOVERNOR_FACTORY = `GovernorFactory`;
+const JSON_NUM_SPACES = 4;
 
 async function main(signer?: SignerWithAddress) {
     if (signer == undefined) {
@@ -60,15 +62,15 @@ async function main(signer?: SignerWithAddress) {
             }
         case DEV_USAGE:
             switch (askForDevContracts()) {
-                case GIT_CONSENSUS:
+                case DevContracts.GIT_CONSENSUS:
                     await gitConsensus(signer);
                     main(signer);
                     return;
-                case TOKEN_FACTORY:
+                case DevContracts.TOKEN_FACTORY:
                     await tokenFactory(signer);
                     main(signer);
                     return;
-                case GOVERNOR_FACTORY:
+                case DevContracts.GOVERNOR_FACTORY:
                     await governorFactory(signer);
                     main(signer);
                     return;
@@ -77,15 +79,15 @@ async function main(signer?: SignerWithAddress) {
 }
 
 export async function gitConsensus(signer: SignerWithAddress): Promise<void> {
-    await deploy(GIT_CONSENSUS, () => deployGitConsensus(signer));
+    await deploy(DevContracts.GIT_CONSENSUS, () => deployGitConsensus(signer));
 }
 
 export async function tokenFactory(signer: SignerWithAddress): Promise<void> {
-    await deploy(TOKEN_FACTORY, () => deployTokenFactory(signer));
+    await deploy(DevContracts.TOKEN_FACTORY, () => deployTokenFactory(signer));
 }
 
 export async function governorFactory(signer: SignerWithAddress): Promise<void> {
-    await deploy(GOVERNOR_FACTORY, () => deployGovernorFactory(signer));
+    await deploy(DevContracts.GOVERNOR_FACTORY, () => deployGovernorFactory(signer));
 }
 
 export async function createClones(
@@ -97,24 +99,34 @@ export async function createClones(
         `\nTo create your new Token & Governor, you will be asked to enter the address of the ` +
             `already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
             `be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
-            `in the git-consensus/contracts deployments.json. Developers may also wish to deploy their own versions of ` +
+            `in the git-consensus/contracts/deployments.json. Developers may also wish to deploy their own versions of ` +
             `these contracts, in which case you want to enter the address of those instead.\n`,
     );
+    const defaultGitConsensusAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.GIT_CONSENSUS)?.address;
+
     const gitConsensusAddr = askForAddress(
-        `the address of the GitConsensus contract`,
-        `0xE559bc7d69c751718C57f8181BebD0E65ed60A3f`,
+        `of the ${DevContracts.GIT_CONSENSUS} contract`,
+        defaultGitConsensusAddr,
     );
+    const defaultTokenFactoryAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.TOKEN_FACTORY)?.address;
     const tokenFactoryAddr = askForAddress(
-        `the address of the TokenFactory contract`,
-        `0xf825fCCf5D9cC7F27C6e0908Caf468402F5aF7D5`,
+        `of the ${DevContracts.TOKEN_FACTORY} contract`,
+        defaultTokenFactoryAddr,
     );
+    const defaultGovernorFactoryAddr = deployments.deployments
+        .find(d => d.network === network.name)
+        ?.contracts.find(c => c.name == DevContracts.GOVERNOR_FACTORY)?.address;
     const governorFactoryAddr = askForAddress(
-        `the address of the GovernorFactory contract`,
-        `0x95146F88A3129263C6dd3E73e439af19DE5C184B`,
+        `of the ${DevContracts.GOVERNOR_FACTORY} contract`,
+        defaultGovernorFactoryAddr,
     );
 
-    const tokenFactory = await ethers.getContractAt(`TokenFactory`, governorFactoryAddr);
-    const governorFactory = await ethers.getContractAt(`GovernorFactory`, governorFactoryAddr);
+    const tokenFactory = await ethers.getContractAt(DevContracts.TOKEN_FACTORY, governorFactoryAddr);
+    const governorFactory = await ethers.getContractAt(DevContracts.GOVERNOR_FACTORY, governorFactoryAddr);
 
     const tokenSalt: string = saltToHex(askFor(`token salt`));
     const govSalt: string = saltToHex(askFor(`governor salt`));
@@ -150,6 +162,8 @@ export async function createClones(
         // TODO: getting incorrect values this (only the final one is correct), and they should match
         console.log(`Your predicted Token address ${etherscanAddress(network.name, tokenAddr)}\n`);
 
+        console.log(`Creating token...`);
+
         const token = await createTokenClone(
             tokenFactoryAddr,
             gitConsensusAddr,
@@ -169,9 +183,16 @@ export async function createClones(
             `Always include this address in your Git annotated tag message for it to be valid in Git Consensus addRelease()`,
         );
 
-        // const update = askYesNo(
-        //     `NOT IMPLEMENTED YET - Update deployments.json with new TokenFactory address ${token.address}?`,
-        // );
+        const update = askYesNo(
+            `Update deployments.json with new Token address ${token.address}?`,
+        );
+        if (update) {
+            deployments = updateDeploymentsJson(deployments, tokenName, token.address, network.name);
+            fs.writeFileSync(
+                path.join(__dirname, "..", "deployments.json"),
+                JSON.stringify(deployments, null, JSON_NUM_SPACES),
+            );
+        }
     }
 
     if (withGovernor) {
@@ -197,7 +218,8 @@ export async function createClones(
         console.log(
             `Your predicted Governor address ${etherscanAddress(network.name, governorAddr)}`,
         );
-
+        
+        console.log(`Creating governor...`);
         const governor = await createGovernorClone(
             governorFactoryAddr,
             tokenAddr,
@@ -212,9 +234,16 @@ export async function createClones(
 
         console.log(`Your Governor has been deployed with address ${governor.address}`);
 
-        // const update = askYesNo(
-        //     `NOT IMPLEMENTED YET - Update deployments.json with new GovernorFactory address ${governor.address}?`,
-        // );
+        const update = askYesNo(
+            `Update deployments.json with new Governor address ${governor.address}?`,
+        );
+        if (update) {
+            deployments = updateDeploymentsJson(deployments, governorName, governor.address, network.name);
+            fs.writeFileSync(
+                path.join(__dirname, "..", "deployments.json"),
+                JSON.stringify(deployments, null, JSON_NUM_SPACES),
+            );
+        }
     }
 
     return [tokenAddr, governorAddr];
@@ -243,33 +272,17 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
                 console.log(`Gas price:`, contract.deployTransaction.gasPrice.toString(), `wei`);
             }
             console.log(`Deployer address:`, contract.deployTransaction.from, `\n`);
-
-            // TODO: update deployments.json with new address
-            // something like:
-
-            // const update = askYesNo(
-            //     `TODO - Update deployments.json with new ${name} address ${contract.address}?`,
-            // );
-            // if (update) {
-            //     console.log(deployments);
-            //     const locations: Array<string> = JSON.parse(JSON.stringify(deployments)).location;
-
-            //     var network: string[] = deployments.ropsten;
-            //     const dayKey: keyof Schedule = 'monday';
-            //     let values2 = deployments.reduce((acc: { [key: string]: number}, deployments) => {
-            //         acc[product] = 1; //No more error
-            //         return acc;
-            //     }, {})
-            //     Object.keys(deployments).forEach(key => {
-            //         console.log(deployments[key as keyof string]);
-            //     });
-
-            //     deployments.deployments[network.name][name] = contract.address;
-            //     fs.writeFileSync(
-            //         path.join(__dirname, "..", "deployments.json"),
-            //         JSON.stringify(deployments, null, 2),
-            //     );
-            // }
+            
+            const update = askYesNo(
+                `Update deployments.json with new ${name} address ${contract.address}?`,
+            );
+            if (update) {
+                deployments = updateDeploymentsJson(deployments, name, contract.address, net.name);
+                fs.writeFileSync(
+                    path.join(__dirname, "..", "deployments.json"),
+                    JSON.stringify(deployments, null, JSON_NUM_SPACES),
+                );
+            }
 
             return contract;
         } catch (e) {
@@ -279,6 +292,68 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
             }
         }
     }
+}
+
+function updateDeploymentsJson(deployments: Deployments, contractName: string, contractAddr: string, networkName: string): Deployments {
+    let networks = deployments.deployments;
+    for (let i = 0; i < networks.length; i++) {
+        if (networks[i].network === networkName) {
+            for (let j = 0; j < networks[i].contracts.length; j++) {
+                let currContractName = networks[i].contracts[j].name;
+                if (currContractName === contractName) {
+                    deployments.deployments[i].contracts[j].address = contractAddr;
+                    return deployments;
+                }
+            }
+            // The network already exists but an entry for the desired contract does not, so create one:
+            var depl: DeploymentContract = {
+                name: contractName,
+                address: contractAddr,
+            }
+            deployments.deployments[i].contracts.push(depl);
+            return deployments;
+        }
+    }
+    // An deployment entry for the network does not exist, so create an entry for it:
+
+    // Get the index of the new deployment.
+    let index = binarySearchByNetwork(deployments, networkName);
+    var newContract: DeploymentContract = {
+        name: contractName,
+        address: contractAddr,
+    };
+    var newDeployment: Deployment = {
+        network: networkName,
+        contracts: [newContract],
+    }
+
+    // Place the new entry in alphabetical order based on network name.
+    deployments.deployments.splice(index, 0, newDeployment);
+    return deployments;
+}
+
+// Performs a binary search by the network name (e.g., goerli) to ensure the new
+// deployment is placed in alphabetical order.
+function binarySearchByNetwork(deployments: Deployments, networkName: string): number {
+    let start = 0;
+    let end = deployments.deployments.length - 1;
+    while (start <= end) {
+        // To prevent overflow.
+        let mid = Math.floor(start + ((end - start) / 2));
+        if (mid == 0 && deployments.deployments[mid].network.localeCompare(networkName) > 0) {
+            return mid;
+        }
+        if (deployments.deployments[mid].network.localeCompare(networkName) < 0
+            && (mid + 1 > end || deployments.deployments[mid + 1].network.localeCompare(networkName) > 0)) {
+            return mid + 1;
+        }
+        if (deployments.deployments[mid].network.localeCompare(networkName) < 0) {
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return 0;
 }
 
 function etherscanAddress(net: string, addr: string): string {
@@ -310,7 +385,7 @@ function askForCloneContracts(): string {
 }
 
 function askForDevContracts(): string {
-    const contracts = [GIT_CONSENSUS, TOKEN_FACTORY, GOVERNOR_FACTORY];
+    const contracts = Object.values(DevContracts);
     const choice = keyInSelect(contracts, `Enter the contract to deploy`, { cancel: false });
     return contracts[choice];
 }
@@ -404,7 +479,7 @@ function askForAddress(addressUsage: string, defaultInput?: string): string {
 }
 
 function askFor(query: string, defaultInput?: string, hideInput = false): string {
-    const questionDefault = defaultInput === undefined ? `` : ` (default: ` + defaultInput + `)`;
+    const questionDefault = defaultInput == null ? `` : ` (default: ` + defaultInput + `)`;
     const options = {
         hideEchoBack: hideInput,
         limit: /./,
