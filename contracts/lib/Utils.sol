@@ -65,9 +65,11 @@ library Utils {
     /// @param _addrStr The string representation of the address to be converted.
     /// @return _addr The address represented by the string.
     /// @dev If user passes in '0x' but not a full address, we will still interpret the next 20
-    ///     bytes as a real address, and it will fail in this function with a ambigious error message:
-    ///     "reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside
-    ///     of an unchecked block)"
+    ///     bytes as a real address, and it will fail in this function with a ambigious error
+    ///     message:
+    ///     `reverted with panic code 0x11 (Arithmetic operation underflowed or overflowed outside
+    ///     of an unchecked block)`
+    ///
     ///     TODO: Try and catch this error and return a more meaningful error message
     ///     src: https://github.com/provable-things/ethereum-api/
     ///          blob/94b49f1b65ec4c0465b0e9f49f00415e5ed001a1/contracts/

@@ -20,8 +20,8 @@ The Git Consensus Protocol enables distributed governance for Git projects. This
 
 This is a modern Ethereum contract repository for Solidity contracts. It combines two extremely powerful frameworks:
 
-- Foundry - for Unit testing written in Solidity [/contracts/test](./contracts/test)
-- Hardhat - for Integration testing written in Typescript ([/integration/](integration/))
+- Foundry - for Unit testing written in Solidity ([contracts/test](./contracts/test))
+- Hardhat - for Integration testing written in Typescript ([integration/](integration/))
 
 These also offer some great tools for some advanced things like contract debugging, deployment, gas measurements, etc.
 
@@ -110,6 +110,19 @@ Then run:
 
 ```sh
 yarn deploy --network ropsten
+```
+
+**Generate contract API docs**:
+
+Ensure `../docs` path exists for [the docs repo](https://github.com/git-consensus/docs). If it *isn't*:
+
+```sh
+git clone https://github.com/git-consensus/docs.git ../docs
+```
+
+Now you can automatically convert NatSpec comments in contracts to docs with:
+```sh
+yarn doc
 ```
 
 ### Recommended VSCode Extensions
