@@ -19,7 +19,7 @@ interface ITokenErrors {
     /// @param value The value attempting to be minted.
     /// @param maxMintableValue The token's `maxMintablePerHash()` value.
     /// @dev Can occur with `addRelease()`. Specifically occurs when a values[i] exists
-    ///    the values array that is greater than the token's `maxMintablePerHash()`.
+    ///     the values array that is greater than the token's `maxMintablePerHash()`.
     error MaxMintablePerHashExceeded(uint256 value, uint256 maxMintableValue);
 }
 

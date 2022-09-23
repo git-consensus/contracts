@@ -184,6 +184,8 @@ const config: HardhatUserConfig = {
     },
     dodoc: {
         // Ensure 'git-consensus/docs' repo is forked and in this path
+        // Check https://github.com/primitivefinance/primitive-dodoc/issues/37 for
+        // why struct methods have no description transferred over
         outputDir: `../docs/api`,
         runOnCompile: false,
         debugMode: false,
