@@ -1,10 +1,10 @@
 {
     "name": "@git-consensus/contracts",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Official Git Consensus contracts, written in Solidity.",
     "type": "commonjs",
-    "main": "build/contracts/index.js",
-    "types": "build/contracts/index.d.ts",
+    "main": "build/scripts/index.js",
+    "types": "build/scripts/index.d.ts",
     "keywords": [
         "git-consensus",
         "contracts",
@@ -25,21 +25,21 @@
         "url": "git+https://github.com/git-consensus/contracts.git"
     },
     "files": [
-        "deployments.json",
-        "build/**",
-        "scripts/**",
-        "contracts/**",
-        "types/**"
+        "/deployments.json",
+        "/build/**",
+        "/scripts/**",
+        "/contracts/**/*.sol",
+        "!/contracts/test/**/*"
     ],
     "scripts": {
         "build": "npx hardhat compile --quiet",
-        "clean": "forge clean && npx hardhat clean && rm -rf yarn.lock yarn-error.log coverage.json artifacts/ cache/ coverage/ node_modules/ types/ && yarn cache clean",
+        "clean": "forge clean && npx hardhat clean && rm -rf yarn.lock yarn-error.log coverage.json artifacts/ build/ cache/ coverage/ node_modules/ types/ && yarn cache clean",
         "coverage": "npx hardhat coverage --solcoverjs ./solcover.js",
         "deploy": "npx hardhat run scripts/console.ts",
         "doc": "npx hardhat dodoc",
         "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-ignore --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
         "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-ignore --no-error-on-unmatched-pattern --fix \"**/*.{ts,tsx}\"",
-        "package": "yarn build && tsc && npm publish",
+        "prepare": "yarn build && tsc",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test --network hardhat",
         "typechain": "npx hardhat typechain",
