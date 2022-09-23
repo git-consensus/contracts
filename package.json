@@ -38,7 +38,7 @@
         "coverage": "npx hardhat coverage --solcoverjs ./solcover.js",
         "deploy": "npx hardhat run scripts/console.ts",
         "doc": "npx hardhat dodoc",
-        "lint": "npx eslint --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
+        "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
         "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-error-on-unmatched-pattern --fix .",
         "prepare": "yarn build && tsc",
         "size": "npx hardhat size-contracts",
