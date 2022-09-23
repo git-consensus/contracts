@@ -1,6 +1,6 @@
 {
     "name": "@git-consensus/contracts",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Official Git Consensus contracts, written in Solidity.",
     "type": "commonjs",
     "main": "build/scripts/index.js",
@@ -26,8 +26,9 @@
     },
     "files": [
         "/deployments.json",
+        "/artifacts/contracts/**/*.json",
+        "!/artifacts/contracts/test/**/*.json",
         "/build/**",
-        "/scripts/**",
         "/contracts/**/*.sol",
         "!/contracts/test/**/*"
     ],
@@ -37,8 +38,8 @@
         "coverage": "npx hardhat coverage --solcoverjs ./solcover.js",
         "deploy": "npx hardhat run scripts/console.ts",
         "doc": "npx hardhat dodoc",
-        "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-ignore --no-error-on-unmatched-pattern .",
-        "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-ignore --no-error-on-unmatched-pattern --fix .",
+        "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
+        "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-error-on-unmatched-pattern --fix \"**/*.{ts,tsx}\"",
         "prepare": "yarn build && tsc",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test --network hardhat",
