@@ -125,7 +125,6 @@ interface IGitConsensusTypes {
 ///         `IGitConsensusTypes` are split into seperate interfaces for clarity and
 ///         unit testing purposes.
 interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
-
     /// @notice Notarizes a commit on-chain, building the hash trustlessly from the commit data.
     ///     Stores the commit such that `commitExists()` returns true for this commit hash, and
     ///     `commitAddr()` returns the owner address. Emits a `IGitConsensusEvents.CommitAdded`

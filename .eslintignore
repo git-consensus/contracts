@@ -3,6 +3,7 @@
 **/artifacts
 **/build
 **/cache
+**/contracts
 **/corpus
 **/coverage
 **/dist
