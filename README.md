@@ -140,7 +140,7 @@ yarn doc
 - [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter)
 - [TypeScript Import Sorter](https://marketplace.visualstudio.com/items?itemName=mike-co.import-sorter)
 
-- ### Style Guide
+### Style Guide
 
 - Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.15/natspec-format.html) format.
 - Always `yarn pretty` your before committing.
