@@ -2,7 +2,10 @@
     "ts-node": {
         "files": true
     },
-    "include": ["./scripts", "./integration", "./types"],
+    "include": [
+        "scripts/**/*.ts",
+        "types/**/*.ts"
+    ],
     "exclude": [
         "./artifacts",
         "./build",
