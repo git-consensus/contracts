@@ -31,7 +31,7 @@ export async function submitTxWait(
     tx: Promise<ContractTransaction>,
     txName = `transaction`,
 ): Promise<ContractReceipt> {
-    expect(tx).to.not.be.reverted;
+    void expect(tx).to.not.be.reverted;
     const receipt = await (await tx).wait();
     if (REPORT_GAS) {
         console.log(`Gas used for ` + txName + `: ` + receipt.gasUsed.toString());
@@ -50,11 +50,7 @@ export async function submitTxFail(
 }
 
 // Expect a transaction to fail. Throws an error if it succeeds.
-export async function expectTxFail<T>(
-    tx: Promise<T>,
-    expectedCause?: string,
-    expectedParams?: string,
-): Promise<void> {
+export async function expectTxFail<T>(tx: Promise<T>, expectedCause?: string): Promise<void> {
     try {
         await tx;
     } catch (error) {
@@ -105,16 +101,16 @@ export function parseEvent(
 // --- EVM Time helpers ---
 
 export const period = {
-    seconds: function (val: number) {
+    seconds: function (val: number): number {
         return val;
     },
-    minutes: function (val: number) {
+    minutes: function (val: number): number {
         return val * this.seconds(60);
     },
-    hours: function (val: number) {
+    hours: function (val: number): number {
         return val * this.minutes(60);
     },
-    days: function (val: number) {
+    days: function (val: number): number {
         return val * this.hours(24);
     },
 };
@@ -131,24 +127,26 @@ export async function waitBlocks(count: number, seconds: number = 12): Promise<v
 
 // --- Math helpers ---
 
-export const saltToHex = (salt: string | number) => ethers.utils.id(salt.toString());
+export const saltToHex = (salt: string | number): string => ethers.utils.id(salt.toString());
 
 // Choosing items randomly until all are taken and only then repeating
 // https://stackoverflow.com/a/17891411/15757416
-export function randomAvoidRepeats(array: any[]) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function randomAvoidRepeats(array: any[]): any {
     let copy = array.slice(0);
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     return function () {
         if (copy.length < 1) {
             copy = array.slice(0);
         }
         const index = Math.floor(Math.random() * copy.length);
-        const item = copy[index];
+        const item: unknown = copy[index];
         copy.splice(index, 1);
         return item;
     };
 }
 
-export function randomNumber(min: number, max: number) {
+export function randomNumber(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 

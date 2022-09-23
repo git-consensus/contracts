@@ -29,6 +29,9 @@ module.exports = {
         "prefer-arrow-callback": "off",
         quotes: ["error", "backtick"],
         "node/no-unsupported-features/es-syntax": "off",
+        "node/no-extraneous-import": "off",
+        "node/no-missing-import": "off",
+        "node/no-unpublished-import": "off",
         "@typescript-eslint/explicit-function-return-type": "error",
         "@typescript-eslint/no-floating-promises": [
             "error",
@@ -39,7 +42,7 @@ module.exports = {
         ],
         "@typescript-eslint/no-inferrable-types": "off",
         "@typescript-eslint/no-unused-vars": [
-            "error",
+            "warn",
             {
                 argsIgnorePattern: "_",
                 varsIgnorePattern: "_",

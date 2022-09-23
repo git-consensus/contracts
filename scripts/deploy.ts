@@ -145,7 +145,8 @@ export async function createTokenClone(
         );
     }
 
-    const tokenAddr = parseEvent(txReceipt, tokenFactory.interface)[0].args.instanceAddr;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const tokenAddr: string = parseEvent(txReceipt, tokenFactory.interface)[0].args.instanceAddr;
     if (VERBOSE) console.log(`TokenClone address: ${tokenAddr}`);
     hre.tracer.nameTags[tokenAddr] = `TokenClone`;
 
@@ -201,7 +202,9 @@ export async function createGovernorClone(
         );
     }
 
-    const governorAddr = parseEvent(txReceipt, governorFactory.interface)[0].args.instanceAddr;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const governorAddr: string = parseEvent(txReceipt, governorFactory.interface)[0].args
+        .instanceAddr;
     if (VERBOSE) console.log(`GovernorClone address: ${governorAddr}`);
     hre.tracer.nameTags[governorAddr] = `GovernorClone`;
 

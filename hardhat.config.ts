@@ -1,3 +1,4 @@
+/* eslint-disable */
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-gas-reporter";
@@ -73,7 +74,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
             jsonRpcUrl = `https://bsc-dataseed1.binance.org`;
             break;
         default:
-            jsonRpcUrl = `https://` + chain + `.infura.io/v3/` + INFURA_API_KEY;
+            jsonRpcUrl = `https://${chain}.infura.io/v3/${INFURA_API_KEY}`;
     }
     return {
         accounts: {
@@ -87,7 +88,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
 }
 
 // try use forge config
-let foundry: any;
+let foundry;
 try {
     foundry = toml.parse(readFileSync(`./foundry.toml`).toString());
     foundry.default.solc = foundry.default[`solc-version`]
