@@ -119,6 +119,10 @@ Ensure `../docs` path exists for [the docs repo](https://github.com/git-consensu
 ```sh
 git clone https://github.com/git-consensus/docs.git ../docs
 ```
+or
+```sh
+git clone git@github.com:git-consensus/docs.git ../docs
+```
 
 Now you can automatically convert NatSpec comments in contracts to docs with:
 ```sh
