@@ -39,6 +39,7 @@
         "doc": "npx hardhat dodoc",
         "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-ignore --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
         "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-ignore --no-error-on-unmatched-pattern --fix \"**/*.{ts,tsx}\"",
+        "package": "yarn build && tsc && npm publish",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test --network hardhat",
         "typechain": "npx hardhat typechain",

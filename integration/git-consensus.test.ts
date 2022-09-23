@@ -1,3 +1,4 @@
+/* eslint-disable */
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { BigNumber, BytesLike } from "ethers";
@@ -483,10 +484,10 @@ describe(`Git Consensus integration tests`, () => {
         charlie = charlieSigner;
         dave = daveSigner;
 
-        commitsNoAddr = await commitExamplesNoAddr();
-        commitsWithAddr = await commitExamplesWithAddr();
-        tagsNoAddr = await tagExamplesNoAddr();
-        tagsWithAddr = await tagExamplesWithAddr();
+        commitsNoAddr = commitExamplesNoAddr();
+        commitsWithAddr = commitExamplesWithAddr();
+        tagsNoAddr = tagExamplesNoAddr();
+        tagsWithAddr = tagExamplesWithAddr();
 
         gitConsensus = await deployGitConsensus(deployer);
         const tokenFactory = await deployTokenFactory(deployer);

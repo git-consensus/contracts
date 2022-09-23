@@ -1,9 +1,14 @@
 import { BigNumber, BigNumberish, Contract, utils } from "ethers";
 import { ethers, network } from "hardhat";
 import { keyInSelect, keyInYNStrict, question } from "readline-sync";
-import { Deployments, Deployment, DeploymentContract, DevContracts } from "./console-types/devcontracts"
-import * as path from 'path';
-import * as fs from 'fs';
+import {
+    Deployments,
+    Deployment,
+    DeploymentContract,
+    DevContracts,
+} from "./console-types/devcontracts";
+import * as path from "path";
+import * as fs from "fs";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
@@ -25,7 +30,8 @@ import {
 } from "./deploy";
 import { saltToHex } from "./utils";
 
-let deployments: Deployments = require("../deployments.json")
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, node/no-unpublished-require
+let deployments: Deployments = require(`../deployments.json`);
 
 // --- Provides a CLI to deploy the possible contracts ---
 
@@ -40,7 +46,7 @@ const TOKEN_CLONE = `Token`;
 const GOVERNOR_CLONE = `Governor`;
 const JSON_NUM_SPACES = 4;
 
-async function main(signer?: SignerWithAddress) {
+async function main(signer?: SignerWithAddress): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
@@ -49,30 +55,31 @@ async function main(signer?: SignerWithAddress) {
             switch (askForCloneContracts()) {
                 case BOTH_CLONE:
                     await createClones(signer, true, true);
-                    main(signer);
+                    void main(signer);
                     return;
                 case TOKEN_CLONE:
                     await createClones(signer, true, false);
-                    main(signer);
+                    void main(signer);
                     return;
                 case GOVERNOR_CLONE:
                     await createClones(signer, false, true);
-                    main(signer);
+                    void main(signer);
                     return;
             }
+        // eslint-disable-next-line no-fallthrough
         case DEV_USAGE:
             switch (askForDevContracts()) {
                 case DevContracts.GIT_CONSENSUS:
                     await gitConsensus(signer);
-                    main(signer);
+                    void main(signer);
                     return;
                 case DevContracts.TOKEN_FACTORY:
                     await tokenFactory(signer);
-                    main(signer);
+                    void main(signer);
                     return;
                 case DevContracts.GOVERNOR_FACTORY:
                     await governorFactory(signer);
-                    main(signer);
+                    void main(signer);
                     return;
             }
     }
@@ -126,7 +133,10 @@ export async function createClones(
     );
 
     const tokenFactory = await ethers.getContractAt(DevContracts.TOKEN_FACTORY, tokenFactoryAddr);
-    const governorFactory = await ethers.getContractAt(DevContracts.GOVERNOR_FACTORY, governorFactoryAddr);
+    const governorFactory = await ethers.getContractAt(
+        DevContracts.GOVERNOR_FACTORY,
+        governorFactoryAddr,
+    );
 
     const tokenSalt: string = saltToHex(askFor(`token salt`));
     const govSalt: string = saltToHex(askFor(`governor salt`));
@@ -137,7 +147,10 @@ export async function createClones(
     if (withToken) {
         const tokenName: string = askFor(`token name`, EXAMPLE_TOKEN_NAME);
         const tokenSymbol: string = askFor(`token symbol`, EXAMPLE_TOKEN_SYMBOL);
-        const maxMintablePerHash: BigNumberish = askForNumber(`max mintable per hash (0 indicates no max)`, "0");
+        const maxMintablePerHash: BigNumberish = askForNumber(
+            `max mintable per hash (0 indicates no max)`,
+            `0`,
+        );
         const buildDistribution: boolean = askYesNo(`Do you want to add an Initial Distribution?`);
 
         const owners: string[] = [];
@@ -182,13 +195,16 @@ export async function createClones(
             `Always include this address in your Git annotated tag message for it to be valid in Git Consensus addRelease()`,
         );
 
-        const update = askYesNo(
-            `Update deployments.json with new Token address ${token.address}?`,
-        );
+        const update = askYesNo(`Update deployments.json with new Token address ${token.address}?`);
         if (update) {
-            deployments = updateDeploymentsJson(deployments, tokenName, token.address, network.name);
+            deployments = updateDeploymentsJson(
+                deployments,
+                tokenName,
+                token.address,
+                network.name,
+            );
             fs.writeFileSync(
-                path.join(__dirname, "..", "deployments.json"),
+                path.join(__dirname, `..`, `deployments.json`),
                 JSON.stringify(deployments, null, JSON_NUM_SPACES),
             );
         }
@@ -216,7 +232,7 @@ export async function createClones(
         console.log(
             `Your predicted Governor address ${etherscanAddress(network.name, governorAddr)}`,
         );
-        
+
         console.log(`Creating governor...`);
         const governor = await createGovernorClone(
             governorFactoryAddr,
@@ -236,9 +252,14 @@ export async function createClones(
             `Update deployments.json with new Governor address ${governor.address}?`,
         );
         if (update) {
-            deployments = updateDeploymentsJson(deployments, governorName, governor.address, network.name);
+            deployments = updateDeploymentsJson(
+                deployments,
+                governorName,
+                governor.address,
+                network.name,
+            );
             fs.writeFileSync(
-                path.join(__dirname, "..", "deployments.json"),
+                path.join(__dirname, `..`, `deployments.json`),
                 JSON.stringify(deployments, null, JSON_NUM_SPACES),
             );
         }
@@ -270,14 +291,14 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
                 console.log(`Gas price:`, contract.deployTransaction.gasPrice.toString(), `wei`);
             }
             console.log(`Deployer address:`, contract.deployTransaction.from, `\n`);
-            
+
             const update = askYesNo(
                 `Update deployments.json with new ${name} address ${contract.address}?`,
             );
             if (update) {
                 deployments = updateDeploymentsJson(deployments, name, contract.address, net.name);
                 fs.writeFileSync(
-                    path.join(__dirname, "..", "deployments.json"),
+                    path.join(__dirname, `..`, `deployments.json`),
                     JSON.stringify(deployments, null, JSON_NUM_SPACES),
                 );
             }
@@ -292,22 +313,27 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
     }
 }
 
-function updateDeploymentsJson(deployments: Deployments, contractName: string, contractAddr: string, networkName: string): Deployments {
-    let networks = deployments.deployments;
+function updateDeploymentsJson(
+    deployments: Deployments,
+    contractName: string,
+    contractAddr: string,
+    networkName: string,
+): Deployments {
+    const networks = deployments.deployments;
     for (let i = 0; i < networks.length; i++) {
         if (networks[i].network === networkName) {
             for (let j = 0; j < networks[i].contracts.length; j++) {
-                let currContractName = networks[i].contracts[j].name;
+                const currContractName = networks[i].contracts[j].name;
                 if (currContractName === contractName) {
                     deployments.deployments[i].contracts[j].address = contractAddr;
                     return deployments;
                 }
             }
             // The network already exists but an entry for the desired contract does not, so create one:
-            var depl: DeploymentContract = {
+            const depl: DeploymentContract = {
                 name: contractName,
                 address: contractAddr,
-            }
+            };
             deployments.deployments[i].contracts.push(depl);
             return deployments;
         }
@@ -315,15 +341,15 @@ function updateDeploymentsJson(deployments: Deployments, contractName: string, c
     // An deployment entry for the network does not exist, so create an entry for it:
 
     // Get the index of the new deployment.
-    let index = binarySearchByNetwork(deployments, networkName);
-    var newContract: DeploymentContract = {
+    const index = binarySearchByNetwork(deployments, networkName);
+    const newContract: DeploymentContract = {
         name: contractName,
         address: contractAddr,
     };
-    var newDeployment: Deployment = {
+    const newDeployment: Deployment = {
         network: networkName,
         contracts: [newContract],
-    }
+    };
 
     // Place the new entry in alphabetical order based on network name.
     deployments.deployments.splice(index, 0, newDeployment);
@@ -337,12 +363,15 @@ function binarySearchByNetwork(deployments: Deployments, networkName: string): n
     let end = deployments.deployments.length - 1;
     while (start <= end) {
         // To prevent overflow.
-        let mid = Math.floor(start + ((end - start) / 2));
+        const mid = Math.floor(start + (end - start) / 2);
         if (mid == 0 && deployments.deployments[mid].network.localeCompare(networkName) > 0) {
             return mid;
         }
-        if (deployments.deployments[mid].network.localeCompare(networkName) < 0
-            && (mid + 1 > end || deployments.deployments[mid + 1].network.localeCompare(networkName) > 0)) {
+        if (
+            deployments.deployments[mid].network.localeCompare(networkName) < 0 &&
+            (mid + 1 > end ||
+                deployments.deployments[mid + 1].network.localeCompare(networkName) > 0)
+        ) {
             return mid + 1;
         }
         if (deployments.deployments[mid].network.localeCompare(networkName) < 0) {
@@ -491,13 +520,13 @@ function printInvalidInput(inputType: string): void {
     console.log(`This is not a valid`, inputType);
 }
 
-function printDistribution(owners: string[], values: BigNumberish[]) {
+function printDistribution(owners: string[], values: BigNumberish[]): void {
     console.log(
         `                   owners                    |   values   \n` +
             `---------------------------------------------|-------------`,
     );
     for (let i = 0; i < owners.length; i++) {
-        console.log(`${owners[i]}   | ${values[i]}`);
+        console.log(`${owners[i]}   | ${values[i].toString()}`);
     }
     console.log(`\n`);
 }

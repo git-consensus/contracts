@@ -1,18 +1,18 @@
 // Types used in console.ts
 
 type DeploymentContract = {
-    name: string,
-    address: string,
-}
+    name: string;
+    address: string;
+};
 
 type Deployment = {
-    network: string,
-    contracts: Array<DeploymentContract>,
-}
+    network: string;
+    contracts: Array<DeploymentContract>;
+};
 
 type Deployments = {
-    deployments: Array<Deployment>
-}
+    deployments: Array<Deployment>;
+};
 
 enum DevContracts {
     GIT_CONSENSUS = `GitConsensus`,
@@ -20,9 +20,4 @@ enum DevContracts {
     GOVERNOR_FACTORY = `GovernorFactory`,
 }
 
-export {
-    DeploymentContract,
-    Deployment,
-    Deployments,
-    DevContracts
-}
+export { DeploymentContract, Deployment, Deployments, DevContracts };
