@@ -8,15 +8,15 @@ interface IGitConsensusErrors {
     /// @notice When commit message does not contain a valid address.
     /// @param message The commit message string.
     /// @dev Can occur with `addCommit()`. Specifically occurs when the message does not
-    ///     contain 0x followed by enough length for an address (40 hex characters).
+    ///    contain 0x followed by enough length for an address (40 hex characters).
     error CommitMsgNeedsAddr(string message);
     /// @notice When tag message does not contain a valid address.
     /// @param message The tag message string.
     /// @dev Can occur with `addRelease()`. Specifically occurs when the message does not
-    ///     contain 0x followed by enough length for an address (40 hex characters).
+    ///    contain 0x followed by enough length for an address (40 hex characters).
     error TagMsgNeedsAddr(string message);
     /// @notice When the sender attempts to extract a substring that is out of bounds in a
-    ///     string.
+    ///    string.
     /// @param offset The index of the substring to extract.
     /// @param substringLen The length of the substring to extract.
     /// @param stringLen The length of the string from which to extract the substring.
@@ -40,13 +40,13 @@ interface IGitConsensusErrors {
 interface IGitConsensusEvents {
     /// @notice Emitted when a commit is added via `addCommit()`.
     /// @param ownerAddr The address that was contained in the commit message. This may represent
-    ///     the committer themselves, which will be the case if the commiter wants to recieve future
-    ///     rewards for this commit.
+    ///    the committer themselves, which will be the case if the commiter wants to recieve future
+    ///    rewards for this commit.
     /// @param commitHash The SHA-1 hash generated from the commit data.
     event CommitAdded(address indexed ownerAddr, bytes20 commitHash);
 
     /// @notice Emitted when a release is added via `addRelease()`.
-    /// @param tokenAddr The    address that was contained in the tag message, and the caller of the
+    /// @param tokenAddr The address that was contained in the tag message, and the caller of the
     ///     `addRelease()` function. This will be the address of the project's governor.
     /// @param tagHash The SHA-1 hash generated from the tag data.
     event ReleaseAdded(address indexed tokenAddr, bytes20 tagHash);
@@ -121,11 +121,10 @@ interface IGitConsensusTypes {
 /// @title  IGitConsensus
 /// @author Matt Stam (@mattstam)
 /// @notice The interface for Git Consensus.
-/// @dev    Errors `IGitConsensusErrors`, Events `IGitConsensusEvents`, and Types
-///         `IGitConsensusTypes` are split into seperate interfaces for clarity and
-///         unit testing purposes.
+/// @dev    Errors `IGitConsensusErrors, Events `IGitConsensusEvents`, and Types
+////       `IGitConsensusTypes` are seperated in seperate interfaces for clarity and
+////        unit testing purposes.
 interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
-
     /// @notice Notarizes a commit on-chain, building the hash trustlessly from the commit data.
     ///     Stores the commit such that `commitExists()` returns true for this commit hash, and
     ///     `commitAddr()` returns the owner address. Emits a `IGitConsensusEvents.CommitAdded`

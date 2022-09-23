@@ -6,6 +6,9 @@ name: coverage
 jobs:
     coverage:
         runs-on: ubuntu-latest
+        env:
+            MNEMONIC: ${{secrets.MNEMONIC}}
+            INFURA_API_KEY: ${{secrets.INFURA_API_KEY}}
         steps:
             - name: Check out the repo
               uses: actions/checkout@v3
@@ -19,4 +22,4 @@ jobs:
             - name: Install the Node.js dependencies
               run: yarn install --immutable
             - name: Run Integration Test Coverage
-            - run: yarn coverage
+              run: yarn coverage

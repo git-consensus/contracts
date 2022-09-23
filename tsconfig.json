@@ -2,10 +2,7 @@
     "ts-node": {
         "files": true
     },
-    "include": [
-        "scripts/**/*.ts",
-        "types/**/*.ts"
-    ],
+    "include": ["scripts/**/*.ts", "types/**/*.ts", ".eslintrc.js"],
     "exclude": [
         "./artifacts",
         "./build",
@@ -13,6 +10,7 @@
         "./contracts",
         "./coverage",
         "./dist",
+        "./integration",
         "./media",
         "./node_modules",
         "./vendor"

@@ -3,9 +3,11 @@
 **/artifacts
 **/build
 **/cache
+**/contracts
 **/corpus
 **/coverage
 **/dist
+**/integration
 **/node_modules
 **/media
 **/out
