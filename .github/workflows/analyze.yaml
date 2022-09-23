@@ -9,6 +9,9 @@ name: analyze
 jobs:
     analyze:
         runs-on: ubuntu-latest
+        env:
+            MNEMONIC: ${{secrets.MNEMONIC}}
+            INFURA_API_KEY: ${{secrets.INFURA_API_KEY}}
         permissions:
             contents: read
             security-events: write
