@@ -1,7 +1,8 @@
 module.exports = {
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        project: "tsconfig.json",
+        ecmaVersion: 12,
+        project: ["./tsconfig.json"],
     },
     env: {
         browser: false,
@@ -17,11 +18,6 @@ module.exports = {
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:prettier/recommended", // prettier must be last
     ],
-    parser: "@typescript-eslint/parser",
-    parserOptions: {
-        ecmaVersion: 12,
-        project: ["./tsconfig.json"],
-    },
     root: true,
     rules: {
         "prettier/prettier": "error",
