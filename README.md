@@ -20,8 +20,8 @@ The Git Consensus Protocol enables distributed governance for Git projects. This
 
 This is a modern Ethereum contract repository for Solidity contracts. It combines two extremely powerful frameworks:
 
-- Foundry - for Unit testing written in Solidity [/contracts/test](./contracts/test)
-- Hardhat - for Integration testing written in Typescript ([/integration/](integration/))
+- Foundry - for Unit testing written in Solidity ([contracts/test](./contracts/test))
+- Hardhat - for Integration testing written in Typescript ([integration/](integration/))
 
 These also offer some great tools for some advanced things like contract debugging, deployment, gas measurements, etc.
 
@@ -112,6 +112,23 @@ Then run:
 yarn deploy --network ropsten
 ```
 
+**Generate contract API docs**:
+
+Ensure `../docs` path exists for [the docs repo](https://github.com/git-consensus/docs). If it *isn't*:
+
+```sh
+git clone https://github.com/git-consensus/docs.git ../docs
+```
+or
+```sh
+git clone git@github.com:git-consensus/docs.git ../docs
+```
+
+Now you can automatically convert NatSpec comments in contracts to docs with:
+```sh
+yarn doc
+```
+
 ### Recommended VSCode Extensions
 
 - [Solidity Visual Developer](https://marketplace.visualstudio.com/items?itemName=tintinweb.solidity-visual-auditor)
@@ -123,7 +140,7 @@ yarn deploy --network ropsten
 - [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter)
 - [TypeScript Import Sorter](https://marketplace.visualstudio.com/items?itemName=mike-co.import-sorter)
 
-- ### Style Guide
+### Style Guide
 
 - Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.15/natspec-format.html) format.
 - Always `yarn pretty` your before committing.
