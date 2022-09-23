@@ -123,6 +123,18 @@ yarn deploy --network ropsten
 - [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter)
 - [TypeScript Import Sorter](https://marketplace.visualstudio.com/items?itemName=mike-co.import-sorter)
 
+- ### Style Guide
+
+- Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.15/natspec-format.html) format.
+- Always `yarn pretty` your before committing.
+- Lowercase commit message (for consistency).
+- Embed your Ethereum address in your commit message on this repository.
+- Integration testing with Mocha/Chai asserts: `expect(actual).to.equal(expected)`
+- Use [Template Literals where possible](https://ponyfoo.com/articles/template-literals-strictly-better-strings).
+- Use same consistent pattern for import ordering.
+
+In general, please do your best to always keep this repository beautiful! ❤️
+
 ## Licensing
 
 The code in this project is licensed under the is licensed under the [GNU General Public License v3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60).

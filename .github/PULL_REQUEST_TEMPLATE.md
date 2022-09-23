@@ -1,11 +1,3 @@
-# **Name of PR**
-
-<!-- This PR fixes #NUMBER_OF_THE_ISSUE, and fixes #NUMBER_OF_THE_ISSUE -->
-
-## Checklist:
-
--   [ ] My code follows the [Style Guide](../../README.md#style-guide).
-
 ## **Description**
 
 <!--
@@ -19,6 +11,8 @@ List any dependencies that are required for this change if there are any.
 <!--
 What tests cover this change? How have you ensured that it has not broke something?
 -->
+
+- [ ] My code follows the [Style Guide](../../README.md#style-guide).
 
 <!--
 If it fixes any existing issue please let us know this way:
