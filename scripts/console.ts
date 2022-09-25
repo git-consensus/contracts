@@ -387,12 +387,24 @@ function etherscanAddress(net: string, addr: string): string {
     if (net == `mainnet`) {
         return `https://etherscan.io/address/` + addr;
     }
+    if (net == `arbitrum`) {
+        return `https://arbiscan.io/address/` + addr;
+    }
+    if (net == `arbitrum-rinkeby`) {
+        return `https://testnet.arbiscan.io/address/` + addr;
+    }
     return `https://` + net + `.etherscan.io/address/` + addr;
 }
 
 function etherscanTx(net: string, txHash: string): string {
     if (net == `mainnet`) {
         return `https://etherscan.io/tx/` + txHash;
+    }
+    if (net == `arbitrum`) {
+        return `https://arbiscan.io/tx/` + txHash;
+    }
+    if (net == `arbitrum-rinkeby`) {
+        return `https://testnet.arbiscan.io/tx/` + txHash;
     }
     return `https://` + net + `.etherscan.io/tx/` + txHash;
 }
