@@ -161,7 +161,7 @@ const config: HardhatUserConfig = {
         ropsten: getChainConfig(`ropsten`),
         rinkeby: getChainConfig(`rinkeby`),
         goerli: getChainConfig(`goerli`),
-	    arbitrum: getChainConfig("arbitrum"),
+        arbitrum: getChainConfig("arbitrum"),
         "arbitrum-rinkeby": getChainConfig("arbitrum-rinkeby"),
         "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
         avalanche: getChainConfig(`avalanche`),
