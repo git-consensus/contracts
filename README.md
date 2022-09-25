@@ -12,7 +12,7 @@ The Git Consensus Protocol enables distributed governance for Git projects. This
 
 ### 📖 [Docs](https://github.com/git-consensus/docs)
 
-### ❓ [Questions](https://github.com/git-consensus/docs)
+### ❓ [Questions](https://github.com/git-consensus/docs/blob/master/FAQ.md)
 
 &nbsp;
 
