@@ -1,6 +1,23 @@
 {
     "deployments": [
         {
+            "network": "arbitrum-rinkeby",
+            "contracts": [
+                {
+                    "name": "GitConsensus",
+                    "address": "0xDcd50BD640E307F79c163951E7F400EA23FA33dA"
+                },
+                {
+                    "name": "TokenFactory",
+                    "address": "0xd0F93ceE49a4A214b96DC7C651dF0C1DebE6af07"
+                },
+                {
+                    "name": "GovernorFactory",
+                    "address": "0x34406F8A2136fED1D82F9C907Bf7a0BEc62B5129"
+                }
+            ]
+        },
+        {
             "network": "ropsten",
             "contracts": [
                 {

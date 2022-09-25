@@ -42,6 +42,8 @@ const chainIds = {
     optimism: 10,
     bsc: 56,
     arbitrum: 42161,
+    "arbitrum-rinkeby": 421611,
+    "arbitrum-goerli": 421613,
     avalanche: 43114,
     "polygon-mainnet": 137,
     "polygon-mumbai": 80001,
@@ -64,9 +66,20 @@ if (!INFURA_API_KEY) {
     throw new Error(`Please set your INFURA_API_KEY in a .env file`);
 }
 
+const ALCHEMY_API_KEY: string | undefined = process.env.ALCHEMY_API_KEY;
+
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;
     switch (chain) {
+        case `arbitrum`:
+            jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+            break;
+        case `arbitrum-rinkeby`:
+            jsonRpcUrl = `https://arb-rinkeby.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+            break;
+        case `arbitrum-goerli`:
+            jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+            break;
         case `avalanche`:
             jsonRpcUrl = `https://api.avax.network/ext/bc/C/rpc`;
             break;
@@ -148,7 +161,9 @@ const config: HardhatUserConfig = {
         ropsten: getChainConfig(`ropsten`),
         rinkeby: getChainConfig(`rinkeby`),
         goerli: getChainConfig(`goerli`),
-        arbitrum: getChainConfig(`arbitrum`),
+        arbitrum: getChainConfig("arbitrum"),
+        "arbitrum-rinkeby": getChainConfig("arbitrum-rinkeby"),
+        "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
         avalanche: getChainConfig(`avalanche`),
         bsc: getChainConfig(`bsc`),
         optimism: getChainConfig(`optimism`),
@@ -168,12 +183,14 @@ const config: HardhatUserConfig = {
             ropsten: process.env.ETHERSCAN_API_KEY || ``,
             rinkeby: process.env.ETHERSCAN_API_KEY || ``,
             goerli: process.env.ETHERSCAN_API_KEY || ``,
-            optimisticEthereum: process.env.OPTIMISM_API_KEY || ``,
-            bsc: process.env.BSCSCAN_API_KEY || ``,
             arbitrumOne: process.env.ARBISCAN_API_KEY || ``,
+            "arbitrum-rinkeby": process.env.ARBISCAN_API_KEY || ``,
+            "arbitrum-goerli": process.env.ARBISCAN_API_KEY || ``,
             avalanche: process.env.SNOWTRACE_API_KEY || ``,
-            polygon: process.env.POLYGONSCAN_API_KEY || ``,
-            polygonMumbai: process.env.POLYGONSCAN_API_KEY || ``,
+            optimism: process.env.OPTIMISM_API_KEY || ``,
+            bsc: process.env.BSCSCAN_API_KEY || ``,
+            "polygon-mainnet": process.env.POLYGONSCAN_API_KEY || ``,
+            "polygon-mumbai": process.env.POLYGONSCAN_API_KEY || ``,
         },
     },
     typechain: {
