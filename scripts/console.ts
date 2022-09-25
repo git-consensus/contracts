@@ -1,14 +1,15 @@
+import * as crypto from "crypto";
 import { BigNumber, BigNumberish, Contract, utils } from "ethers";
+import * as fs from "fs";
 import { ethers, network } from "hardhat";
+import * as path from "path";
 import { keyInSelect, keyInYNStrict, question } from "readline-sync";
 import {
-    Deployments,
     Deployment,
     DeploymentContract,
+    Deployments,
     DevContracts,
 } from "./console-types/devcontracts";
-import * as path from "path";
-import * as fs from "fs";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
@@ -38,12 +39,23 @@ let deployments: Deployments = require(`../deployments.json`);
 // TODO: Hardware Wallet support:
 // https://docs.ethers.io/v5/api/other/hardware/
 
-const CLONE_USAGE = `USER - onboard a project to GitConsensus (create a Token & Governor)`;
-const DEV_USAGE = `DEV - deploy GitConsensus, TokenFactory, or GovernorFactory`;
+const CONTRIBUTOR_USAGE = `CONTRIBUTOR - add or check a git commit/tag on-chain, Token interactions, or Governor interactions.`;
+const MAINTAINER_USAGE = `MAINTAINER - onboard a project to Git Consensus Protocol.`;
+const DEV_USAGE = `DEV - re-deploy GitConsensus, TokenFactory, or GovernorFactory contracts.`;
 
-const BOTH_CLONE = `Token & Governor`;
-const TOKEN_CLONE = `Token`;
-const GOVERNOR_CLONE = `Governor`;
+const CONTRIBUTOR_ACTION_COMMIT_CHECK = `check a git commit`;
+const CONTRIBUTOR_ACTION_COMMIT_ADD = `add a git commit`;
+const CONTRIBUTOR_ACTION_TAG_CHECK = `check a git tag (verify a release)`;
+const CONTRIBUTOR_ACTION_TOKEN_CHECK = `check voting power (token balance)`;
+const CONTRIBUTOR_ACTION_TOKEN_DELEGATE = `delegate voting power to another address`;
+const CONTRIBUTOR_ACTION_PROPOSE = `create a proposal (for a release)`;
+const CONTRIBUTOR_ACTION_VOTE = `vote on an active proposal`;
+const CONTRIBUTOR_ACTION_EXECUTE = `execute an successful proposal (to add a release)`;
+
+const BOTH_CLONE = `Token and Governor`;
+const TOKEN_CLONE = `Token only`;
+const GOVERNOR_CLONE = `Governor only`;
+
 const JSON_NUM_SPACES = 4;
 
 async function main(signer?: SignerWithAddress): Promise<void> {
@@ -51,7 +63,14 @@ async function main(signer?: SignerWithAddress): Promise<void> {
         signer = await askForSigner();
     }
     switch (askForUsage()) {
-        case CLONE_USAGE:
+        case CONTRIBUTOR_USAGE:
+            switch (askForContributorAction()) {
+                // TODO: add methods for each contributor action
+                default:
+                    void main(signer);
+                    return;
+            }
+        case MAINTAINER_USAGE:
             switch (askForCloneContracts()) {
                 case BOTH_CLONE:
                     await createClones(signer, true, true);
@@ -102,13 +121,6 @@ export async function createClones(
     withToken?: boolean,
     withGovernor?: boolean,
 ): Promise<string[]> {
-    console.log(
-        `\nTo create your new Token & Governor, you will be asked to enter the address of the ` +
-            `already deployed GitConsensus and Factory contracts that you want to use on ${network.name}. These will ` +
-            `be defaulted from the list of the official deployed contracts on ${network.name} which can be found ` +
-            `in the git-consensus/contracts/deployments.json. Developers may also wish to deploy their own versions of ` +
-            `these contracts, in which case you want to enter the address of those instead.\n`,
-    );
     const defaultGitConsensusAddr = deployments.deployments
         .find(d => d.network === network.name)
         ?.contracts.find(c => c.name == DevContracts.GIT_CONSENSUS)?.address;
@@ -138,8 +150,10 @@ export async function createClones(
         governorFactoryAddr,
     );
 
-    const tokenSalt: string = saltToHex(askFor(`token salt`));
-    const govSalt: string = saltToHex(askFor(`governor salt`));
+    const tokenSaltInput: string = askFor(`token salt`, crypto.randomBytes(16).toString(`base64`));
+    const govSaltInput: string = askFor(`governor salt`, crypto.randomBytes(16).toString(`base64`));
+    const tokenSalt: string = saltToHex(tokenSaltInput);
+    const govSalt: string = saltToHex(govSaltInput);
 
     const tokenAddr = await tokenFactory.predictAddress(tokenSalt);
     const governorAddr = await governorFactory.predictAddress(govSalt);
@@ -189,13 +203,15 @@ export async function createClones(
             tokenSalt,
         );
 
-        console.log(`Your Token has been deployed with address ${token.address}`);
-        // TODO: link to a doc that goes in details about token address in tag usage
         console.log(
-            `Always include this address in your Git annotated tag message for it to be valid in Git Consensus addRelease()`,
+            `\nYour Token has been deployed with address ${token.address}` +
+                `\nEnsure you ALWAYS embed this address in your git annotated tag message for it to be ` +
+                `valid for becoming an official release that can be added on-chain.`,
         );
 
-        const update = askYesNo(`Update deployments.json with new Token address ${token.address}?`);
+        const update = askYesNo(
+            `Update 'deployments.json' with new Token address ${token.address}?`,
+        );
         if (update) {
             deployments = updateDeploymentsJson(
                 deployments,
@@ -246,10 +262,10 @@ export async function createClones(
             govSalt,
         );
 
-        console.log(`Your Governor has been deployed with address ${governor.address}`);
+        console.log(`\nYour Governor has been deployed with address ${governor.address}`);
 
         const update = askYesNo(
-            `Update deployments.json with new Governor address ${governor.address}?`,
+            `Update 'deployments.json' with new Governor address ${governor.address}?`,
         );
         if (update) {
             deployments = updateDeploymentsJson(
@@ -293,7 +309,7 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
             console.log(`Deployer address:`, contract.deployTransaction.from, `\n`);
 
             const update = askYesNo(
-                `Update deployments.json with new ${name} address ${contract.address}?`,
+                `Update 'deployments.json' with new ${name} address ${contract.address}?`,
             );
             if (update) {
                 deployments = updateDeploymentsJson(deployments, name, contract.address, net.name);
@@ -410,22 +426,80 @@ function etherscanTx(net: string, txHash: string): string {
 }
 
 function askForUsage(): string {
-    const usage = [CLONE_USAGE, DEV_USAGE];
-    const network = keyInSelect(usage, `Please enter your intended usage`, { cancel: true });
-    return usage[network];
+    const usageOpts = [CONTRIBUTOR_USAGE, MAINTAINER_USAGE, DEV_USAGE];
+    const usageChoice = keyInSelect(usageOpts, `Please enter your intended usage`, {
+        cancel: true,
+    });
+
+    switch (usageOpts[usageChoice]) {
+        case CONTRIBUTOR_USAGE:
+            console.log(
+                `\n\nYou will be asked to enter the address of the already deployed GitConsensus, Token, or Governor` +
+                    `contracts that you want to use on ${network.name}. These will be defaulted from the list of the official deployed ` +
+                    `contracts on ${network.name} which can be found in this repository's 'deployments.json' file.`,
+            );
+            break;
+        case MAINTAINER_USAGE:
+            console.log(
+                `\nTo turn your new or existing git project into a git project utilizing the Git Consensus Protocol, ` +
+                    `you will need to go through a one-time step of deploying project-specific Token & Governor clones.` +
+                    `\n\nThe Token clone is an extended ERC20 contract that holds balances for each address, and ` +
+                    `assigns voting power based on this balance.` +
+                    `\n\nThe Governor clone is a standard Governor contract that utilizes the Token's voting balance to create, ` +
+                    `vote on, and execute proposals.` +
+                    `\n\nBoth of these clones accept input parameters that are specific to your project. Defaults have been ` +
+                    `provided, which you can accept by pressing enter.` +
+                    `\n\nYou will also be asked to enter the address of the already deployed GitConsensus, TokenFactory, and GovernorFactory ` +
+                    `contracts that you want to use on ${network.name}. These will be defaulted from the list of the official deployed ` +
+                    `contracts on ${network.name} which can be found in this repository's 'deployments.json' file.`,
+            );
+            break;
+        case DEV_USAGE:
+            console.log(
+                `\nAlthough the of the core Git Consensus contracts (GitConsensus, TokenFactory, and GovernorFactory) ` +
+                    `have been deployed to most networks, contract developers may also wish to deploy their own versions of ` +
+                    `these contracts. As long as these contracts implement the interfaces (e.g. IGitConsensus), various other ` +
+                    `logic can be adjusted.` +
+                    `\n\nKeep in mind, any newly deployed contracts will have clean state (e.g. an empty 'commitToOwnerAddr' ` +
+                    `mapping). For production purposes, it is always recommended to stick to the addresses of the officially ` +
+                    `deployed contracts in 'deployments.json' so that looking up the address correlated to a commit/tag from the past is ` +
+                    `simple.\n`,
+            );
+            break;
+    }
+
+    return usageOpts[usageChoice];
+}
+
+function askForContributorAction(): string {
+    const actions = [
+        CONTRIBUTOR_ACTION_COMMIT_CHECK,
+        CONTRIBUTOR_ACTION_COMMIT_ADD,
+        CONTRIBUTOR_ACTION_TAG_CHECK,
+        CONTRIBUTOR_ACTION_TOKEN_CHECK,
+        CONTRIBUTOR_ACTION_TOKEN_DELEGATE,
+        CONTRIBUTOR_ACTION_PROPOSE,
+        CONTRIBUTOR_ACTION_VOTE,
+        CONTRIBUTOR_ACTION_EXECUTE,
+    ];
+    const choice = keyInSelect(actions, `Please enter your intended action`, {
+        cancel: true,
+    });
+
+    return actions[choice];
 }
 
 function askForCloneContracts(): string {
-    const contracts = [BOTH_CLONE, TOKEN_CLONE, GOVERNOR_CLONE];
-    const choice = keyInSelect(contracts, `Enter the contract to deploy`, {
-        cancel: false,
+    const clones = [BOTH_CLONE, TOKEN_CLONE, GOVERNOR_CLONE];
+    const choice = keyInSelect(clones, `Enter the contract to deploy`, {
+        cancel: true,
     });
-    return contracts[choice];
+    return clones[choice];
 }
 
 function askForDevContracts(): string {
     const contracts = Object.values(DevContracts);
-    const choice = keyInSelect(contracts, `Enter the contract to deploy`, { cancel: false });
+    const choice = keyInSelect(contracts, `Enter the contract to deploy`, { cancel: true });
     return contracts[choice];
 }
 
