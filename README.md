@@ -1,4 +1,4 @@
-![Git Consensus](./media/git-consensus.png)
+![Git Consensus](./media/git-consensus.svg)
 
 # Git Consensus Contracts
 
