@@ -10,6 +10,6 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v2
-            - name: Commit Address Check
+            - name: Commit Address Checker
               id: Testing
               uses: git-consensus/github-action-verify-address@v1.2
