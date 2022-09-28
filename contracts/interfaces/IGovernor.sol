@@ -24,7 +24,7 @@ interface IGovernor {
     /// @param votingPeriod The number of blocks that voting is open for a proposal
     ///     (e.g. 100800 = 2 weeks = 12/s per block).
     /// @param proposalThreshold The minimum number of votes required for an account to
-    //      create a proposal (e.g. 0 = anyone can create a proposal).
+    ///      create a proposal (e.g. 0 = anyone can create a proposal).
     /// @param quorumNumerator The quorumNumerator/100 to give a percentage representing
     ///     minimum number of votes out of the supply required to pass a proposal (e.g. 5 = 5%).
     function initialize(
