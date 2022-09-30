@@ -5,13 +5,13 @@ import { ethers, network } from "hardhat";
 import * as path from "path";
 import { keyInSelect, keyInYNStrict, question } from "readline-sync";
 import {
+    ContributorAction,
     Deployment,
     DeploymentContract,
     Deployments,
-    Usage,
-    ContributorAction,
-    MaintainerActionContract,
     DevActionContract,
+    MaintainerActionContract,
+    Usage,
 } from "./console-types/types";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -48,12 +48,17 @@ async function main(signer?: SignerWithAddress): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
+
+    // TODO: separate out switches into their own function
+
     switch (askForUsage()) {
-        case Usage.CONTRIBUTOR:
         // TODO: add methods for each contributor action
-        default:
-            void main(signer);
-            return;
+        case Usage.CONTRIBUTOR:
+            switch (askForContributorAction()) {
+                default:
+                    void main(signer);
+                    return;
+            }
         case Usage.MAINTAINER:
             switch (askForCloneContracts()) {
                 case MaintainerActionContract.BOTH:
@@ -107,14 +112,18 @@ export async function createClones(
 ): Promise<string[]> {
     const defaultGitConsensusAddr = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
-        ?.contracts.find((c: { name: any }) => c.name == DevActionContract.GIT_CONSENSUS)?.address;
+        ?.contracts.find(
+            (c: { name: string }) => c.name == DevActionContract.GIT_CONSENSUS,
+        )?.address;
     const gitConsensusAddr = askForAddress(
         `of the ${DevActionContract.GIT_CONSENSUS} contract`,
         defaultGitConsensusAddr,
     );
     const defaultTokenFactoryAddr = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
-        ?.contracts.find((c: { name: any }) => c.name == DevActionContract.TOKEN_FACTORY)?.address;
+        ?.contracts.find(
+            (c: { name: string }) => c.name == DevActionContract.TOKEN_FACTORY,
+        )?.address;
     const tokenFactoryAddr = askForAddress(
         `of the ${DevActionContract.TOKEN_FACTORY} contract`,
         defaultTokenFactoryAddr,
@@ -122,7 +131,7 @@ export async function createClones(
     const defaultGovernorFactoryAddr = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
         ?.contracts.find(
-            (c: { name: any }) => c.name == DevActionContract.GOVERNOR_FACTORY,
+            (c: { name: string }) => c.name == DevActionContract.GOVERNOR_FACTORY,
         )?.address;
     const governorFactoryAddr = askForAddress(
         `of the ${DevActionContract.GOVERNOR_FACTORY} contract`,
