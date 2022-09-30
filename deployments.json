@@ -5,7 +5,7 @@
             "contracts": [
                 {
                     "name": "GitConsensus",
-                    "address": "0xDcd50BD640E307F79c163951E7F400EA23FA33dA"
+                    "address": "0xAdb6af4cDB6527D537F9fe73eC7cffB7E07CEd03"
                 },
                 {
                     "name": "TokenFactory",
@@ -14,6 +14,14 @@
                 {
                     "name": "GovernorFactory",
                     "address": "0x34406F8A2136fED1D82F9C907Bf7a0BEc62B5129"
+                },
+                {
+                    "name": "ExampleToken",
+                    "address": "0x5Ef1A8C3BFC937C0de7E368C1bFCB6f31395071d"
+                },
+                {
+                    "name": "ExampleGovernor",
+                    "address": "0x22FB165Fbbdc3AFD02Adb73558B6f4623376Ba43"
                 }
             ]
         },
