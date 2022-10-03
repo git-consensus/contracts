@@ -114,7 +114,7 @@ export async function injectCommitAddress(
         }
 
         const commitId = await repo.createCommit(
-            branchRef,
+            branchRef.toString(),
             oldCommits[i].author(),
             oldCommits[i].committer(),
             message,
@@ -127,7 +127,9 @@ export async function injectCommitAddress(
     }
 
     // set branch to point to new HEAD
-    await branchRef.setTarget(prevCommit?.id(), `ffwd merge`);
+    if (prevCommit !== undefined) {
+        await branchRef.setTarget(prevCommit.id(), `ffwd merge`);
+    }
 
     return commitIds;
 }
