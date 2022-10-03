@@ -138,11 +138,11 @@ export async function createClones(
         defaultGovernorFactoryAddr,
     );
 
-    const tokenFactory = await ethers.getContractAt(
+    const tokenFactory: any = await ethers.getContractAt(
         DevActionContract.TOKEN_FACTORY,
         tokenFactoryAddr,
     );
-    const governorFactory = await ethers.getContractAt(
+    const governorFactory: any = await ethers.getContractAt(
         DevActionContract.GOVERNOR_FACTORY,
         governorFactoryAddr,
     );
@@ -152,8 +152,8 @@ export async function createClones(
     const tokenSalt: string = saltToHex(tokenSaltInput);
     const govSalt: string = saltToHex(govSaltInput);
 
-    const tokenAddr = await tokenFactory.predictAddress(tokenSalt);
-    const governorAddr = await governorFactory.predictAddress(govSalt);
+    const tokenAddr: any = await tokenFactory.predictAddress(tokenSalt);
+    const governorAddr: any = await governorFactory.predictAddress(govSalt);
 
     if (withToken) {
         const tokenName: string = askFor(`token name`, EXAMPLE_TOKEN_NAME);

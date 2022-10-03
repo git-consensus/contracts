@@ -141,9 +141,7 @@ describe(`Git Consensus integration tests`, () => {
                 expect(addCommitLogs[0].args.commitHash).to.equal(`0x${commit.hash}`);
 
                 expect(await gitConsensus.hashExists(`0x` + commit.hash)).to.equal(true);
-                expect(await gitConsensus.hashAddr(`0x` + commit.hash)).to.equal(
-                    commit.ownerAddr,
-                );
+                expect(await gitConsensus.hashAddr(`0x` + commit.hash)).to.equal(commit.ownerAddr);
             }
         });
 

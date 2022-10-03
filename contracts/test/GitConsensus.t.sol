@@ -91,7 +91,8 @@ contract BaseSetup is Test, IGitConsensusErrors, IGitConsensusEvents, IGitConsen
     ///     flow a new project would go through to set these up (predicting governor address first,
     ///     then creating each).
     /// @dev Testing `addCommit()` would work fine on it's own, but `addRelease()` actually needs
-    ///     a Token set up with a backing governor, otherwise checking the governor as the msg.sender
+    ///     a Token set up with a backing governor,
+    ///     otherwise checking the governor as the msg.sender
     ///     would fail, as would the actual minting of new tokens.
     function createTokenGovPair(bytes32 _tokenSalt, bytes32 _govSalt)
         public

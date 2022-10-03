@@ -104,12 +104,12 @@ contract GitConsensus is IGitConsensus {
     }
 
     /// @inheritdoc IGitConsensus
-    function hashAddr(bytes20 _hash) external view returns (address ownerAddr_) {
-        return hashToAddr[_hash];
+    function hashAddr(bytes20 _gitHash) external view returns (address ownerAddr_) {
+        return hashToAddr[_gitHash];
     }
 
     /// @inheritdoc IGitConsensus
-    function hashExists(bytes20 _hash) external view returns (bool exists_) {
-        return hashToAddr[_hash] != address(0);
+    function hashExists(bytes20 _gitHash) external view returns (bool exists_) {
+        return hashToAddr[_gitHash] != address(0);
     }
 }
