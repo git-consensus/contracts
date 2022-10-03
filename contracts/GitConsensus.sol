@@ -13,8 +13,7 @@ contract GitConsensus is IGitConsensus {
     /// @dev To parse address in commit/tag message, look for 0x followed by 40 hex characters
     uint8 constant ADDR_BYTES_LENGTH = 42;
 
-    mapping(bytes20 => address) private commitToOwnerAddr;
-    mapping(bytes20 => address) private tagToTokenAddr;
+    mapping(bytes20 => address) private hashToAddr;
 
     /// @inheritdoc IGitConsensus
     function addCommit(CommitData calldata _commitData) external returns (bytes20 commitHash_) {
@@ -42,7 +41,7 @@ contract GitConsensus is IGitConsensus {
         string memory addrStr = Utils.substring(_commitData.message, addrOffset, ADDR_BYTES_LENGTH);
         address ownerAddr = Utils.parseAddr(addrStr);
 
-        commitToOwnerAddr[commitHash_] = ownerAddr;
+        hashToAddr[commitHash_] = ownerAddr;
 
         emit CommitAdded(ownerAddr, commitHash_);
     }
@@ -91,7 +90,7 @@ contract GitConsensus is IGitConsensus {
         // mint new tokens for each commit owner
         for (uint256 i = 0; i < _hashes.length; ++i) {
             bytes20 commitHash = _hashes[i];
-            address owner = commitToOwnerAddr[commitHash];
+            address owner = hashToAddr[commitHash];
             uint256 value = _values[i];
 
             if (value == 0 || owner == address(0)) {
@@ -100,29 +99,18 @@ contract GitConsensus is IGitConsensus {
 
             token.mint(owner, value);
         }
-
-        tagToTokenAddr[tagHash_] = tokenAddr;
-
+        hashToAddr[tagHash_] = tokenAddr;
         emit ReleaseAdded(tokenAddr, tagHash_);
     }
 
     /// @inheritdoc IGitConsensus
-    function commitAddr(bytes20 _commitHash) external view returns (address ownerAddr_) {
-        return commitToOwnerAddr[_commitHash];
+    function hashAddr(bytes20 _hash) external view returns (address ownerAddr_) {
+        return hashToAddr[_hash];
     }
 
     /// @inheritdoc IGitConsensus
-    function commitExists(bytes20 _commitHash) external view returns (bool exists_) {
-        return commitToOwnerAddr[_commitHash] != address(0);
+    function commitExists(bytes20 _hash) external view returns (bool exists_) {
+        return hashToAddr[_hash] != address(0);
     }
 
-    /// @inheritdoc IGitConsensus
-    function tagAddr(bytes20 _tagHash) external view returns (address tokenAddr_) {
-        return tagToTokenAddr[_tagHash];
-    }
-
-    /// @inheritdoc IGitConsensus
-    function tagExists(bytes20 _tagHash) external view returns (bool exists_) {
-        return tagToTokenAddr[_tagHash] != address(0);
-    }
 }
