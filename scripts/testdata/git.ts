@@ -114,7 +114,7 @@ export async function injectCommitAddress(
         }
 
         const commitId = await repo.createCommit(
-            branchRef.toString(),
+            branchRef as unknown as string,
             oldCommits[i].author(),
             oldCommits[i].committer(),
             message,
