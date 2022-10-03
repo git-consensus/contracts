@@ -11,7 +11,7 @@ import {
     Deployments,
     DevActionContract,
     MaintainerActionContract,
-    Usage,
+    Usage
 } from "./console-types/types";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -23,14 +23,14 @@ import {
     EXAMPLE_VOTING_DELAY_BLOCKS,
     EXAMPLE_VOTING_PERIOD_BLOCKS,
     EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
-    EXAMPLE_VOTING_QUORUM_PERCENT,
+    EXAMPLE_VOTING_QUORUM_PERCENT
 } from "./const";
 import {
     createGovernorClone,
     createTokenClone,
     deployGitConsensus,
     deployGovernorFactory,
-    deployTokenFactory,
+    deployTokenFactory
 } from "./deploy";
 import { saltToHex } from "./utils";
 

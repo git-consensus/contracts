@@ -5,7 +5,7 @@ import {
     BigNumberish,
     ContractReceipt,
     ContractTransaction,
-    utils,
+    utils
 } from "ethers";
 import { concat, Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";

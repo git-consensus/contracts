@@ -14,7 +14,7 @@ import {
     TokenFactory,
     TokenFactory__factory,
     TokenImpl,
-    TokenImpl__factory,
+    TokenImpl__factory
 } from "../types";
 import { deployWait, parseEvent, submitTxWait } from "./utils";
 
