@@ -210,15 +210,15 @@ contract WhenCallingGitConsensus is BaseSetup {
         commitDataEmpty.message = Strings.toHexString(_ownerAddr);
 
         bytes20 commitHashExpected = mGitConsensus.addCommit(commitDataEmpty);
-        assertFalse(aGitConsensus.commitExists(commitHashExpected));
-        assertEq(address(0), aGitConsensus.commitAddr(commitHashExpected));
+        assertFalse(aGitConsensus.hashExists(commitHashExpected));
+        assertEq(address(0), aGitConsensus.hashAddr(commitHashExpected));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr, commitHashExpected);
 
         bytes20 commitHash = aGitConsensus.addCommit(commitDataEmpty);
-        assertTrue(aGitConsensus.commitExists(commitHash));
-        assertEq(_ownerAddr, aGitConsensus.commitAddr(commitHash));
+        assertTrue(aGitConsensus.hashExists(commitHash));
+        assertEq(_ownerAddr, aGitConsensus.hashAddr(commitHash));
 
         assertEq(commitHashExpected, commitHash);
     }
@@ -238,15 +238,15 @@ contract WhenCallingGitConsensus is BaseSetup {
         });
 
         bytes20 commitHashExpected = mGitConsensus.addCommit(commit);
-        assertFalse(aGitConsensus.commitExists(commitHashExpected));
-        assertEq(address(0), aGitConsensus.commitAddr(commitHashExpected));
+        assertFalse(aGitConsensus.hashExists(commitHashExpected));
+        assertEq(address(0), aGitConsensus.hashAddr(commitHashExpected));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr, commitHashExpected);
 
         bytes20 commitHash = aGitConsensus.addCommit(commit);
-        assertTrue(aGitConsensus.commitExists(commitHash));
-        assertEq(_ownerAddr, aGitConsensus.commitAddr(commitHash));
+        assertTrue(aGitConsensus.hashExists(commitHash));
+        assertEq(_ownerAddr, aGitConsensus.hashAddr(commitHash));
 
         assertEq(commitHashExpected, commitHash);
     }
@@ -295,15 +295,15 @@ contract WhenCallingGitConsensus is BaseSetup {
         });
 
         bytes20 commitHashExpected = mGitConsensus.addCommit(commit);
-        assertFalse(aGitConsensus.commitExists(commitHashExpected));
-        assertEq(address(0), aGitConsensus.commitAddr(commitHashExpected));
+        assertFalse(aGitConsensus.hashExists(commitHashExpected));
+        assertEq(address(0), aGitConsensus.hashAddr(commitHashExpected));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr, commitHashExpected);
 
         bytes20 commitHash = aGitConsensus.addCommit(commit);
-        assertTrue(aGitConsensus.commitExists(commitHash));
-        assertEq(_ownerAddr, aGitConsensus.commitAddr(commitHash));
+        assertTrue(aGitConsensus.hashExists(commitHash));
+        assertEq(_ownerAddr, aGitConsensus.hashAddr(commitHash));
 
         assertEq(commitHashExpected, commitHash);
     }
@@ -338,14 +338,14 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr, commitHashExpected1);
         bytes20 commitHash1 = aGitConsensus.addCommit(commit1);
-        assertTrue(aGitConsensus.commitExists(commitHash1));
-        assertEq(_ownerAddr, aGitConsensus.commitAddr(commitHash1));
+        assertTrue(aGitConsensus.hashExists(commitHash1));
+        assertEq(_ownerAddr, aGitConsensus.hashAddr(commitHash1));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr, commitHashExpected2);
         bytes20 commitHash2 = aGitConsensus.addCommit(commit2);
-        assertTrue(aGitConsensus.commitExists(commitHash2));
-        assertEq(_ownerAddr, aGitConsensus.commitAddr(commitHash2));
+        assertTrue(aGitConsensus.hashExists(commitHash2));
+        assertEq(_ownerAddr, aGitConsensus.hashAddr(commitHash2));
 
         assertFalse(commitHash2 == commitHash1);
     }
@@ -385,14 +385,14 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr1, commitHashExpected1);
         bytes20 commitHash1 = aGitConsensus.addCommit(commit1);
-        assertTrue(aGitConsensus.commitExists(commitHash1));
-        assertEq(_ownerAddr1, aGitConsensus.commitAddr(commitHash1));
+        assertTrue(aGitConsensus.hashExists(commitHash1));
+        assertEq(_ownerAddr1, aGitConsensus.hashAddr(commitHash1));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr2, commitHashExpected2);
         bytes20 commitHash2 = aGitConsensus.addCommit(commit2);
-        assertTrue(aGitConsensus.commitExists(commitHash2));
-        assertEq(_ownerAddr2, aGitConsensus.commitAddr(commitHash2));
+        assertTrue(aGitConsensus.hashExists(commitHash2));
+        assertEq(_ownerAddr2, aGitConsensus.hashAddr(commitHash2));
 
         assertFalse(commitHash2 == commitHash1);
     }
@@ -434,15 +434,15 @@ contract WhenCallingGitConsensus is BaseSetup {
         emit CommitAdded(_ownerAddr1, commitHashExpected1);
         vm.prank(_ownerAddr1);
         bytes20 commitHash1 = aGitConsensus.addCommit(commit1);
-        assertTrue(aGitConsensus.commitExists(commitHash1));
-        assertEq(_ownerAddr1, aGitConsensus.commitAddr(commitHash1));
+        assertTrue(aGitConsensus.hashExists(commitHash1));
+        assertEq(_ownerAddr1, aGitConsensus.hashAddr(commitHash1));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(_ownerAddr2, commitHashExpected2);
         vm.prank(_ownerAddr2);
         bytes20 commitHash2 = aGitConsensus.addCommit(commit2);
-        assertTrue(aGitConsensus.commitExists(commitHash2));
-        assertEq(_ownerAddr2, aGitConsensus.commitAddr(commitHash2));
+        assertTrue(aGitConsensus.hashExists(commitHash2));
+        assertEq(_ownerAddr2, aGitConsensus.hashAddr(commitHash2));
 
         assertFalse(commitHash2 == commitHash1);
     }
@@ -543,8 +543,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 
     function testOk_releasePartialMsgAddr(bytes32 _tokenSalt, bytes32 _govSalt) public {
@@ -570,8 +570,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagData, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 
     function testOk_releaseFilledMsgAddr(bytes32 _tokenSalt, bytes32 _govSalt) public {
@@ -625,8 +625,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagData, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 
     function testOk_releaseTwoHashDiffMsgStrNotMatch(bytes32 _tokenSalt, bytes32 _govSalt) public {
@@ -672,8 +672,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         emit ReleaseAdded(tokenAddr, tagHashExpected2);
         bytes20 commitHash2 = aGitConsensus.addRelease(tagData2, hashes2, values2);
 
-        assertTrue(aGitConsensus.tagExists(commitHash1));
-        assertTrue(aGitConsensus.tagExists(commitHash2));
+        assertTrue(aGitConsensus.hashExists(commitHash1));
+        assertTrue(aGitConsensus.hashExists(commitHash2));
 
         assertFalse(commitHash2 == commitHash1);
     }
@@ -722,8 +722,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 
     function testOk_releaseRandomDistribution(
@@ -751,8 +751,8 @@ contract WhenCallingGitConsensus is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 }
 
@@ -780,15 +780,15 @@ contract GasBenchmark is BaseSetup {
         commitDataEmpty.message = message;
 
         bytes20 commitHashExpected = mGitConsensus.addCommit(commitDataEmpty);
-        assertFalse(aGitConsensus.commitExists(commitHashExpected));
-        assertEq(address(0), aGitConsensus.commitAddr(commitHashExpected));
+        assertFalse(aGitConsensus.hashExists(commitHashExpected));
+        assertEq(address(0), aGitConsensus.hashAddr(commitHashExpected));
 
         vm.expectEmit(true, false, false, true);
         emit CommitAdded(alice, commitHashExpected);
 
         bytes20 commitHash = aGitConsensus.addCommit(commitDataEmpty);
-        assertTrue(aGitConsensus.commitExists(commitHash));
-        assertEq(alice, aGitConsensus.commitAddr(commitHash));
+        assertTrue(aGitConsensus.hashExists(commitHash));
+        assertEq(alice, aGitConsensus.hashAddr(commitHash));
         assertEq(commitHashExpected, commitHash);
     }
 
@@ -812,7 +812,7 @@ contract GasBenchmark is BaseSetup {
         vm.expectEmit(true, false, false, false);
         emit ReleaseAdded(tokenAddr, tagHashExpected);
         bytes20 tagHash = aGitConsensus.addRelease(tagDataEmpty, hashes, values);
-        assertEq(tokenAddr, aGitConsensus.tagAddr(tagHash));
-        assertTrue(aGitConsensus.tagExists(tagHash));
+        assertEq(tokenAddr, aGitConsensus.hashAddr(tagHash));
+        assertTrue(aGitConsensus.hashExists(tagHash));
     }
 }

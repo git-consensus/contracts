@@ -129,9 +129,9 @@ describe(`Git Consensus integration tests`, () => {
 
         it(`[loop] should succeed all example commit that have address`, async () => {
             for (const commit of commitsWithAddr) {
-                expect(await gitConsensus.commitExists(`0x` + commit.hash)).to.equal(false);
+                expect(await gitConsensus.hashExists(`0x` + commit.hash)).to.equal(false);
 
-                expect(await gitConsensus.commitAddr(`0x` + commit.hash)).to.equal(ZERO_ADDRESS);
+                expect(await gitConsensus.hashAddr(`0x` + commit.hash)).to.equal(ZERO_ADDRESS);
 
                 const addCommitTx1 = await gitConsensus.addCommit(commit.data);
 
@@ -140,8 +140,8 @@ describe(`Git Consensus integration tests`, () => {
                 expect(addCommitLogs[0].args.ownerAddr).to.equal(commit.ownerAddr);
                 expect(addCommitLogs[0].args.commitHash).to.equal(`0x${commit.hash}`);
 
-                expect(await gitConsensus.commitExists(`0x` + commit.hash)).to.equal(true);
-                expect(await gitConsensus.commitAddr(`0x` + commit.hash)).to.equal(
+                expect(await gitConsensus.hashExists(`0x` + commit.hash)).to.equal(true);
+                expect(await gitConsensus.hashAddr(`0x` + commit.hash)).to.equal(
                     commit.ownerAddr,
                 );
             }
@@ -154,8 +154,8 @@ describe(`Git Consensus integration tests`, () => {
                     `${GitConsensusErrors.COMMIT_MSG_NEEDS_ADDR}("${commit.data.message}")`,
                 );
 
-                expect(await gitConsensus.commitExists(`0x` + commit.hash)).to.equal(false);
-                expect(await gitConsensus.commitAddr(`0x` + commit.hash)).to.equal(ZERO_ADDRESS);
+                expect(await gitConsensus.hashExists(`0x` + commit.hash)).to.equal(false);
+                expect(await gitConsensus.hashAddr(`0x` + commit.hash)).to.equal(ZERO_ADDRESS);
             }
         });
     });
@@ -187,8 +187,8 @@ describe(`Git Consensus integration tests`, () => {
                     `${GitConsensusErrors.TAG_MSG_NEEDS_ADDR}("${tag.data.message}")`,
                 );
 
-                expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
-                expect(await gitConsensus.tagAddr(`0x` + tag.hash)).to.equal(ZERO_ADDRESS);
+                expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(false);
+                expect(await gitConsensus.hashAddr(`0x` + tag.hash)).to.equal(ZERO_ADDRESS);
             }
         });
 
@@ -224,7 +224,7 @@ describe(`Git Consensus integration tests`, () => {
             await gitConsensus.addCommit(commit1.data);
             await gitConsensus.addCommit(commit2.data);
 
-            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+            expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(false);
 
             // build a distribution to reward these two commits
             const value1: BigNumber = randomBigNumber();
@@ -273,7 +273,7 @@ describe(`Git Consensus integration tests`, () => {
             expect(addReleaseLogs1[0].args.tokenAddr).to.equal(token.address);
             expect(addReleaseLogs1[0].args.tagHash).to.equal(`0x${tag.hash}`);
 
-            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(true);
+            expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(true);
             expect(await token.totalSupply()).to.equal(totalSupplyPre.add(value1.add(value2)));
             expect(await token.balanceOf(commit1.ownerAddr)).to.equal(
                 commitOwner1BalPre.add(value1),
@@ -295,7 +295,7 @@ describe(`Git Consensus integration tests`, () => {
 
             for (const tag of tagsWithAddr) {
                 const totalSupplyPre: BigNumber = await token.totalSupply();
-                expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+                expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(false);
 
                 // build a random distribution for each release
                 const distroLength = randomNumber(0, 4); // arbitrary
@@ -312,7 +312,7 @@ describe(`Git Consensus integration tests`, () => {
                     const value = randomBigNumber();
                     values.push(value);
 
-                    const ownerAddr = await gitConsensus.commitAddr(`0x${hash}`);
+                    const ownerAddr = await gitConsensus.hashAddr(`0x${hash}`);
                     commitOwnersAddr.push(ownerAddr);
                     if (ownerAddr == ZERO_ADDRESS) {
                         commitOwnersBalPre.push(BigNumber.from(0));
@@ -366,7 +366,7 @@ describe(`Git Consensus integration tests`, () => {
                 expect(addReleaseLogs1[0].args.tokenAddr).to.equal(token.address);
                 expect(addReleaseLogs1[0].args.tagHash).to.equal(`0x${tag.hash}`);
 
-                expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(true);
+                expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(true);
                 expect(await token.totalSupply()).to.equal(
                     totalSupplyPre.add(await sumBigNumbers(values)),
                 );
@@ -393,7 +393,7 @@ describe(`Git Consensus integration tests`, () => {
             await gitConsensus.addCommit(commit1.data);
             await gitConsensus.addCommit(commit2.data);
 
-            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+            expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(false);
 
             // build a distribution to reward these two commits
             const value1: BigNumber = randomBigNumber();
@@ -436,7 +436,7 @@ describe(`Git Consensus integration tests`, () => {
             );
 
             // No data should have changed since the transaction was reverted.
-            expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
+            expect(await gitConsensus.hashExists(`0x` + tag.hash)).to.equal(false);
             expect(await token.totalSupply()).to.equal(totalSupplyPre);
             expect(await token.balanceOf(commit1.ownerAddr)).to.equal(commitOwner1BalPre);
             expect(await token.balanceOf(commit2.ownerAddr)).to.equal(commitOwner2BalPre);

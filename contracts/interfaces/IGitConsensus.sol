@@ -164,29 +164,18 @@ interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsens
     ) external returns (bytes20 tagHash);
 
     /// @notice Get the owner address of a git commit.
-    /// @param commitHash The hash of the git commit. If the commit that generated this hash does
+    /// @param gitHash The hash of the git commit. If the commit that generated this hash does
     ///     not exist, it means that no corresponding commit was ever added to the contract.
-    /// @return ownerAddr The address of the owner of the commit. This is equal to the address
-    ///     that was included in the commit message. If this commit hash was not notarized
+    /// This hash can either come from a release hash or a given commit hash.
+    /// @return hashAddr The address of of the commit. This is equal to the address
+    ///     that was included in the commit message or the given release address.
+    ///     If this commit hash was not notarized
     ///     via `addCommit()`, then the address returned is a zero address.
-    function commitAddr(bytes20 commitHash) external view returns (address ownerAddr);
+    function hashAddr(bytes20 gitHash) external view returns (address hashAddr);
 
-    /// @notice Check if a commit hash exists, indicating that the corresponding commit has been
+    /// @notice Check if a hash exists, indicating that the corresponding commit has been
     ///     notarized in the contract via `addCommit()` previously.
-    /// @param commitHash The hash of the git commit.
+    /// @param gitHash The hash of the git commit.
     /// @return exists `true` if the commit hash exists, `false` otherwise.
-    function commitExists(bytes20 commitHash) external view returns (bool exists);
-
-    /// @notice Get the token address of a git tag.
-    /// @param tagHash The hash of the git tag. If the tag that generated this hash does not exist,
-    ///     it means that no corresponding release was ever added to the contract.
-    /// @return tokenAddr The address of the token in the tag message. If this release was not
-    ///     notarized via `addRelease()`, then the address returned is a zero address.
-    function tagAddr(bytes20 tagHash) external view returns (address tokenAddr);
-
-    /// @notice Check if a tag hash exists, indicating that the corresponding release has been
-    ///     notarized in the contract via `addRelease()` previously.
-    /// @param tagHash The hash of the git tag.
-    /// @return exists `true` if the tag hash exists, `false` otherwise.
-    function tagExists(bytes20 tagHash) external view returns (bool exists);
+    function hashExists(bytes20 gitHash) external view returns (bool exists);
 }

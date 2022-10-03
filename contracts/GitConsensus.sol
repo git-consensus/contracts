@@ -109,8 +109,7 @@ contract GitConsensus is IGitConsensus {
     }
 
     /// @inheritdoc IGitConsensus
-    function commitExists(bytes20 _hash) external view returns (bool exists_) {
+    function hashExists(bytes20 _hash) external view returns (bool exists_) {
         return hashToAddr[_hash] != address(0);
     }
-
 }
