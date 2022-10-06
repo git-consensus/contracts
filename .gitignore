@@ -123,3 +123,6 @@ certora_*
 # random
 *.swp
 *.swo
+
+# windows defender files
+**/*Zone.Identifier

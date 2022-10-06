@@ -12,8 +12,8 @@ Run `forge test` to run the contract unit tests, and `yarn test` to run the inte
 It is recommended that you paste the relevant output of the test down below.
 -->
 
-- [ ] My code follows the [Style Guide](../../#style-guide).
-- [ ] My code requires a documentation update.
+- [ ] My code follows the [Style Guide](../CONTRIBUTING.md#style-guide).
+- [ ] My code requires a [Documentation Update](../CONTRIBUTING.md#generate-contract-api-docs).
 
 <!--
 If this PR fixes any existing issue, make it clear by commenting: "fixes #<number of issue>"/.
