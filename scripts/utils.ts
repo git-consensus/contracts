@@ -160,11 +160,25 @@ export function randomBigNumber(bytes = 20): BigNumber {
     );
 }
 
-// calculate total sum from all individual values in the array
+// Calculate total sum from all individual values in the array.
 export async function sumBigNumbers(values: PromiseOrValue<BigNumberish>[]): Promise<BigNumberish> {
     let sum = ethers.BigNumber.from(0);
     for (const val of values) {
         sum = sum.add(await val);
     }
     return sum;
+}
+
+// Mirrors the behavior of the address parsing in the GitConsensus contract.
+export function parseAddr(str: string): string {
+    return str.slice(indexOfAddr(str));
+}
+
+export function indexOfAddr(str: string): number {
+    for (let i = str.length - 1; i > 0; --i) {
+        if (str[i - 1] == `0` && str[i] == `x`) {
+            return i - 1;
+        }
+    }
+    return 0;
 }

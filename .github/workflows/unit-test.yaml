@@ -10,6 +10,8 @@ jobs:
             MNEMONIC: ${{secrets.MNEMONIC}}
             INFURA_API_KEY: ${{secrets.INFURA_API_KEY}}
         steps:
+            - name: Install nodegit dependencies
+              run: sudo apt-get install -y python2 python3 libkrb5-dev gcc openssl libssh2-1-dev libcurl4-openssl-dev g++ make
             - name: Check out the repo
               uses: actions/checkout@v3
               with:

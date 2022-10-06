@@ -23,8 +23,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 dotenv.config({ path: resolve(__dirname, `./.env`) });
 
 // pretty sure there are better ways to check this
-export const REPORT_GAS = process.env.REPORT_GAS == `TRUE` ? true : false;
-export const VERBOSE = process.env.VERBOSE == `TRUE` ? true : false;
+export const REPORT_GAS: boolean = process.env.REPORT_GAS == `TRUE` ? true : false;
+export const VERBOSE: boolean = process.env.VERBOSE == `TRUE` ? true : false;
 
 // Number of accounts to generate from mnemonic, will determine how many user will
 // be able to choose from during deployments.
@@ -32,7 +32,40 @@ export const ACCOUNT_COUNT: number = process.env.ACCOUNT_COUNT
     ? Number(process.env.ACCOUNT_COUNT)
     : 20;
 
-const SOLC_DEFAULT = `0.8.17`;
+// For running integration tests, we need to re-build a git repo by injecting our
+// addresses into the messages. This depends on the MNEMONIC, so it will be different
+// for each user. You may point this to a different git repo. For simplicity
+// this will default to using https://github.com/git-consensus/example.
+
+export const TESTDATA_REMOTE: string = process.env.TESTDATA_REMOTE
+    ? process.env.TESTDATA_REMOTE
+    : `https://github.com/git-consensus/example.git`;
+export const TESTDATA_LOCAL_PATH: string = process.env.TESTDATA_LOCAL_PATH
+    ? process.env.TESTDATA_LOCAL_PATH
+    : `./example`;
+export const TESTDATA_BRANCH: string = process.env.TESTDATA_BRANCH
+    ? process.env.TESTDATA_BRANCH
+    : `master`;
+
+// Ensure that we have all the environment variables we need.
+const MNEMONIC: string | undefined = process.env.MNEMONIC;
+if (!MNEMONIC) {
+    throw new Error(`Please set your MNEMONIC in a .env file`);
+}
+
+const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
+if (!INFURA_API_KEY) {
+    throw new Error(`Please set your INFURA_API_KEY in a .env file`);
+}
+
+const ALCHEMY_API_KEY: string | undefined = process.env.ALCHEMY_API_KEY;
+
+const SOLC_DEFAULT: string = `0.8.17`;
+
+const GAS_LIMITS = {
+    coverage: BigNumber.from(3_000_000_000),
+    hardhat: BigNumber.from(3_000_000_000),
+};
 
 const chainIds = {
     mainnet: 1,
@@ -49,24 +82,6 @@ const chainIds = {
     "polygon-mumbai": 80001,
     hardhat: 31337,
 };
-
-const GAS_LIMITS = {
-    coverage: BigNumber.from(3_000_000_000),
-    hardhat: BigNumber.from(3_000_000_000),
-};
-
-// Ensure that we have all the environment variables we need.
-const MNEMONIC: string | undefined = process.env.MNEMONIC;
-if (!MNEMONIC) {
-    throw new Error(`Please set your MNEMONIC in a .env file`);
-}
-
-const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
-if (!INFURA_API_KEY) {
-    throw new Error(`Please set your INFURA_API_KEY in a .env file`);
-}
-
-const ALCHEMY_API_KEY: string | undefined = process.env.ALCHEMY_API_KEY;
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;

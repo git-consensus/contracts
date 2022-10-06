@@ -1,22 +1,17 @@
 /* eslint-disable */
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { BigNumber, BytesLike } from "ethers";
+import fs from "fs-extra";
 import hre, { ethers } from "hardhat";
 
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-
+import { Repository } from "nodegit";
+import { TESTDATA_BRANCH, TESTDATA_LOCAL_PATH, TESTDATA_REMOTE, VERBOSE } from "../hardhat.config";
 import {
-    ALICE_ADDR,
-    BOB_ADDR,
-    CHARLIE_ADDR,
-    DAVE_ADDR,
-    EXAMPLE_GOVERNOR_ADDR,
     EXAMPLE_GOVERNOR_NAME,
-    EXAMPLE_OWNERS,
     EXAMPLE_TOKEN_NAME,
     EXAMPLE_TOKEN_SYMBOL,
-    EXAMPLE_VALUES,
     EXAMPLE_VOTING_DELAY_BLOCKS,
     EXAMPLE_VOTING_PERIOD_BLOCKS,
     EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
@@ -35,6 +30,15 @@ import {
     deployTokenFactory,
 } from "../scripts/deploy";
 import {
+    commitExamplesNoAddr,
+    commitExamplesWithAddr,
+    tagExamplesNoAddr,
+    tagExamplesWithAddr,
+    TestCommit,
+    TestTag,
+} from "../scripts/testdata/example";
+import { cloneRepo, injectCommitAddress, injectTagAddress } from "../scripts/testdata/git";
+import {
     parseEvent,
     randomAvoidRepeats,
     randomBigNumber,
@@ -46,14 +50,6 @@ import {
 } from "../scripts/utils";
 import { GitConsensus, GovernorImpl, TokenImpl } from "../types";
 import { IGitConsensusTypes } from "../types/contracts/interfaces/IGitConsensus.sol/IGitConsensus";
-import {
-    Commit,
-    commitExamplesNoAddr,
-    commitExamplesWithAddr,
-    Tag,
-    tagExamplesNoAddr,
-    tagExamplesWithAddr,
-} from "./example";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -66,15 +62,18 @@ describe(`Git Consensus integration tests`, () => {
     let token: TokenImpl;
     let governor: GovernorImpl;
 
+    let tokenAddr: string;
+    let governorAddr: string;
+
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
     let charlie: SignerWithAddress;
     let dave: SignerWithAddress;
 
-    let commitsNoAddr: Commit[];
-    let commitsWithAddr: Commit[];
-    let tagsNoAddr: Tag[];
-    let tagsWithAddr: Tag[];
+    let commitsNoAddr: TestCommit[];
+    let commitsWithAddr: TestCommit[];
+    let tagsNoAddr: TestTag[];
+    let tagsWithAddr: TestTag[];
 
     context(`commits`, async () => {
         it(`should succeed single commit that have address`, async () => {
@@ -162,7 +161,7 @@ describe(`Git Consensus integration tests`, () => {
 
     context(`releases`, async () => {
         it(`should fail release with different size hash and value arrays`, async () => {
-            const tag: Tag = tagsWithAddr[0];
+            const tag: TestTag = tagsWithAddr[0];
             const hashes: BytesLike[] = [
                 `0x` + commitsWithAddr[0].hash,
                 `0x` + commitsWithAddr[1].hash,
@@ -184,7 +183,7 @@ describe(`Git Consensus integration tests`, () => {
             for (const tag of tagsNoAddr) {
                 await submitTxFail(
                     gitConsensus.addRelease(tag.data, hashes, values),
-                    `${GitConsensusErrors.TAG_MSG_NEEDS_ADDR}("${tag.data.message}")`,
+                    `${GitConsensusErrors.TAG_MSG_NEEDS_ADDR}("${tag.data.message.toString()}")`,
                 );
 
                 expect(await gitConsensus.tagExists(`0x` + tag.hash)).to.equal(false);
@@ -193,7 +192,7 @@ describe(`Git Consensus integration tests`, () => {
         });
 
         it(`should fail invalid release from non-governor`, async () => {
-            const tag: Tag = tagsWithAddr[0];
+            const tag: TestTag = tagsWithAddr[0];
             const hashes: BytesLike[] = [
                 `0x` + commitsWithAddr[0].hash,
                 `0x` + commitsWithAddr[1].hash,
@@ -201,21 +200,16 @@ describe(`Git Consensus integration tests`, () => {
             const values: BigNumber[] = [BigNumber.from(10), BigNumber.from(20)];
             await submitTxFail(
                 gitConsensus.connect(alice).addRelease(tag.data, hashes, values),
-                `${GitConsensusErrors.UNAUTHORIZED_RELEASE}("${alice.address}", "${EXAMPLE_GOVERNOR_ADDR}")`,
+                `${GitConsensusErrors.UNAUTHORIZED_RELEASE}("${alice.address}", "${governorAddr}")`,
             );
         });
 
         it(`should succeed valid release, commits from last tag to current`, async () => {
-            // only want to include last two commits that were new in v1.1.1 -> v1.1.2
-            // a7645f13560c99eafea6e9d71c80b74877ee1e4e BB to BBB in file.txt 0x39E5949217828f309bc60733c9EDbF2f1F522449 (v1.1.1) -Bob
-            // 1da9b6c0c1678a21d783f36b0b5bfce2fa527f6c CC to CCC in file.txt 0xc66EF5281FF553f04a64BC4700146606DB921062 -Charlie
-            // a0c8c1b5083b1d5eaab179a288bbf79295029b1c DD to DDD in file.txt 0x6E503a5c6C41b5A68cD3Bfff98d8B04bc45CAf93 (v1.1.2) -Dave
-
             const tagsLen: number = tagsWithAddr.length;
-            const tag: Tag = tagsWithAddr[tagsLen - 1];
+            const tag: TestTag = tagsWithAddr[tagsLen - 1];
             const commitsLen: number = commitsWithAddr.length;
-            const commit1: Commit = commitsWithAddr[commitsLen - 2];
-            const commit2: Commit = commitsWithAddr[commitsLen - 1];
+            const commit1: TestCommit = commitsWithAddr[commitsLen - 2];
+            const commit2: TestCommit = commitsWithAddr[commitsLen - 1];
 
             const commitOwner1BalPre: BigNumber = await token.balanceOf(commit1.ownerAddr);
             const commitOwner2BalPre: BigNumber = await token.balanceOf(commit2.ownerAddr);
@@ -244,7 +238,7 @@ describe(`Git Consensus integration tests`, () => {
             const proposalTxReceipt1 = await submitTxWait(
                 governor
                     .connect(alice)
-                    .propose([gitConsensus.address], [0], [calldata1], tag.data.message),
+                    .propose([gitConsensus.address], [0], [calldata1], tag.data.message.toString()),
             );
             const proposalId1 = parseEvent(proposalTxReceipt1, governor.interface)[0].args
                 .proposalId;
@@ -261,7 +255,7 @@ describe(`Git Consensus integration tests`, () => {
                         [gitConsensus.address],
                         [0],
                         [calldata1],
-                        ethers.utils.id(await tag.data.message),
+                        ethers.utils.id(await tag.data.message.toString()),
                     ),
             );
             const executeLogs1 = parseEvent(executeTxReceipt1, governor.interface);
@@ -337,7 +331,12 @@ describe(`Git Consensus integration tests`, () => {
                 const proposalTxReceipt1 = await submitTxWait(
                     governor
                         .connect(alice)
-                        .propose([gitConsensus.address], [0], [calldata1], tag.data.message),
+                        .propose(
+                            [gitConsensus.address],
+                            [0],
+                            [calldata1],
+                            tag.data.message.toString(),
+                        ),
                 );
                 const proposalId1 = parseEvent(proposalTxReceipt1, governor.interface)[0].args
                     .proposalId;
@@ -354,7 +353,7 @@ describe(`Git Consensus integration tests`, () => {
                             [gitConsensus.address],
                             [0],
                             [calldata1],
-                            ethers.utils.id(await tag.data.message),
+                            ethers.utils.id(await tag.data.message.toString()),
                         ),
                 );
                 const executeLogs1 = parseEvent(executeTxReceipt1, governor.interface);
@@ -381,10 +380,10 @@ describe(`Git Consensus integration tests`, () => {
 
         it(`should fail to mint tokens above maxMintablePerHash`, async () => {
             const tagsLen: number = tagsWithAddr.length;
-            const tag: Tag = tagsWithAddr[tagsLen - 1];
+            const tag: TestTag = tagsWithAddr[tagsLen - 1];
             const commitsLen: number = commitsWithAddr.length;
-            const commit1: Commit = commitsWithAddr[commitsLen - 2];
-            const commit2: Commit = commitsWithAddr[commitsLen - 1];
+            const commit1: TestCommit = commitsWithAddr[commitsLen - 2];
+            const commit2: TestCommit = commitsWithAddr[commitsLen - 1];
 
             const commitOwner1BalPre: BigNumber = await token.balanceOf(commit1.ownerAddr);
             const commitOwner2BalPre: BigNumber = await token.balanceOf(commit2.ownerAddr);
@@ -413,7 +412,12 @@ describe(`Git Consensus integration tests`, () => {
             const proposalTxReceipt1 = await submitTxWait(
                 governor
                     .connect(alice)
-                    .propose([gitConsensus.address], [0], [calldata1], tag.data.message),
+                    .propose(
+                        [gitConsensus.address],
+                        [0],
+                        [calldata1],
+                        await tag.data.message.toString(),
+                    ),
             );
             const proposalId1 = parseEvent(proposalTxReceipt1, governor.interface)[0].args
                 .proposalId;
@@ -430,7 +434,7 @@ describe(`Git Consensus integration tests`, () => {
                         [gitConsensus.address],
                         [0],
                         [calldata1],
-                        ethers.utils.id(await tag.data.message),
+                        ethers.utils.id(await tag.data.message.toString()),
                     ),
                 `${TokenErrors.MAX_MINTABLE_PER_HASH_EXCEEDED}(${value2}, ${MAX_MINTABLE_PER_HASH})`,
             );
@@ -447,10 +451,9 @@ describe(`Git Consensus integration tests`, () => {
         it(`should create clones using arguments`, async () => {
             expect(await token.name()).to.equal(EXAMPLE_TOKEN_NAME);
             expect(await token.symbol()).to.equal(EXAMPLE_TOKEN_SYMBOL);
-            for (let i = 0; i < EXAMPLE_OWNERS.length; i++) {
-                expect(await token.balanceOf(EXAMPLE_OWNERS[i])).to.eq(EXAMPLE_VALUES[i]);
-            }
-            expect(await token.totalSupply()).to.eq(await sumBigNumbers(EXAMPLE_VALUES));
+            expect(await token.balanceOf(alice.address)).to.eq("200");
+            expect(await token.balanceOf(bob.address)).to.eq("100");
+            expect(await token.totalSupply()).to.eq(await sumBigNumbers([200, 100]));
 
             expect(await governor.name()).to.equal(EXAMPLE_GOVERNOR_NAME);
             expect(await governor.votingDelay()).to.eq(EXAMPLE_VOTING_DELAY_BLOCKS);
@@ -471,29 +474,40 @@ describe(`Git Consensus integration tests`, () => {
         const [deployer, aliceSigner, bobSigner, charlieSigner, daveSigner] =
             await ethers.getSigners();
 
-        // If these addresses are mis-aligned, the embedded address in commit/tag messages
-        // will be incorrect. When using hardhat network, ethers.getSigners() should return
-        // same as the constants.
-        expect(await aliceSigner.getAddress()).to.eq(ALICE_ADDR);
-        expect(await bobSigner.getAddress()).to.eq(BOB_ADDR);
-        expect(await charlieSigner.getAddress()).to.eq(CHARLIE_ADDR);
-        expect(await daveSigner.getAddress()).to.eq(DAVE_ADDR);
-
         alice = aliceSigner;
         bob = bobSigner;
         charlie = charlieSigner;
         dave = daveSigner;
 
-        commitsNoAddr = commitExamplesNoAddr();
-        commitsWithAddr = commitExamplesWithAddr();
-        tagsNoAddr = tagExamplesNoAddr();
-        tagsWithAddr = tagExamplesWithAddr();
-
         gitConsensus = await deployGitConsensus(deployer);
         const tokenFactory = await deployTokenFactory(deployer);
         const governorFactory = await deployGovernorFactory(deployer);
 
-        const governorAddr = await governorFactory.predictAddress(ZERO_HASH);
+        tokenAddr = await tokenFactory.predictAddress(ZERO_HASH);
+        governorAddr = await governorFactory.predictAddress(ZERO_HASH);
+
+        let repo: Repository;
+        if (!(await fs.pathExists(TESTDATA_LOCAL_PATH))) {
+            if (VERBOSE) console.log(`cloning ${TESTDATA_REMOTE} into ${TESTDATA_LOCAL_PATH}`);
+            repo = await cloneRepo(TESTDATA_REMOTE, TESTDATA_LOCAL_PATH, TESTDATA_BRANCH);
+        } else {
+            if (VERBOSE) console.log(`opening existing repo at ${TESTDATA_LOCAL_PATH}`);
+            repo = await Repository.open(TESTDATA_LOCAL_PATH);
+        }
+
+        // Signers will have different address values for each person that runs this test, since
+        // based on MNEMONIC in the .env file. So we need to inject the signers addressed into commits
+        // and token address into tag (which changed based on the deployer signer to create TokenFactory).
+
+        await injectCommitAddress(
+            repo,
+            await alice.getAddress(),
+            await bob.getAddress(),
+            await charlie.getAddress(),
+            await dave.getAddress(),
+        );
+
+        await injectTagAddress(repo, tokenAddr);
 
         token = await createTokenClone(
             tokenFactory.address,
@@ -503,14 +517,14 @@ describe(`Git Consensus integration tests`, () => {
             EXAMPLE_TOKEN_NAME,
             EXAMPLE_TOKEN_SYMBOL,
             MAX_MINTABLE_PER_HASH, // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
-            EXAMPLE_OWNERS,
-            EXAMPLE_VALUES,
+            [alice.address, bob.address],
+            [200, 100],
             ZERO_HASH,
         );
 
         governor = await createGovernorClone(
             governorFactory.address,
-            token.address,
+            tokenAddr,
             alice, // can be anyone
             EXAMPLE_GOVERNOR_NAME,
             EXAMPLE_VOTING_DELAY_BLOCKS,
@@ -519,5 +533,10 @@ describe(`Git Consensus integration tests`, () => {
             EXAMPLE_VOTING_QUORUM_PERCENT,
             ZERO_HASH,
         );
+
+        commitsNoAddr = commitExamplesNoAddr();
+        commitsWithAddr = await commitExamplesWithAddr();
+        tagsNoAddr = tagExamplesNoAddr();
+        tagsWithAddr = await tagExamplesWithAddr();
     });
 });

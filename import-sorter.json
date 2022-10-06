@@ -11,6 +11,7 @@
             "./contracts",
             "./coverage",
             "./dist",
+            "./example",
             "./media",
             "./node_modules",
             "./out",
