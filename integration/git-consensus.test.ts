@@ -491,8 +491,7 @@ describe(`Git Consensus integration tests`, () => {
             if (VERBOSE) console.log(`cloning ${TESTDATA_REMOTE} into ${TESTDATA_LOCAL_PATH}`);
             repo = await cloneRepo(TESTDATA_REMOTE, TESTDATA_LOCAL_PATH, TESTDATA_BRANCH);
         } else {
-            if (VERBOSE)
-                console.log(`building testdata on existing repo at ${TESTDATA_LOCAL_PATH}`);
+            if (VERBOSE) console.log(`opening existing repo at ${TESTDATA_LOCAL_PATH}`);
             repo = await Repository.open(TESTDATA_LOCAL_PATH);
         }
 

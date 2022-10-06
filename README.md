@@ -20,8 +20,8 @@ The Git Consensus Protocol enables distributed governance for Git projects. This
 
 This is a modern Ethereum contract repository for Solidity contracts. It combines two extremely powerful frameworks:
 
-- Foundry - for Unit testing written in Solidity ([contracts/test](./contracts/test))
-- Hardhat - for Integration testing written in Typescript ([integration/](integration/))
+- Foundry - for Unit testing written in Solidity ([contracts/test/](./contracts/test/))
+- Hardhat - for Integration testing written in Typescript ([integration/](./integration/))
 
 These also offer some great tools for some advanced things like contract debugging, deployment, gas measurements, etc.
 
@@ -45,7 +45,13 @@ Install [Yarn](https://classic.yarnpkg.com/en/):
 npm install --global yarn
 ```
 
-Build Node dependencies ([/node_modules/](node_modules/)):
+Install [Nodegit](https://github.com/nodegit/nodegit) dependencies:
+
+```sh
+apt-get install -y python2 python3 libkrb5-dev gcc openssl libssh2-1-dev libcurl4-openssl-dev g++ make
+```
+
+Install Node dependencies ([node_modules/](./node_modules/)):
 
 ```sh
 yarn install
@@ -69,14 +75,14 @@ foundryup
 Advanced ways to use `foundryup`, and other documentation, can be found in the [foundryup package](./foundryup/README.md).
 Foundry is a blazing fast, portable and modular toolkit for Ethereum application development. It consists of:
 
-- **Forge**: Library for Unit / Fuzz testing written in Solidity (see [/contracts/test](./contracts/test)).
+- **Forge**: Library for Unit / Fuzz testing written in Solidity (see [contracts/test/](./contracts/test/)).
 - **Cast**: Library for interacting with a live Ethereum JSON-RPC compatible node, or for parsing data. A swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
 
 Need help getting started with Foundry? Read the [📖 Foundry Book](https://onbjerg.github.io/foundry-book/)
 
 ### Hardhat
 
-Hardhat is an Ethereum development environment for professionals. We use the [Hardhat Network](https://hardhat.org/hardhat-network/) for Integration testing which written in Typescript. It uses Ethers.js and Mocha/Chai. See [/integration/](integration/).
+Hardhat is an Ethereum development environment for professionals. We use the [Hardhat Network](https://hardhat.org/hardhat-network/) for Integration testing which written in Typescript. It uses Ethers.js and Mocha/Chai. See [integration/](./integration/) for how it's used in Git Consensus.
 
 On [Hardhat's website](https://hardhat.org) you will find:
 
@@ -86,15 +92,15 @@ On [Hardhat's website](https://hardhat.org) you will find:
 
 ### Do Things
 
-Finished [Setup](#Setup)?
+Finished [Setup](#setup)?
 
-**Run some [unit tests](<(./contracts/test)>) with Forge:**
+**Run some [unit tests](<(./contracts/test/)>) with Forge:**
 
 ```sh
 forge test
 ```
 
-**Build contract artifacts and run [integration tests](integration/) with Hardhat:**
+**Build contract artifacts and run [integration tests](./integration/) with Hardhat:**
 
 ```sh
 yarn test
@@ -119,12 +125,15 @@ Ensure `../docs` path exists for [the docs repo](https://github.com/git-consensu
 ```sh
 git clone https://github.com/git-consensus/docs.git ../docs
 ```
+
 or
+
 ```sh
 git clone git@github.com:git-consensus/docs.git ../docs
 ```
 
 Now you can automatically convert NatSpec comments in contracts to docs with:
+
 ```sh
 yarn doc
 ```
