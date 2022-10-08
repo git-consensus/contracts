@@ -218,13 +218,12 @@ const config: HardhatUserConfig = {
         // Ensure 'git-consensus/docs' repo is forked and in this path
         // Check https://github.com/primitivefinance/primitive-dodoc/issues/37 for
         // why struct methods have no description transferred over
-        outputDir: `../docs/api`,
+        outputDir: `../docs/API`,
         runOnCompile: false,
         debugMode: false,
-        keepFileStructure: true,
+        keepFileStructure: false,
         freshOutput: true,
-        include: [`contracts/`], // idk why this includes imports but it do
-        exclude: [`contracts/lib/`, `contracts/test/`],
+        include: [`contracts/interfaces`],
     },
     contractSizer: {
         alphaSort: true,
