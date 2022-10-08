@@ -11,13 +11,14 @@ Git Consensus enables distributed governance for Git projects. This repository s
 ## [Links](#links)
 
 ### ⚙️ [Repository Setup](./CONTRIBUTING.md#setup)
+
 ### 👩‍💻 [Developer Guide](./CONTRIBUTING.md)
 
-### 💡 [Motivation](https://github.com/git-consensus/docs/blob/master/MOTIVATION.md)
+### 📖 [Docs](https://git-consensus.github.io/docs/)
 
-### 📖 [Docs](https://github.com/git-consensus/docs)
+### 💡 [Motivation](https://git-consensus.github.io/docs/motivation/)
 
-### ❓ [Questions](https://github.com/git-consensus/docs/blob/master/QUESTIONS.md)
+### ❓ [Questions](https://git-consensus.github.io/docs/questions/)
 
 &nbsp;
 
