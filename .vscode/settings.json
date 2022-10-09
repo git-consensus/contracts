@@ -1,5 +1,4 @@
 {
-    "search.useIgnoreFiles": true,
     "solidity.compileUsingRemoteVersion": "latest",
     "solidity.packageDefaultDependenciesContractsDirectory": "contracts"
 }

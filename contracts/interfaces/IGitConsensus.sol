@@ -121,9 +121,9 @@ interface IGitConsensusTypes {
 /// @title  IGitConsensus
 /// @author Matt Stam (@mattstam)
 /// @notice The interface for Git Consensus.
-/// @dev    Errors `IGitConsensusErrors, Events `IGitConsensusEvents`, and Types
-////       `IGitConsensusTypes` are seperated in seperate interfaces for clarity and
-////        unit testing purposes.
+/// @dev    Errors `IGitConsensusErrors`, Events `IGitConsensusEvents`, and Types
+///         `IGitConsensusTypes` are seperated in different interfaces for clarity
+///          and unit testing purposes.
 interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
     /// @notice Notarizes a commit on-chain, building the hash trustlessly from the commit data.
     ///     Stores the commit such that `hashExists()` returns true for this commit hash, and
