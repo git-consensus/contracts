@@ -197,7 +197,6 @@ export async function commitExamplesWithAddr(
     localPath: string = TESTDATA_LOCAL_PATH,
 ): Promise<TestCommit[]> {
     let repo: Repository;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     if (!(await fs.pathExists(localPath))) {
         return Promise.reject(`Test data not found at ${localPath}`);
     } else {
@@ -286,7 +285,6 @@ export async function tagExamplesWithAddr(
     localPath: string = TESTDATA_LOCAL_PATH,
 ): Promise<TestTag[]> {
     let repo: Repository;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     if (!(await fs.pathExists(localPath))) {
         return Promise.reject(`Test data not found at ${localPath}`);
     } else {

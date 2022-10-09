@@ -34,8 +34,9 @@ import {
 } from "./deploy";
 import { saltToHex } from "./utils";
 import { GovernorFactory, TokenFactory } from "../types";
+import { GovernorImpl, TokenImpl } from "../types/contracts/clones";
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, node/no-unpublished-require
+// eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-unpublished-require
 let deployments: Deployments = require(`../deployments.json`);
 
 // --- Provides a CLI to deploy the possible contracts ---
@@ -125,16 +126,16 @@ export async function createClones(
         ?.contracts.find(
             (c: { name: string }) => c.name == DevActionContract.TOKEN_FACTORY,
         )?.address;
-    const tokenFactoryAddr = askForAddress(
+    const tokenFactoryAddr: string = askForAddress(
         `of the ${DevActionContract.TOKEN_FACTORY} contract`,
         defaultTokenFactoryAddr,
     );
-    const defaultGovernorFactoryAddr = deployments.deployments
+    const defaultGovernorFactoryAddr: string | undefined = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
         ?.contracts.find(
             (c: { name: string }) => c.name == DevActionContract.GOVERNOR_FACTORY,
         )?.address;
-    const governorFactoryAddr = askForAddress(
+    const governorFactoryAddr: string = askForAddress(
         `of the ${DevActionContract.GOVERNOR_FACTORY} contract`,
         defaultGovernorFactoryAddr,
     );
@@ -188,7 +189,7 @@ export async function createClones(
 
         console.log(`Creating token...`);
 
-        const token = await createTokenClone(
+        const token: TokenImpl = await createTokenClone(
             tokenFactoryAddr,
             gitConsensusAddr,
             governorAddr,
@@ -248,7 +249,7 @@ export async function createClones(
         );
 
         console.log(`Creating governor...`);
-        const governor = await createGovernorClone(
+        const governor: GovernorImpl = await createGovernorClone(
             governorFactoryAddr,
             tokenAddr,
             signer,
