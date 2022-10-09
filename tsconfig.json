@@ -10,6 +10,7 @@
         "./contracts",
         "./coverage",
         "./dist",
+        "./example",
         "./integration",
         "./media",
         "./node_modules",

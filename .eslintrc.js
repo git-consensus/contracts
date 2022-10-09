@@ -28,6 +28,7 @@ module.exports = {
         "node/no-extraneous-import": `off`,
         "node/no-missing-import": `off`,
         "node/no-unpublished-import": `off`,
+        "@typescript-eslint/restrict-template-expressions": `off`,
         "@typescript-eslint/explicit-function-return-type": `error`,
         "@typescript-eslint/no-floating-promises": [
             `error`,

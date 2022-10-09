@@ -4,28 +4,13 @@
 export const ZERO_ADDRESS = `0x0000000000000000000000000000000000000000`;
 export const ZERO_HASH = `0x0000000000000000000000000000000000000000000000000000000000000000`;
 
-// The first token & governor clones' addresses when submitting with ZERO_HASH as salt,
-// so this example repo made with this expectation. This is what is embedded in the tag
-// messages, so if this differs, test will break.
-export const EXAMPLE_TOKEN_ADDR = `0x1249723FA3B0Adb68D7873fD611691e7B6fBD081`;
-export const EXAMPLE_GOVERNOR_ADDR = `0x037A59f34F776a84a2e7507f0F978e7444b4bf5A`;
-
-// These should always be ethers.getSigners()[1],[2],[3],[4] on hardhat network.
-export const ALICE_ADDR = `0xf304255aF88d457Ba221525F3C36188016AFE08E`;
-export const BOB_ADDR = `0x39E5949217828f309bc60733c9EDbF2f1F522449`;
-export const CHARLIE_ADDR = `0xc66EF5281FF553f04a64BC4700146606DB921062`;
-export const DAVE_ADDR = `0x6E503a5c6C41b5A68cD3Bfff98d8B04bc45CAf93`;
-
 // These some random params to make for the github.com/git-consensus/example onboarding with
 // a new Token and Governor clone. Uses standard naming conventions for them.
 
 // --- Token Clone params --
 
 export const EXAMPLE_TOKEN_NAME: string = `ExampleToken`;
-export const EXAMPLE_TOKEN_SYMBOL: string = `EXT`;
-// used for giving Alice and Bob initial ownership distribution
-export const EXAMPLE_OWNERS: string[] = [ALICE_ADDR, BOB_ADDR];
-export const EXAMPLE_VALUES: number[] = [200, 100];
+export const EXAMPLE_TOKEN_SYMBOL: string= `EXT`;
 
 // --- Governor Clone params --
 export const EXAMPLE_GOVERNOR_NAME: string = `ExampleGovernor`;

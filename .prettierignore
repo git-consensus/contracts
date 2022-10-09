@@ -6,6 +6,7 @@
 **/corpus
 **/coverage
 **/dist
+**/example
 **/node_modules
 **/media
 **/out

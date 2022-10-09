@@ -11,6 +11,9 @@ node_modules
 out
 types
 
+# example repo
+example
+
 # Logs
 logs
 *.log
