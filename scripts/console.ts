@@ -33,6 +33,7 @@ import {
     deployTokenFactory,
 } from "./deploy";
 import { saltToHex } from "./utils";
+import { GovernorFactory, TokenFactory } from "../types";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires, node/no-unpublished-require
 let deployments: Deployments = require(`../deployments.json`);
@@ -138,11 +139,11 @@ export async function createClones(
         defaultGovernorFactoryAddr,
     );
 
-    const tokenFactory: any = await ethers.getContractAt(
+    const tokenFactory: TokenFactory = await ethers.getContractAt(
         DevActionContract.TOKEN_FACTORY,
         tokenFactoryAddr,
     );
-    const governorFactory: any = await ethers.getContractAt(
+    const governorFactory: GovernorFactory = await ethers.getContractAt(
         DevActionContract.GOVERNOR_FACTORY,
         governorFactoryAddr,
     );
@@ -152,8 +153,8 @@ export async function createClones(
     const tokenSalt: string = saltToHex(tokenSaltInput);
     const govSalt: string = saltToHex(govSaltInput);
 
-    const tokenAddr: any = await tokenFactory.predictAddress(tokenSalt);
-    const governorAddr: any = await governorFactory.predictAddress(govSalt);
+    const tokenAddr: string = await tokenFactory.predictAddress(tokenSalt);
+    const governorAddr: string = await governorFactory.predictAddress(govSalt);
 
     if (withToken) {
         const tokenName: string = askFor(`token name`, EXAMPLE_TOKEN_NAME);

@@ -127,7 +127,7 @@ interface IGitConsensusTypes {
 interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsensusTypes {
     /// @notice Notarizes a commit on-chain, building the hash trustlessly from the commit data.
     ///     Stores the commit such that `hashExists()` returns true for this commit hash, and
-    ///     `commitAddr()` returns the owner address. Emits a `IGitConsensusEvents.CommitAdded`
+    ///     `hashExists()` returns the owner address. Emits a `IGitConsensusEvents.CommitAdded`
     /// @param commitData The data of the commit (tree, parents, author, message, etc).
     ///     `commitData.message` MUST include an address, which determines where the tokens are sent
     ///     when/if the corresponding commit is embedded in a future `addRelease()` call.
@@ -163,20 +163,19 @@ interface IGitConsensus is IGitConsensusErrors, IGitConsensusEvents, IGitConsens
         uint256[] calldata values
     ) external returns (bytes20 tagHash);
 
-    /// @param gitHash The hash of the git commit. If the commit that generated this hash does
-    ///     not exist, it means that no corresponding commit was ever added to the contract.
-    /// This hash can either come from a release hash or a given commit hash.
-    /// @return hashAddr The address that corresponds to the commit or tag. In the case of a commit,
-    /// this is equal to the address that was included in the commit message which is generally used
-    /// to represent the owner of the commit. In the case of a tag, this is equal to the address that
-    /// was included in the tag message, which should be the token address. If the gitHash
-    /// was not notarized via `addCommit()` or `addRelease()`,
-    /// then the address returned is a zero address.
-    function hashAddr(bytes20 gitHash) external view returns (address addr_);
+    /// @param gitHash The hash of the git commit. If the this hash does not exist, it means that
+    ///     no corresponding git commit or tag was ever added to the contract.
+    /// @return addr The address that corresponds to the commit or tag. In the case of a commit,
+    ///     this is equal to the address that was included in the commit message which is generally
+    ///     to represent the owner of the commit. In the case of a tag, this is equal to the address
+    ///     that used was included in the tag message, which should be the token address. If the
+    ///     `gitHash` was not notarized via `addCommit()` or `addRelease()`, then the address
+    ///     eturned is a zero address.
+    function hashAddr(bytes20 gitHash) external view returns (address addr);
 
-    /// @notice Check if a hash exists, indicating that the corresponding commit has been
-    ///     notarized in the contract via `addCommit()` previously.
-    /// @param gitHash The hash of the git commit.
-    /// @return exists `true` if the commit hash exists, `false` otherwise.
+    /// @notice Check if a git hash exists, indicating that the corresponding commit or tag has been
+    ///     notarized in the contract via `addCommit()` or `addRelease()` previously.
+    /// @param gitHash The hash of the git commit or tag.
+    /// @return exists `true` if the hash exists, `false` otherwise.
     function hashExists(bytes20 gitHash) external view returns (bool exists);
 }

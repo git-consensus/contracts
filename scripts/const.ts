@@ -21,23 +21,23 @@ export const DAVE_ADDR = `0x6E503a5c6C41b5A68cD3Bfff98d8B04bc45CAf93`;
 
 // --- Token Clone params --
 
-export const EXAMPLE_TOKEN_NAME = `ExampleToken`;
-export const EXAMPLE_TOKEN_SYMBOL = `EXT`;
+export const EXAMPLE_TOKEN_NAME: string = `ExampleToken`;
+export const EXAMPLE_TOKEN_SYMBOL: string = `EXT`;
 // used for giving Alice and Bob initial ownership distribution
-export const EXAMPLE_OWNERS = [ALICE_ADDR, BOB_ADDR];
-export const EXAMPLE_VALUES = [200, 100];
+export const EXAMPLE_OWNERS: string[] = [ALICE_ADDR, BOB_ADDR];
+export const EXAMPLE_VALUES: number[] = [200, 100];
 
 // --- Governor Clone params --
-export const EXAMPLE_GOVERNOR_NAME = `ExampleGovernor`;
+export const EXAMPLE_GOVERNOR_NAME: string = `ExampleGovernor`;
 // delay for voting to start on new proposal
-export const EXAMPLE_VOTING_DELAY_BLOCKS = 1;
+export const EXAMPLE_VOTING_DELAY_BLOCKS: number = 1;
 // length of time for voting to occur before proposal is considered passed or failed
-export const EXAMPLE_VOTING_PERIOD_BLOCKS = 100800; // 2 weeks (if 12s per block)
+export const EXAMPLE_VOTING_PERIOD_BLOCKS: number = 100800; // 2 weeks (if 12s per block)
 // number of votes an account needs to make a proposal, keep 0 for allowing any proposal
 // but in a real case this may allow malicious actors to spam proposals.
-export const EXAMPLE_VOTING_PROPOSAL_THRESHOLD = 0;
+export const EXAMPLE_VOTING_PROPOSAL_THRESHOLD: number = 0;
 // % of 'FOR' votes out of total supply required for proposal to succeed.
-export const EXAMPLE_VOTING_QUORUM_PERCENT = 5; // 5%
+export const EXAMPLE_VOTING_QUORUM_PERCENT: number = 5; // 5%
 
 /// --- ERRORS ---
 

@@ -99,12 +99,14 @@ contract GitConsensus is IGitConsensus {
 
             token.mint(owner, value);
         }
+
         hashToAddr[tagHash_] = tokenAddr;
+
         emit ReleaseAdded(tokenAddr, tagHash_);
     }
 
     /// @inheritdoc IGitConsensus
-    function hashAddr(bytes20 _gitHash) external view returns (address ownerAddr_) {
+    function hashAddr(bytes20 _gitHash) external view returns (address addr_) {
         return hashToAddr[_gitHash];
     }
 
