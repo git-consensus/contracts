@@ -69,13 +69,10 @@ const GAS_LIMITS = {
 
 const chainIds = {
     mainnet: 1,
-    ropsten: 3,
-    rinkeby: 4,
     goerli: 5,
     optimism: 10,
     bsc: 56,
     arbitrum: 42161,
-    "arbitrum-rinkeby": 421611,
     "arbitrum-goerli": 421613,
     avalanche: 43114,
     "polygon-mainnet": 137,
@@ -88,9 +85,6 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     switch (chain) {
         case `arbitrum`:
             jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-            break;
-        case `arbitrum-rinkeby`:
-            jsonRpcUrl = `https://arb-rinkeby.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
             break;
         case `arbitrum-goerli`:
             jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
@@ -173,11 +167,8 @@ const config: HardhatUserConfig = {
             gas: GAS_LIMITS.hardhat.toNumber(), // https://github.com/nomiclabs/hardhat/issues/660#issuecomment-715897156
         },
         mainnet: getChainConfig(`mainnet`),
-        ropsten: getChainConfig(`ropsten`),
-        rinkeby: getChainConfig(`rinkeby`),
         goerli: getChainConfig(`goerli`),
         arbitrum: getChainConfig("arbitrum"),
-        "arbitrum-rinkeby": getChainConfig("arbitrum-rinkeby"),
         "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
         avalanche: getChainConfig(`avalanche`),
         bsc: getChainConfig(`bsc`),
@@ -195,11 +186,8 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             mainnet: process.env.ETHERSCAN_API_KEY || ``,
-            ropsten: process.env.ETHERSCAN_API_KEY || ``,
-            rinkeby: process.env.ETHERSCAN_API_KEY || ``,
             goerli: process.env.ETHERSCAN_API_KEY || ``,
-            arbitrumOne: process.env.ARBISCAN_API_KEY || ``,
-            "arbitrum-rinkeby": process.env.ARBISCAN_API_KEY || ``,
+            arbitrum: process.env.ARBISCAN_API_KEY || ``,
             "arbitrum-goerli": process.env.ARBISCAN_API_KEY || ``,
             avalanche: process.env.SNOWTRACE_API_KEY || ``,
             optimism: process.env.OPTIMISM_API_KEY || ``,
