@@ -1,11 +1,11 @@
 {
     "deployments": [
         {
-            "network": "arbitrum-rinkeby",
+            "network": "arbitrum-goerli",
             "contracts": [
                 {
                     "name": "GitConsensus",
-                    "address": "0xDcd50BD640E307F79c163951E7F400EA23FA33dA"
+                    "address": "0x61A338AC596D4B70F10079EDaE846cC9723B3B15"
                 },
                 {
                     "name": "TokenFactory",
@@ -18,19 +18,19 @@
             ]
         },
         {
-            "network": "ropsten",
+            "network": "goerli",
             "contracts": [
                 {
                     "name": "GitConsensus",
-                    "address": "0xE559bc7d69c751718C57f8181BebD0E65ed60A3f"
+                    "address": "0xa203fCc21B2894Fbf76e74dbFF1a7111F6A45f46"
                 },
                 {
                     "name": "TokenFactory",
-                    "address": "0xf825fCCf5D9cC7F27C6e0908Caf468402F5aF7D5"
+                    "address": "0xA6E54184C736d019fB151ae575F07aCEDac3ACFE"
                 },
                 {
                     "name": "GovernorFactory",
-                    "address": "0x95146F88A3129263C6dd3E73e439af19DE5C184B"
+                    "address": "0xCE8267Be6E960B2abf818e7E95DAeDd4D9A22A1A"
                 }
             ]
         }

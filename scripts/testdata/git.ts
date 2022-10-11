@@ -28,7 +28,6 @@ export async function cloneRepo(
     branchName?: string,
 ): Promise<Repository> {
     // local dir needs to be empty
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     fs.emptyDirSync(localPath);
 
     if (branchName === undefined) branchName = `master`;
@@ -140,7 +139,6 @@ export async function injectTagAddress(
     tagInterval: number = 3,
 ): Promise<Oid[]> {
     // clean up old tags if any exist
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     fs.emptyDirSync(`${repo.path()}/refs/tags/`);
 
     const commits = await getCommits(repo);

@@ -10,7 +10,7 @@ export const ZERO_HASH = `0x0000000000000000000000000000000000000000000000000000
 // --- Token Clone params --
 
 export const EXAMPLE_TOKEN_NAME: string = `ExampleToken`;
-export const EXAMPLE_TOKEN_SYMBOL: string= `EXT`;
+export const EXAMPLE_TOKEN_SYMBOL: string = `EXT`;
 
 // --- Governor Clone params --
 export const EXAMPLE_GOVERNOR_NAME: string = `ExampleGovernor`;

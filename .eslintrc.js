@@ -30,6 +30,11 @@ module.exports = {
         "node/no-unpublished-import": `off`,
         "@typescript-eslint/restrict-template-expressions": `off`,
         "@typescript-eslint/explicit-function-return-type": `error`,
+        "@typescript-eslint/no-unsafe-assignment": `off`,
+        "@typescript-eslint/no-unsafe-call": `off`,
+        "@typescript-eslint/no-unsafe-member-access": `off`,
+        "@typescript-eslint/no-unsafe-argument": `off`,
+        "@typescript-eslint/no-unsafe-return": `off`,
         "@typescript-eslint/no-floating-promises": [
             `error`,
             {
