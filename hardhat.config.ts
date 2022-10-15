@@ -47,7 +47,7 @@ export const TESTDATA_BRANCH: string = process.env.TESTDATA_BRANCH
     ? process.env.TESTDATA_BRANCH
     : `master`;
 
-    // Ensure that we have all the environment variables we need.
+// Ensure that we have all the environment variables we need.
 const MNEMONIC: string = process.env.MNEMONIC ? process.env.MNEMONIC : ``;
 
 const INFURA_API_KEY: string = process.env.INFURA_API_KEY ? process.env.INFURA_API_KEY : ``;
