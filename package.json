@@ -32,19 +32,22 @@
         "/contracts/**/*.sol",
         "!/contracts/test/**/*"
     ],
+    "engines": {
+        "node": "14.x"
+    },
     "scripts": {
         "build": "npx hardhat compile --quiet",
-        "clean": "forge clean && npx hardhat clean && rm -rf yarn.lock yarn-error.log coverage.json artifacts/ build/ cache/ coverage/ example/ node_modules/ types/ && yarn cache clean",
+        "clean": "forge clean; npx hardhat clean; rm -rf package-lock.json coverage.json artifacts/ build/ cache/ coverage/ example/ node_modules/ types/",
         "coverage": "npx hardhat coverage --solcoverjs ./solcover.js",
         "deploy": "npx hardhat run scripts/console.ts",
         "doc": "npx hardhat dodoc",
         "lint": "npx prettier --config ./.prettierrc.json --check . && npx eslint --no-error-on-unmatched-pattern \"**/*.{ts,tsx}\"",
         "pretty": "npx prettier --config ./.prettierrc.json --write . && npx eslint --no-error-on-unmatched-pattern --fix .",
-        "prepare": "yarn build && tsc",
+        "prepare": "npm run build && tsc",
         "size": "npx hardhat size-contracts",
         "test": "npx hardhat test --network hardhat",
         "typechain": "npx hardhat typechain",
-        "update": "forge update && yarn upgrade",
+        "update": "forge update && npm upgrade",
         "ut": "forge test"
     },
     "devDependencies": {
@@ -82,6 +85,7 @@
         "hardhat-tracer": "^1.1.0-rc.9",
         "mocha": "^10.0.0",
         "nodegit": "^0.27.0",
+        "nodegit-gyp": "^7.1.2",
         "prettier": "^2.7.1",
         "prettier-plugin-solidity": "^1.0.0-beta.24",
         "readline-sync": "^1.4.10",

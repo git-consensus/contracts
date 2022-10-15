@@ -26,11 +26,11 @@ dotenv.config({ path: resolve(__dirname, `./.env`) });
 export const REPORT_GAS: boolean = process.env.REPORT_GAS == `TRUE` ? true : false;
 export const VERBOSE: boolean = process.env.VERBOSE == `TRUE` ? true : false;
 
-// Number of accounts to generate from mnemonic, will determine how many user will
+// Number of accounts to generate from MNEMONIC, will determine how many user will
 // be able to choose from during deployments.
 export const ACCOUNT_COUNT: number = process.env.ACCOUNT_COUNT
     ? Number(process.env.ACCOUNT_COUNT)
-    : 20;
+    : 5;
 
 // For running integration tests, we need to re-build a git repo by injecting our
 // addresses into the messages. This depends on the MNEMONIC, so it will be different
@@ -47,18 +47,12 @@ export const TESTDATA_BRANCH: string = process.env.TESTDATA_BRANCH
     ? process.env.TESTDATA_BRANCH
     : `master`;
 
-// Ensure that we have all the environment variables we need.
-const MNEMONIC: string | undefined = process.env.MNEMONIC;
-if (!MNEMONIC) {
-    throw new Error(`Please set your MNEMONIC in a .env file`);
-}
+    // Ensure that we have all the environment variables we need.
+const MNEMONIC: string = process.env.MNEMONIC ? process.env.MNEMONIC : ``;
 
-const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
-if (!INFURA_API_KEY) {
-    throw new Error(`Please set your INFURA_API_KEY in a .env file`);
-}
+const INFURA_API_KEY: string = process.env.INFURA_API_KEY ? process.env.INFURA_API_KEY : ``;
 
-const ALCHEMY_API_KEY: string | undefined = process.env.ALCHEMY_API_KEY;
+const ALCHEMY_API_KEY: string = process.env.ALCHEMY_API_KEY ? process.env.ALCHEMY_API_KEY : ``;
 
 const SOLC_DEFAULT: string = `0.8.17`;
 
@@ -101,7 +95,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     return {
         accounts: {
             count: ACCOUNT_COUNT,
-            mnemonic: MNEMONIC,
+            mnemonic: process.env.MNEMONIC,
             path: `m/44'/60'/0'/0`,
         },
         chainId: chainIds[chain],
@@ -159,7 +153,7 @@ const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             accounts: {
-                mnemonic: MNEMONIC,
+                mnemonic: process.env.MNEMONIC,
             },
             allowUnlimitedContractSize: true,
             chainId: chainIds.hardhat,
@@ -210,7 +204,7 @@ const config: HardhatUserConfig = {
         runOnCompile: false,
         debugMode: false,
         keepFileStructure: false,
-        freshOutput: true,
+        freshOutput: false,
         include: [`contracts/interfaces`],
     },
     contractSizer: {
