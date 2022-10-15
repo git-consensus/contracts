@@ -19,8 +19,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                  cache: yarn
-                  node-version: "16"
+                  node-version: "14"
             - name: Install the Node.js dependencies
               run: yarn install --immutable
             - name: Install Foundry
