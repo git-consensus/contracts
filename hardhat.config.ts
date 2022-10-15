@@ -47,13 +47,6 @@ export const TESTDATA_BRANCH: string = process.env.TESTDATA_BRANCH
     ? process.env.TESTDATA_BRANCH
     : `master`;
 
-// Ensure that we have all the environment variables we need.
-const MNEMONIC: string = process.env.MNEMONIC ? process.env.MNEMONIC : ``;
-
-const INFURA_API_KEY: string = process.env.INFURA_API_KEY ? process.env.INFURA_API_KEY : ``;
-
-const ALCHEMY_API_KEY: string = process.env.ALCHEMY_API_KEY ? process.env.ALCHEMY_API_KEY : ``;
-
 const SOLC_DEFAULT: string = `0.8.17`;
 
 const GAS_LIMITS = {
@@ -78,10 +71,10 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;
     switch (chain) {
         case `arbitrum`:
-            jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+            jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         case `arbitrum-goerli`:
-            jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+            jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         case `avalanche`:
             jsonRpcUrl = `https://api.avax.network/ext/bc/C/rpc`;
@@ -90,7 +83,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
             jsonRpcUrl = `https://bsc-dataseed1.binance.org`;
             break;
         default:
-            jsonRpcUrl = `https://${chain}.infura.io/v3/${INFURA_API_KEY}`;
+            jsonRpcUrl = `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`;
     }
     return {
         accounts: {
