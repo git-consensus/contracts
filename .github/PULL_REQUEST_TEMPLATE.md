@@ -12,6 +12,7 @@ Run `forge test` to run the contract unit tests, and `npm run test` to run the i
 It is recommended that you paste the relevant output of the test down below.
 -->
 
+- [ ] My commit message [contains my Ethereum address](https://git-consensus.github.io/docs/usage/start/).
 - [ ] My code follows the [Style Guide](../CONTRIBUTING.md#style-guide).
 - [ ] My code requires a [Documentation Update](../CONTRIBUTING.md#generate-contract-api-docs).
 
