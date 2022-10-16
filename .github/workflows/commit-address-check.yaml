@@ -1,8 +1,9 @@
 ---
-name: wallet-address-commit-checker
+name: Commit Address Check
 "on":
-    - push
-    - pull_request
+    push:
+        branches:
+            - master
 jobs:
     commit-address-check:
         name: verify commit message contains wallet address

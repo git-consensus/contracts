@@ -1,4 +1,4 @@
-name: analyze
+name: Slither
 "on":
     push:
         branches:
@@ -7,7 +7,7 @@ name: analyze
         branches:
             - master
 jobs:
-    analyze:
+    slither:
         runs-on: ubuntu-latest
         env:
             MNEMONIC: ${{secrets.MNEMONIC}}

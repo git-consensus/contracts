@@ -2,14 +2,14 @@
 
 This is a modern Ethereum contract repository for Solidity contracts. It combines two extremely powerful frameworks:
 
-- [Foundry](#foundry) - for Unit testing written in Solidity ([contracts/test/](./contracts/test/))
-- [Hardhat](#hardhat) - for Integration testing written in Typescript ([integration/](./integration/))
+- [Foundry](#foundry) - for Unit testing written in Solidity ([contracts/test/](./contracts/test/)).
+- [Hardhat](#hardhat) - for Integration testing written in Typescript ([integration/](./integration/)).
 
 These also offer some great tools for some advanced things like contract debugging, deployment, gas measurements, etc.
 
 &nbsp;
 
-### [Directory Structure](#directory-structure)
+## [Directory Structure](#directory-structure)
 
 ```txt
 integration/ - "Integration tests with Hardhat"
@@ -59,10 +59,8 @@ git clone https://github.com/git-consensus/contracts.git && cd contracts
 #### [Install Node.js / NPM](#install-nodejs--npm)
 
 ```sh
-npm install --global npm
+npm install -g npm
 ```
-
-This is *probably* already installed though.
 
 #### [Copy over a new `.env` file](#copy-over-a-new-env-file)
 
@@ -70,7 +68,7 @@ This is *probably* already installed though.
 cp .env.example .env
 ```
 
-Fill in *at least* your [`MNEMONIC`](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase) and [`INFURA_API_KEY`](https://docs.infura.io/infura/getting-started).
+Fill in *at least* your [`MNEMONIC`](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase).
 
 #### [Setup nodegit dependencies](#setup-nodegit-dependencies)
 
@@ -129,17 +127,21 @@ Finished [Setup](#setup)?
 forge test
 ```
 
+This will run everything in [contracts/test/](./contracts/test/), which utilizes [Forge](https://book.getfoundry.sh/forge/tests) to test contract code.
+
 #### [Run the integration tests with Hardhat](#run-the-integration-tests-with-hardhat)
 
 ```sh
 npm run test
 ```
 
+This will run everything in [integration/](./integration/), which utilizes [Hardhat](https://hardhat.org/hardhat-runner/docs/getting-started#overview) to tests for full usage scenarios.
+
 #### [Deploy to Goerli test network](#deploy-to-goerli-test-network)
 
-Create a [.env](./.env) file matching the variables seen in [.env.example](./.env.example)
+Create a [.env](./.env) file matching the variables seen in [.env.example](./.env.example).
 
-Getting fully prepared may involve getting a [INFURA_API_KEY](https://infura.io/) by signing up, and getting some test ETH on your target network via a facet.
+Getting fully prepared may involve getting a [`INFURA_API_KEY`](https://docs.infura.io/infura/getting-started) by signing up, and getting some test ETH on your target network via a [facet](https://goerlifaucet.com/).
 
 Then run:
 
@@ -163,7 +165,7 @@ npm run doc
 
 &nbsp;
 
-### [Foundary & Hardhat Info](#foundary--hardhat-info)
+## [Foundary & Hardhat Info](#foundary--hardhat-info)
 
 #### [Foundry](#foundry)
 
@@ -171,9 +173,9 @@ Advanced ways to use `foundryup`, and other documentation, can be found in the [
 Foundry is a blazing fast, portable and modular toolkit for Ethereum application development. It consists of:
 
 - **[Forge](https://book.getfoundry.sh/reference/forge/forge)**: Library for Unit / Fuzz testing written in Solidity (see [contracts/test/](./contracts/test/)).
-- **[Cast]((https://book.getfoundry.sh/reference/cast/cast))**: Library for interacting with a live Ethereum JSON-RPC compatible node, or for parsing data. A swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+- **[Cast](https://book.getfoundry.sh/reference/cast/cast)**: Library for interacting with a live Ethereum JSON-RPC compatible node, or for parsing data. A swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
 
-Need help getting started with Foundry? Read the [📖 Foundry Book](https://onbjerg.github.io/foundry-book/)
+Need help getting started with Foundry? Read the [📖 Foundry Book](https://onbjerg.github.io/foundry-book/).
 
 #### [Hardhat](#hardhat)
 
@@ -187,7 +189,7 @@ On [Hardhat's website](https://hardhat.org) you will find:
 
 &nbsp;
 
-### [Recommended VSCode Extensions](#recommended-vscode-extensions)
+## [Recommended VSCode Extensions](#recommended-vscode-extensions)
 
 - [Solidity Visual Developer](https://marketplace.visualstudio.com/items?itemName=tintinweb.solidity-visual-auditor)
 - [Solidity Language & Themes (only)](https://marketplace.visualstudio.com/items?itemName=tintinweb.vscode-solidity-language)
@@ -200,7 +202,7 @@ On [Hardhat's website](https://hardhat.org) you will find:
 
 &nbsp;
 
-### [Style Guide](#style-guide)
+## [Style Guide](#style-guide)
 
 - Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.15/natspec-format.html) format.
 - Always `npm run pretty` your before committing.
@@ -214,7 +216,7 @@ In general, please do your best to always keep this repository beautiful! ❤️
 
 &nbsp;
 
-### [Contract Dependencies](#contract-dependencies)
+## [Contract Dependencies](#contract-dependencies)
 
 - OpenZepplin
   - [ERC20](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#ERC20)

@@ -1,8 +1,12 @@
 ---
-name: slither-summary
+name: Slither Summary
 "on":
-    - push
-    - pull_request
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
 jobs:
     summary:
         runs-on: ubuntu-latest

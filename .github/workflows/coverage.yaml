@@ -1,8 +1,12 @@
 ---
-name: coverage
+name: Coverage
 "on":
-    - push
-    - pull_request
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
 jobs:
     coverage:
         runs-on: ubuntu-latest
@@ -21,6 +25,6 @@ jobs:
               with:
                   node-version: "14"
             - name: Install the Node.js dependencies
-              run: yarn install --immutable
+              run: npm i
             - name: Run Integration Test Coverage
-              run: yarn coverage
+              run: npm run coverage
