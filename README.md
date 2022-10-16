@@ -8,7 +8,7 @@
 [![Integration Tests](https://github.com/git-consensus/contracts/actions/workflows/integration-test.yaml/badge.svg)](https://github.com/git-consensus/contracts/actions/workflows/integration-test.yaml)
 [![Slither Static Analysis](https://github.com/git-consensus/contracts/actions/workflows/slither.yaml/badge.svg)](https://github.com/git-consensus/contracts/actions/workflows/slither.yaml)
 [![Lint](https://github.com/git-consensus/contracts/actions/workflows/lint.yaml/badge.svg)](https://github.com/git-consensus/contracts/actions/workflows/lint.yaml)
-[![npm version](https://img.shields.io/npm/v/@git-consensus/contracts/latest.svg)](https://www.npmjs.com/package/@git-consensus/contracts/v/latest)
+[![NPM Version](https://img.shields.io/npm/v/@git-consensus/contracts/latest.svg)](https://www.npmjs.com/package/@git-consensus/contracts/v/latest)
 
 Git Consensus enables distributed governance for Git projects. This repository serves as the location for the Solidity contract interfaces and implementations.
 
