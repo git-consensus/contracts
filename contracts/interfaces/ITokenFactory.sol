@@ -36,6 +36,9 @@ interface ITokenFactory is ITokenFactoryEvents {
     ///     always be set to the Git Consensus contract's address.
     /// @param name Name of the token (e.g. "MyToken").
     /// @param symbol Symbol of the token (e.g. "MTK").
+    /// @param maxMintablePerHash The maximum value that can be minted for a single hash in
+    ///     the hashes array during `GitConsensus.addRelease(tagData, hashes, values)`. If no
+    ///     maximum is desired, set to 0.
     /// @param owners Array of addresses to receive an initial distribution of tokens. MUST
     ///     equal length of `values`.
     /// @param values Array of amounts of tokens to be given to each owner (in wei). The initial
@@ -47,7 +50,7 @@ interface ITokenFactory is ITokenFactoryEvents {
         address minterAddr,
         string calldata name,
         string calldata symbol,
-        uint256 _maxMintablePerHash,
+        uint256 maxMintablePerHash,
         address[] calldata owners,
         uint256[] calldata values,
         bytes32 salt
