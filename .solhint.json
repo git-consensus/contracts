@@ -4,7 +4,7 @@
     "rules": {
         "singleQuote": ["error", false],
         "code-complexity": ["error", 18],
-        "compiler-version": ["error", ">=0.8.9"],
+        "compiler-version": ["error", ">=0.8.17"],
         "constructor-syntax": "error",
         "func-visibility": [
             "error",

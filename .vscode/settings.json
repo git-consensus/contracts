@@ -1,4 +1,6 @@
 {
     "solidity.compileUsingRemoteVersion": "latest",
-    "solidity.packageDefaultDependenciesContractsDirectory": "contracts"
+    "solidity.packageDefaultDependenciesContractsDirectory": "contracts",
+    "mochaExplorer.files": "integration/**/*.ts",
+    "mochaExplorer.require": "ts-node/register"
 }
