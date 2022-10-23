@@ -199,12 +199,13 @@ On [Hardhat's website](https://hardhat.org) you will find:
 - [Prettier](https://marketplace.visualstudio.com/items?itemName=SimonSiefke.prettier-vscode)
 - [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter)
 - [TypeScript Import Sorter](https://marketplace.visualstudio.com/items?itemName=mike-co.import-sorter)
+- [Mocha Test Explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
 
 &nbsp;
 
 ## [Style Guide](#style-guide)
 
-- Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.15/natspec-format.html) format.
+- Add Solidity comments in the [natspec](https://docs.soliditylang.org/en/v0.8.17/natspec-format.html) format.
 - Always `npm run pretty` your before committing.
 - Lowercase commit message (for consistency).
 - Embed your Ethereum address in your commit message on this repository.

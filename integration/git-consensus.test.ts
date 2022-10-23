@@ -58,22 +58,99 @@ const { expect } = chai;
 const MAX_MINTABLE_PER_HASH = ethers.constants.MaxUint256.sub(1);
 
 describe(`Git Consensus integration tests`, () => {
+    // contracts
     let gitConsensus: GitConsensus;
     let token: TokenImpl;
     let governor: GovernorImpl;
 
-    let tokenAddr: string;
-    let governorAddr: string;
-
+    // users
+    let deployer: SignerWithAddress;
     let alice: SignerWithAddress;
     let bob: SignerWithAddress;
     let charlie: SignerWithAddress;
     let dave: SignerWithAddress;
 
+    // git repository for test data
+    let repo: Repository;
+
+    // test data
     let commitsNoAddr: TestCommit[];
     let commitsWithAddr: TestCommit[];
     let tagsNoAddr: TestTag[];
     let tagsWithAddr: TestTag[];
+
+    before(async () => {
+        // Signers will have different address values for each person that runs this test, since
+        // based on MNEMONIC in the .env file. So we need to re-build the test repository while
+        // injecting the signers addresses into commits messages and token address into tags.
+        // This ensures that the generated test data is correct.
+
+        if (!(await fs.pathExists(TESTDATA_LOCAL_PATH))) {
+            if (VERBOSE) console.log(`cloning ${TESTDATA_REMOTE} into ${TESTDATA_LOCAL_PATH}`);
+            repo = await cloneRepo(TESTDATA_REMOTE, TESTDATA_LOCAL_PATH, TESTDATA_BRANCH);
+        } else {
+            if (VERBOSE) console.log(`opening existing repo at ${TESTDATA_LOCAL_PATH}`);
+            repo = await Repository.open(TESTDATA_LOCAL_PATH);
+        }
+
+        const [deployerSigner, aliceSigner, bobSigner, charlieSigner, daveSigner] =
+            await ethers.getSigners();
+
+        deployer = deployerSigner;
+        alice = aliceSigner;
+        bob = bobSigner;
+        charlie = charlieSigner;
+        dave = daveSigner;
+
+        await injectCommitAddress(
+            repo,
+            await alice.getAddress(),
+            await bob.getAddress(),
+            await charlie.getAddress(),
+            await dave.getAddress(),
+        );
+    });
+
+    beforeEach(async () => {
+        gitConsensus = await deployGitConsensus(deployer);
+        const tokenFactory = await deployTokenFactory(deployer);
+        const governorFactory = await deployGovernorFactory(deployer);
+
+        const tokenAddr = await tokenFactory.predictAddress(ZERO_HASH);
+        const governorAddr = await governorFactory.predictAddress(ZERO_HASH);
+
+        await injectTagAddress(repo, tokenAddr);
+
+        token = await createTokenClone(
+            tokenFactory.address,
+            gitConsensus.address,
+            governorAddr,
+            alice, // can be anyone
+            EXAMPLE_TOKEN_NAME,
+            EXAMPLE_TOKEN_SYMBOL,
+            MAX_MINTABLE_PER_HASH, // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
+            [alice.address, bob.address],
+            [200, 100],
+            ZERO_HASH,
+        );
+
+        governor = await createGovernorClone(
+            governorFactory.address,
+            tokenAddr,
+            alice, // can be anyone
+            EXAMPLE_GOVERNOR_NAME,
+            EXAMPLE_VOTING_DELAY_BLOCKS,
+            EXAMPLE_VOTING_PERIOD_BLOCKS,
+            EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
+            EXAMPLE_VOTING_QUORUM_PERCENT,
+            ZERO_HASH,
+        );
+
+        commitsNoAddr = commitExamplesNoAddr();
+        commitsWithAddr = await commitExamplesWithAddr();
+        tagsNoAddr = tagExamplesNoAddr();
+        tagsWithAddr = await tagExamplesWithAddr();
+    });
 
     context(`commits`, async () => {
         it(`should succeed single commit that have address`, async () => {
@@ -198,7 +275,7 @@ describe(`Git Consensus integration tests`, () => {
             const values: BigNumber[] = [BigNumber.from(10), BigNumber.from(20)];
             await submitTxFail(
                 gitConsensus.connect(alice).addRelease(tag.data, hashes, values),
-                `${GitConsensusErrors.UNAUTHORIZED_RELEASE}("${alice.address}", "${governorAddr}")`,
+                `${GitConsensusErrors.UNAUTHORIZED_RELEASE}("${alice.address}", "${governor.address}")`,
             );
         });
 
@@ -449,6 +526,9 @@ describe(`Git Consensus integration tests`, () => {
         it(`should create clones using arguments`, async () => {
             expect(await token.name()).to.equal(EXAMPLE_TOKEN_NAME);
             expect(await token.symbol()).to.equal(EXAMPLE_TOKEN_SYMBOL);
+            expect(await token.minter()).to.equal(gitConsensus.address);
+            expect(await token.governor()).to.equal(governor.address);
+            expect(await token.maxMintablePerHash()).to.equal(MAX_MINTABLE_PER_HASH);
             expect(await token.balanceOf(alice.address)).to.eq("200");
             expect(await token.balanceOf(bob.address)).to.eq("100");
             expect(await token.totalSupply()).to.eq(await sumBigNumbers([200, 100]));
@@ -459,82 +539,5 @@ describe(`Git Consensus integration tests`, () => {
             expect(await governor.proposalThreshold()).to.eq(EXAMPLE_VOTING_PROPOSAL_THRESHOLD);
             expect(await governor[`quorumNumerator()`]()).to.eq(EXAMPLE_VOTING_QUORUM_PERCENT);
         });
-    });
-
-    beforeEach(async () => {
-        // Resets the state of the hardhat network each time, which means that for
-        // each `it()` block, the contracts will always have the same address. Mainly
-        // relevant for the Governor clone (which has const address in the tag message).
-        // If we *didn't* do this, createGovernor(...) would get a different
-        // address everytime, even with the same salt.
-        await hre.network.provider.send(`hardhat_reset`);
-
-        const [deployer, aliceSigner, bobSigner, charlieSigner, daveSigner] =
-            await ethers.getSigners();
-
-        alice = aliceSigner;
-        bob = bobSigner;
-        charlie = charlieSigner;
-        dave = daveSigner;
-
-        gitConsensus = await deployGitConsensus(deployer);
-        const tokenFactory = await deployTokenFactory(deployer);
-        const governorFactory = await deployGovernorFactory(deployer);
-
-        tokenAddr = await tokenFactory.predictAddress(ZERO_HASH);
-        governorAddr = await governorFactory.predictAddress(ZERO_HASH);
-
-        let repo: Repository;
-        if (!(await fs.pathExists(TESTDATA_LOCAL_PATH))) {
-            if (VERBOSE) console.log(`cloning ${TESTDATA_REMOTE} into ${TESTDATA_LOCAL_PATH}`);
-            repo = await cloneRepo(TESTDATA_REMOTE, TESTDATA_LOCAL_PATH, TESTDATA_BRANCH);
-        } else {
-            if (VERBOSE) console.log(`opening existing repo at ${TESTDATA_LOCAL_PATH}`);
-            repo = await Repository.open(TESTDATA_LOCAL_PATH);
-        }
-
-        // Signers will have different address values for each person that runs this test, since
-        // based on MNEMONIC in the .env file. So we need to inject the signers addressed into commits
-        // and token address into tag (which changed based on the deployer signer to create TokenFactory).
-
-        await injectCommitAddress(
-            repo,
-            await alice.getAddress(),
-            await bob.getAddress(),
-            await charlie.getAddress(),
-            await dave.getAddress(),
-        );
-
-        await injectTagAddress(repo, tokenAddr);
-
-        token = await createTokenClone(
-            tokenFactory.address,
-            gitConsensus.address,
-            governorAddr,
-            alice, // can be anyone
-            EXAMPLE_TOKEN_NAME,
-            EXAMPLE_TOKEN_SYMBOL,
-            MAX_MINTABLE_PER_HASH, // randomBigNumber() only uses 20 * 8 = 160 bits, so no risk of going over
-            [alice.address, bob.address],
-            [200, 100],
-            ZERO_HASH,
-        );
-
-        governor = await createGovernorClone(
-            governorFactory.address,
-            tokenAddr,
-            alice, // can be anyone
-            EXAMPLE_GOVERNOR_NAME,
-            EXAMPLE_VOTING_DELAY_BLOCKS,
-            EXAMPLE_VOTING_PERIOD_BLOCKS,
-            EXAMPLE_VOTING_PROPOSAL_THRESHOLD,
-            EXAMPLE_VOTING_QUORUM_PERCENT,
-            ZERO_HASH,
-        );
-
-        commitsNoAddr = commitExamplesNoAddr();
-        commitsWithAddr = await commitExamplesWithAddr();
-        tagsNoAddr = tagExamplesNoAddr();
-        tagsWithAddr = await tagExamplesWithAddr();
     });
 });
