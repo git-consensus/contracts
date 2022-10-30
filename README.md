@@ -44,4 +44,4 @@ To get started with development, check out the [Developer Guide](./CONTRIBUTING.
 
 ## [License](#license)
 
-The code in this project is licensed under the is licensed under the [GNU General Public License v3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60).
+The code in this project is licensed under the [GNU General Public License v3](https://gist.github.com/kn9ts/cbe95340d29fc1aaeaa5dd5c059d2e60).

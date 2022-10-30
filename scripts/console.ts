@@ -16,7 +16,10 @@ import {
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
+import { GovernorFactory, TokenFactory } from "../types";
+import { GovernorImpl, TokenImpl } from "../types/contracts/clones";
 import {
+    GIGA,
     EXAMPLE_GOVERNOR_NAME,
     EXAMPLE_TOKEN_NAME,
     EXAMPLE_TOKEN_SYMBOL,
@@ -33,25 +36,29 @@ import {
     deployTokenFactory,
 } from "./deploy";
 import { saltToHex } from "./utils";
-import { GovernorFactory, TokenFactory } from "../types";
-import { GovernorImpl, TokenImpl } from "../types/contracts/clones";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-unpublished-require
-let deployments: Deployments = require(`../deployments.json`);
+import { VERBOSE } from "../hardhat.config";
 
 // --- Provides a CLI to deploy the possible contracts ---
 
 // TODO: Hardware Wallet support:
 // https://docs.ethers.io/v5/api/other/hardware/
 
-const JSON_NUM_SPACES = 4;
+// undefined gas amounts will be estimated at transaction creation time
+let gasPrice: BigNumber | undefined;
+let gasLimit: BigNumber | undefined;
 
 async function main(signer?: SignerWithAddress): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
-
-    // TODO: separate out switches into their own function
+    if (VERBOSE) {
+        if (gasPrice == undefined) {
+            gasPrice = await askForGasPrice();
+        }
+        if (gasLimit == undefined) {
+            gasLimit = askForGasLimit();
+        }
+    }
 
     switch (askForUsage()) {
         // TODO: add methods for each contributor action
@@ -96,15 +103,24 @@ async function main(signer?: SignerWithAddress): Promise<void> {
 }
 
 export async function gitConsensus(signer: SignerWithAddress): Promise<void> {
-    await deploy(DevActionContract.GIT_CONSENSUS, () => deployGitConsensus(signer));
+    await trackDeployment(
+        () => deployGitConsensus(signer, gasPrice, gasLimit),
+        DevActionContract.GIT_CONSENSUS,
+    );
 }
 
 export async function tokenFactory(signer: SignerWithAddress): Promise<void> {
-    await deploy(DevActionContract.TOKEN_FACTORY, () => deployTokenFactory(signer));
+    await trackDeployment(
+        () => deployTokenFactory(signer, gasPrice, gasLimit),
+        DevActionContract.TOKEN_FACTORY,
+    );
 }
 
 export async function governorFactory(signer: SignerWithAddress): Promise<void> {
-    await deploy(DevActionContract.GOVERNOR_FACTORY, () => deployGovernorFactory(signer));
+    await trackDeployment(
+        () => deployGovernorFactory(signer, gasPrice, gasLimit),
+        DevActionContract.GOVERNOR_FACTORY,
+    );
 }
 
 export async function createClones(
@@ -200,6 +216,8 @@ export async function createClones(
             owners,
             values,
             tokenSalt,
+            gasPrice,
+            gasLimit,
         );
 
         console.log(
@@ -259,6 +277,8 @@ export async function createClones(
             proposalThreshold,
             quorumNumerator,
             govSalt,
+            gasPrice,
+            gasLimit,
         );
 
         console.log(`\nYour Governor has been deployed with address ${governor.address}`);
@@ -283,29 +303,43 @@ export async function createClones(
     return [tokenAddr, governorAddr];
 }
 
-// --- Deployment and input handling helpers ---
+// --- Deployment helpers ---
 
-// source of most of these are from Radicle:
-// https://github.com/radicle-dev/radicle-contracts/blob/7070d51fdd8f99790b8fb4e4c953351fd417839a/src/deploy-to-network.ts
+const JSON_NUM_SPACES = 4;
 
-async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): Promise<T> {
+// eslint-disable-next-line @typescript-eslint/no-var-requires, node/no-unpublished-require
+let deployments: Deployments = require(`../deployments.json`);
+
+async function trackDeployment<T extends Contract>(
+    fn: () => Promise<T>,
+    name: string = `Contract`,
+): Promise<T> {
     for (;;) {
         try {
-            console.log(`Deploying`, name, `contract...`);
+            console.log(`Deploying ${name} ...`);
 
             const contract = await fn();
             const net = await contract.provider.getNetwork();
 
-            console.log(name, `address:`, etherscanAddress(net.name, contract.address));
+            console.log(`Deployer address: ${contract.deployTransaction.from}`);
+            console.log(`${name} address: ${etherscanAddress(net.name, contract.address)}`);
             console.log(
-                name,
-                `transaction:`,
-                etherscanTx(net.name, contract.deployTransaction.hash),
+                `${name} transaction: ${etherscanTx(net.name, contract.deployTransaction.hash)}`,
             );
-            if (contract.deployTransaction.gasPrice) {
-                console.log(`Gas price:`, contract.deployTransaction.gasPrice.toString(), `wei`);
+
+            if (
+                contract.deployTransaction.blockNumber &&
+                contract.deployTransaction.gasPrice &&
+                contract.deployTransaction.gasLimit
+            ) {
+                console.log(`Block number: ${contract.deployTransaction.blockNumber.toString()}`);
+                console.log(
+                    `Gas price: ${(
+                        contract.deployTransaction.gasPrice.toNumber() / GIGA
+                    ).toString()} Gwei`,
+                );
+                console.log(`Gas limit: ${contract.deployTransaction.gasLimit.toString()} Wei\n`);
             }
-            console.log(`Deployer address:`, contract.deployTransaction.from, `\n`);
 
             const update = askYesNo(
                 `Update 'deployments.json' with new ${name} address ${contract.address}?`,
@@ -320,7 +354,7 @@ async function deploy<T extends Contract>(name: string, fn: () => Promise<T>): P
 
             return contract;
         } catch (e) {
-            console.log(`Failed to deploy`, name, `contract, error:`, e);
+            console.log(`Failed to deploy ${name} contract, error: ${e}`);
             if (askYesNo(`Retry?`) == false) {
                 throw `Deployment failed`;
             }
@@ -398,31 +432,10 @@ function binarySearchByNetwork(deployments: Deployments, networkName: string): n
     return 0;
 }
 
-function etherscanAddress(net: string, addr: string): string {
-    if (net == `mainnet`) {
-        return `https://etherscan.io/address/` + addr;
-    }
-    if (net == `arbitrum`) {
-        return `https://arbiscan.io/address/` + addr;
-    }
-    if (net == `arbitrum-rinkeby`) {
-        return `https://testnet.arbiscan.io/address/` + addr;
-    }
-    return `https://` + net + `.etherscan.io/address/` + addr;
-}
+// --- Input handling helpers ---
 
-function etherscanTx(net: string, txHash: string): string {
-    if (net == `mainnet`) {
-        return `https://etherscan.io/tx/` + txHash;
-    }
-    if (net == `arbitrum`) {
-        return `https://arbiscan.io/tx/` + txHash;
-    }
-    if (net == `arbitrum-rinkeby`) {
-        return `https://testnet.arbiscan.io/tx/` + txHash;
-    }
-    return `https://` + net + `.etherscan.io/tx/` + txHash;
-}
+// source of most of these are from Radicle:
+// https://github.com/radicle-dev/radicle-contracts/blob/7070d51fdd8f99790b8fb4e4c953351fd417839a/src/deploy-to-network.ts
 
 function askForUsage(): string {
     const usageOpts = [Usage.CONTRIBUTOR, Usage.MAINTAINER, Usage.DEV];
@@ -441,7 +454,7 @@ function askForUsage(): string {
         case Usage.MAINTAINER:
             console.log(
                 `\nTo turn your new or existing git project into a git project utilizing the Git Consensus Protocol, ` +
-                    `you will need to go through a one-time step of deploying project-specific Token & Governor clones.` +
+                    `you will need to go through a one-time step of deploying project-specific Token & Governor clones. ` +
                     `\n\nThe Token clone is an extended ERC20 contract that holds balances for each address and ` +
                     `assigns voting power based on this balance.` +
                     `\n\nThe Governor clone is a standard Governor contract that utilizes the Token's voting balance to create, ` +
@@ -459,7 +472,7 @@ function askForUsage(): string {
                     `have been deployed to most networks, contract developers may also wish to deploy their own versions of ` +
                     `these contracts. As long as these contracts implement the interfaces (e.g. IGitConsensus), various other ` +
                     `logic can be adjusted.` +
-                    `\n\nKeep in mind, any newly deployed contracts will have clean state (e.g. an empty hash->address` +
+                    `\n\nKeep in mind, any newly deployed contracts will have clean state (e.g. an empty hash->address ` +
                     `mapping). For production purposes, it is always recommended to stick to the addresses of the officially ` +
                     `deployed contracts in 'deployments.json', so that looking up the address correlated to a commit/tag from the past is ` +
                     `simple.\n`,
@@ -504,56 +517,30 @@ async function askForSigner(): Promise<SignerWithAddress> {
     return deployer;
 }
 
-function askForGasPrice(gasUsage: string, defaultPrice: BigNumber): BigNumber {
-    const giga = 10 ** 9;
-    const question = `gas price ` + gasUsage + ` in GWei`;
-    const defaultPriceGwei = (defaultPrice.toNumber() / giga).toString();
+async function askForGasPrice(): Promise<BigNumber | undefined> {
+    const defaultPrice = await ethers.provider.getGasPrice();
+    const defaultPriceGwei = (defaultPrice.toNumber() / GIGA).toString();
     for (;;) {
-        const priceStr = askFor(question, defaultPriceGwei);
+        const priceStr = askFor(`gas price in GWei`, defaultPriceGwei);
         const price = parseFloat(priceStr);
         if (Number.isFinite(price) && price >= 0) {
-            const priceWei = (price * giga).toFixed();
-            return BigNumber.from(priceWei);
+            const priceWei = (price * GIGA).toFixed();
+            const priceBn = BigNumber.from(priceWei);
+            if (priceBn.isZero()) {
+                return undefined;
+            }
+            return priceBn;
         }
-        printInvalidInput(`amount`);
+        printInvalidInput(`gas amount`);
     }
 }
 
-function askForAmount(amountUsage: string, decimals: number, symbol: string): BigNumber {
-    const amount = askForBigNumber(`amount ` + amountUsage + ` in ` + symbol);
-    return BigNumber.from(10).pow(decimals).mul(amount);
-}
-
-function askForBigNumber(numberUsage: string): BigNumber {
-    for (;;) {
-        const bigNumber = askFor(numberUsage);
-        try {
-            return BigNumber.from(bigNumber);
-        } catch (e) {
-            printInvalidInput(`number`);
-        }
+function askForGasLimit(): BigNumber | undefined {
+    const limitBn = BigNumber.from(askForNumber(`gas limit in Wei (0 for estimate)`, `0`));
+    if (limitBn.isZero()) {
+        return undefined;
     }
-}
-
-function askForTimestamp(dateUsage: string): number {
-    for (;;) {
-        const dateStr = askFor(
-            `the date ` +
-                dateUsage +
-                ` in the ISO-8601 format, e.g. 2020-01-21, the timezone is UTC if unspecified`,
-        );
-        try {
-            const date = new Date(dateStr);
-            return date.valueOf() / 1000;
-        } catch (e) {
-            printInvalidInput(`date`);
-        }
-    }
-}
-
-function askForDaysInSeconds(daysUsage: string): number {
-    const days = askForNumber(daysUsage + ` in whole days`);
-    return days * 24 * 60 * 60;
+    return limitBn;
 }
 
 function askYesNo(query: string): boolean {
@@ -593,7 +580,7 @@ function askFor(query: string, defaultInput?: string, hideInput = false): string
 }
 
 function printInvalidInput(inputType: string): void {
-    console.log(`This is not a valid`, inputType);
+    console.log(`The ${inputType} you entered is invalid. Please try again.`);
 }
 
 function printDistribution(owners: string[], values: BigNumberish[]): void {
@@ -605,6 +592,34 @@ function printDistribution(owners: string[], values: BigNumberish[]): void {
         console.log(`${owners[i]}   | ${values[i].toString()}`);
     }
     console.log(`\n`);
+}
+
+// --- External link helpers ---
+
+function etherscanAddress(net: string, addr: string): string {
+    if (net == `mainnet`) {
+        return `https://etherscan.io/address/${addr}`;
+    }
+    if (net == `arbitrum`) {
+        return `https://arbiscan.io/address/${addr}`;
+    }
+    if (net == `arbitrum-goerli`) {
+        return `https://goerli.arbiscan.io/address/${addr}`;
+    }
+    return `https://${net}.etherscan.io/address/${addr}`;
+}
+
+function etherscanTx(net: string, txHash: string): string {
+    if (net == `mainnet`) {
+        return `https://etherscan.io/tx/${txHash}`;
+    }
+    if (net == `arbitrum`) {
+        return `https://arbiscan.io/tx/${txHash}`;
+    }
+    if (net == `arbitrum-goerli`) {
+        return `https://goerli.arbiscan.io/tx/${txHash}`;
+    }
+    return `https://${net}.etherscan.io/tx/${txHash}`;
 }
 
 main().catch(error => {

@@ -1,11 +1,11 @@
 # [Contributing to Git Consensus Contracts](#contributing-to-git-consensus-contracts)
 
-This is a modern Ethereum contract repository for Solidity contracts. It combines two extremely powerful frameworks:
+This is a modern Solidity template for Ethereum smart contracts. It combines two extremely powerful frameworks:
 
-- [Foundry](#foundry) - for Unit testing written in Solidity ([contracts/test/](./contracts/test/)).
-- [Hardhat](#hardhat) - for Integration testing written in Typescript ([integration/](./integration/)).
+- [Foundry](#foundry) - for Unit tests written in Solidity ([contracts/test/](./contracts/test/)).
+- [Hardhat](#hardhat) - for Integration tests written in Typescript ([integration/](./integration/)).
 
-These also offer some great tools for some advanced things like contract debugging, deployment, gas measurements, etc.
+These frameworks also offer some advanced tools for contract debugging, deployment, gas measurements, etc.
 
 &nbsp;
 
@@ -25,8 +25,8 @@ contracts/
 |- test/ - "Unit tests with Foundry"
 |--- GitConsensus.t.sol
 |- GitConsensus.sol - "Git Consensus Implementation"`
-.env - "Real dot env"
-.env.example - "Example dot env"
+.env - "Real environment vars"
+.env.example - "Example environment vars"
 .eslintignore - "Ignore list for eslint"
 .eslintrc - "Configure eslint"
 .gitignore - "Ignore list for Git"
@@ -37,7 +37,6 @@ contracts/
 deployments.json - "List of contract addresses on each network"
 foundry.toml - "Configure Foundry"
 hardhat.config.ts - "Configure Hardhat"
-import-sorter.json - "Configure Typescript import sort extension"
 LICENSE - "Software license"
 package.json - "Node dependencies"
 slither.config.json - "Configure Slither"
@@ -64,18 +63,23 @@ npm install -g npm
 
 #### [Copy over a new `.env` file](#copy-over-a-new-env-file)
 
-```
+```sh
 cp .env.example .env
 ```
 
 Fill in *at least* your [`MNEMONIC`](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase).
 
-#### [Setup nodegit dependencies](#setup-nodegit-dependencies)
+#### [Install Node dependencies](#install-node-dependencies)
+
+```sh
+npm i
+```
+
+If this fails, you may need to run some additional steps for [nodegit](https://github.com/nodegit/nodegit):
 
 - **Mac**:
 
     ```sh
-    xcode-select --install
     npm config set python $(which python2)
     ```
 
@@ -93,12 +97,6 @@ Fill in *at least* your [`MNEMONIC`](https://metamask.zendesk.com/hc/en-us/artic
     ```sh
     npm install -g --production windows-build-tools
     ```
-
-#### [Install Node dependencies](#install-node-dependencies)
-
-```sh
-npm i
-```
 
 #### [Install Foundry](#install-foundry)
 
@@ -146,7 +144,7 @@ Getting fully prepared may involve getting a [`INFURA_API_KEY`](https://docs.inf
 Then run:
 
 ```sh
-npm run deploy --network goerli
+npm run deploy -- --network goerli
 ```
 
 #### [Generate contract API docs](#generate-contract-api-docs)
@@ -198,7 +196,6 @@ On [Hardhat's website](https://hardhat.org) you will find:
 - [ETHover](https://marketplace.visualstudio.com/items?itemName=tintinweb.vscode-ethover)
 - [Prettier](https://marketplace.visualstudio.com/items?itemName=SimonSiefke.prettier-vscode)
 - [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter)
-- [TypeScript Import Sorter](https://marketplace.visualstudio.com/items?itemName=mike-co.import-sorter)
 - [Mocha Test Explorer](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
 
 &nbsp;
