@@ -468,7 +468,7 @@ function askForUsage(): string {
             break;
         case Usage.DEV:
             console.log(
-                `\nAlthough the of the core Git Consensus contracts (GitConsensus, TokenFactory, and GovernorFactory) ` +
+                `\nAlthough the core Git Consensus contracts (GitConsensus, TokenFactory, and GovernorFactory) ` +
                     `have been deployed to most networks, contract developers may also wish to deploy their own versions of ` +
                     `these contracts. As long as these contracts implement the interfaces (e.g. IGitConsensus), various other ` +
                     `logic can be adjusted.` +
@@ -526,10 +526,7 @@ async function askForGasPrice(): Promise<BigNumber | undefined> {
         if (Number.isFinite(price) && price >= 0) {
             const priceWei = (price * GIGA).toFixed();
             const priceBn = BigNumber.from(priceWei);
-            if (priceBn.isZero()) {
-                return undefined;
-            }
-            return priceBn;
+            return priceBn.isZero() ? undefined : priceBn;
         }
         printInvalidInput(`gas amount`);
     }
@@ -537,10 +534,7 @@ async function askForGasPrice(): Promise<BigNumber | undefined> {
 
 function askForGasLimit(): BigNumber | undefined {
     const limitBn = BigNumber.from(askForNumber(`gas limit in Wei (0 for estimate)`, `0`));
-    if (limitBn.isZero()) {
-        return undefined;
-    }
-    return limitBn;
+    return limitBn.isZero() ? undefined : limitBn;
 }
 
 function askYesNo(query: string): boolean {

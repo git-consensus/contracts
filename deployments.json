@@ -5,15 +5,15 @@
             "contracts": [
                 {
                     "name": "GitConsensus",
-                    "address": "0x6ca2C54CB523fDfa71E8E2C7dB9847122Ae39D87"
+                    "address": "0x61A338AC596D4B70F10079EDaE846cC9723B3B15"
                 },
                 {
                     "name": "TokenFactory",
-                    "address": "0x4Dca127c4C8AfF9c3E3069a5A8e8280C16DAd606"
+                    "address": "0xd0F93ceE49a4A214b96DC7C651dF0C1DebE6af07"
                 },
                 {
                     "name": "GovernorFactory",
-                    "address": "0x6a7b9aF7365B49b1f4E126439F372c83C4CE2E8A"
+                    "address": "0x34406F8A2136fED1D82F9C907Bf7a0BEc62B5129"
                 }
             ]
         },
