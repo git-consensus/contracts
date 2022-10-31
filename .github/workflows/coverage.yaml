@@ -14,7 +14,7 @@ jobs:
             MNEMONIC: ${{secrets.MNEMONIC}}
         steps:
             - name: Install nodegit dependencies
-            - run: |
+              run: |
                   sudo apt-get update
                   sudo apt-get install -y python2 python3 libkrb5-dev gcc openssl libssh2-1-dev libcurl4-openssl-dev g++ make
             - name: Check out the repo
