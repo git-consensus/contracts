@@ -36,7 +36,7 @@ import {
     deployTokenFactory,
 } from "./deploy";
 import { saltToHex } from "./utils";
-import { VERBOSE } from "../hardhat.config";
+import { GAS_MODE, VERBOSE } from "../hardhat.config";
 
 // --- Provides a CLI to deploy the possible contracts ---
 
@@ -51,7 +51,7 @@ async function main(signer?: SignerWithAddress): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
-    if (VERBOSE) {
+    if (GAS_MODE) {
         if (gasPrice == undefined) {
             gasPrice = await askForGasPrice();
         }
@@ -328,6 +328,7 @@ async function trackDeployment<T extends Contract>(
             );
 
             if (
+                GAS_MODE &&
                 contract.deployTransaction.blockNumber &&
                 contract.deployTransaction.gasPrice &&
                 contract.deployTransaction.gasLimit
@@ -589,6 +590,8 @@ function printDistribution(owners: string[], values: BigNumberish[]): void {
 }
 
 // --- External link helpers ---
+
+// TODO: parameterize the path that follows *.io/, add rest of L2s, move function to hardhat config
 
 function etherscanAddress(net: string, addr: string): string {
     if (net == `mainnet`) {

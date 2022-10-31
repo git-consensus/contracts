@@ -22,9 +22,10 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 dotenv.config({ path: resolve(__dirname, `./.env`) });
 
-// pretty sure there are better ways to check this
-export const REPORT_GAS: boolean = process.env.REPORT_GAS == `TRUE` ? true : false;
+// Enable increased log verbosity
 export const VERBOSE: boolean = process.env.VERBOSE == `TRUE` ? true : false;
+// Enable custom gas configuration and gas reporting
+export const GAS_MODE: boolean = process.env.GAS_MODE == `TRUE` ? true : false;
 
 // Number of accounts to generate from MNEMONIC, will determine how many user will
 // be able to choose from during deployments.
@@ -165,7 +166,7 @@ const config: HardhatUserConfig = {
     },
     gasReporter: {
         currency: `USD`,
-        enabled: REPORT_GAS,
+        enabled: GAS_MODE,
         coinmarketcap: process.env.CMC_API_KEY,
         excludeContracts: [`./contracts/test`],
         src: `./contracts`,
