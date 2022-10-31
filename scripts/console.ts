@@ -36,7 +36,7 @@ import {
     deployTokenFactory,
 } from "./deploy";
 import { saltToHex } from "./utils";
-import { GAS_MODE, VERBOSE } from "../hardhat.config";
+import { GAS_MODE } from "../hardhat.config";
 
 // --- Provides a CLI to deploy the possible contracts ---
 

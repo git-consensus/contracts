@@ -12,7 +12,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             MNEMONIC: ${{secrets.MNEMONIC}}
-            INFURA_API_KEY: ${{secrets.INFURA_API_KEY}}
         steps:
             - name: Install nodegit dependencies
             - run: |
