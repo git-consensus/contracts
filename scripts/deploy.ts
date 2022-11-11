@@ -24,12 +24,19 @@ import { deployWait, parseEvent, submitTxWait } from "./utils";
 // when `npx hardhat test --logs` is used.
 
 // deployGitConsensus deploys the GitConsensus contract.
-export async function deployGitConsensus(deployer: SignerWithAddress): Promise<GitConsensus> {
+export async function deployGitConsensus(
+    deployer: SignerWithAddress,
+    gasPrice?: BigNumberish,
+    gasLimit?: BigNumberish,
+): Promise<GitConsensus> {
     const gitConsensus: GitConsensus__factory = await hre.ethers.getContractFactory(
         `GitConsensus`,
         deployer,
     );
-    const gitConsensusContract = await deployWait(gitConsensus.deploy());
+
+    const gitConsensusContract = await deployWait(
+        gitConsensus.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+    );
 
     if (VERBOSE) console.log(`GitConsensus: ${gitConsensusContract.address}`);
     hre.tracer.nameTags[gitConsensusContract.address] = `GitConsensus`;
@@ -39,13 +46,19 @@ export async function deployGitConsensus(deployer: SignerWithAddress): Promise<G
 
 // deployTokenFactory deploys the TokenFactory contract, which allows repositories to deploy
 // a clone (gas efficent minimal-proxy) of the TokenImpl contract.
-export async function deployTokenFactory(deployer: SignerWithAddress): Promise<TokenFactory> {
+export async function deployTokenFactory(
+    deployer: SignerWithAddress,
+    gasPrice?: BigNumberish,
+    gasLimit?: BigNumberish,
+): Promise<TokenFactory> {
     // Deploy token implementation contract
     const tokenImpl: TokenImpl__factory = await hre.ethers.getContractFactory(
         `TokenImpl`,
         deployer,
     );
-    const tokenImplContract: TokenImpl = await deployWait(tokenImpl.deploy());
+    const tokenImplContract: TokenImpl = await deployWait(
+        tokenImpl.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+    );
     if (VERBOSE) console.log(`TokenImpl address: ${tokenImplContract.address}`);
     hre.tracer.nameTags[tokenImplContract.address] = `TokenImpl`;
 
@@ -55,7 +68,7 @@ export async function deployTokenFactory(deployer: SignerWithAddress): Promise<T
         deployer,
     );
     const tokenFactoryContract: TokenFactory = await deployWait(
-        tokenFactory.deploy(tokenImplContract.address),
+        tokenFactory.deploy(tokenImplContract.address, { gasPrice: gasPrice, gasLimit: gasLimit }),
     );
     if (VERBOSE) console.log(`TokenFactory address: ${tokenFactoryContract.address}`);
     hre.tracer.nameTags[tokenFactoryContract.address] = `TokenFactory`;
@@ -65,13 +78,19 @@ export async function deployTokenFactory(deployer: SignerWithAddress): Promise<T
 
 // deployGovernorFactory deploys the GovernorFactory contract, which allows repositories to deploy
 // a clone (gas efficent minimal-proxy) of the GovernorImpl contract.
-export async function deployGovernorFactory(deployer: SignerWithAddress): Promise<GovernorFactory> {
+export async function deployGovernorFactory(
+    deployer: SignerWithAddress,
+    gasPrice?: BigNumberish,
+    gasLimit?: BigNumberish,
+): Promise<GovernorFactory> {
     // Deploy governor implementation contract
     const governorImpl: GovernorImpl__factory = await hre.ethers.getContractFactory(
         `GovernorImpl`,
         deployer,
     );
-    const governorImplContract: GovernorImpl = await deployWait(governorImpl.deploy());
+    const governorImplContract: GovernorImpl = await deployWait(
+        governorImpl.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+    );
     if (VERBOSE) console.log(`GovernorImpl address: ${governorImplContract.address}`);
     hre.tracer.nameTags[governorImplContract.address] = `GovernorImpl`;
 
@@ -81,7 +100,10 @@ export async function deployGovernorFactory(deployer: SignerWithAddress): Promis
         deployer,
     );
     const governorFactoryContract: GovernorFactory = await deployWait(
-        governorFactory.deploy(governorImplContract.address),
+        governorFactory.deploy(governorImplContract.address, {
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
+        }),
     );
     if (VERBOSE) console.log(`GovernorFactory address: ${governorFactoryContract.address}`);
     hre.tracer.nameTags[governorFactoryContract.address] = `GovernorFactory`;
@@ -101,49 +123,33 @@ export async function createTokenClone(
     owners: string[],
     values: BigNumberish[],
     salt: BytesLike,
-    gasLimit?: number,
+    gasPrice?: BigNumberish,
+    gasLimit?: BigNumberish,
 ): Promise<TokenImpl> {
-    const tokenFactory = await ethers.getContractAt(`TokenFactory`, tokenFactoryAddr);
+    const tokenFactory: TokenFactory = await ethers.getContractAt(`TokenFactory`, tokenFactoryAddr);
 
     // Distribution size differences will mean that automatic gas limit from ethers may fail,
     // and probably should be explicitly set in all cases distribution array length is greater than 1.
     // See: https://docs.ethers.io/v5/troubleshooting/errors/#help-UNPREDICTABLE_GAS_LIMIT
-    // TODOL Some function that ups the predicted gas by some factor for each element in the array.
-    let txReceipt: ContractReceipt;
-    if (gasLimit != undefined && gasLimit != 0) {
-        txReceipt = await submitTxWait(
-            tokenFactory
-                .connect(creator)
-                .createToken(
-                    governorAddr,
-                    gitConsensusAddr,
-                    name,
-                    symbol,
-                    maxMintablePerHash,
-                    owners,
-                    values,
-                    salt,
-                    {
-                        gasLimit: gasLimit,
-                    },
-                ),
-        );
-    } else {
-        txReceipt = await submitTxWait(
-            tokenFactory
-                .connect(creator)
-                .createToken(
-                    governorAddr,
-                    gitConsensusAddr,
-                    name,
-                    symbol,
-                    maxMintablePerHash,
-                    owners,
-                    values,
-                    salt,
-                ),
-        );
-    }
+    // TODO: Some function that ups the predicted gas by some factor for each element in the array.
+    const txReceipt: ContractReceipt = await submitTxWait(
+        tokenFactory
+            .connect(creator)
+            .createToken(
+                governorAddr,
+                gitConsensusAddr,
+                name,
+                symbol,
+                maxMintablePerHash,
+                owners,
+                values,
+                salt,
+                {
+                    gasPrice: gasPrice,
+                    gasLimit: gasLimit,
+                },
+            ),
+    );
 
     const tokenAddr: string = parseEvent(txReceipt, tokenFactory.interface)[0].args.instanceAddr;
     if (VERBOSE) console.log(`TokenClone address: ${tokenAddr}`);
@@ -163,43 +169,31 @@ export async function createGovernorClone(
     proposalThreshold: number,
     quorumNumerator: number,
     salt: BytesLike,
-    gasLimit?: number,
+    gasPrice?: BigNumberish,
+    gasLimit?: BigNumberish,
 ): Promise<GovernorImpl> {
-    const governorFactory = await ethers.getContractAt(`GovernorFactory`, governorFactoryAddr);
+    const governorFactory: GovernorFactory = await ethers.getContractAt(
+        `GovernorFactory`,
+        governorFactoryAddr,
+    );
 
-    let txReceipt: ContractReceipt;
-    if (gasLimit != undefined && gasLimit != 0) {
-        txReceipt = await submitTxWait(
-            governorFactory
-                .connect(creator)
-                .createGovernor(
-                    tokenAddr,
-                    name,
-                    votingDelay,
-                    votingPeriod,
-                    proposalThreshold,
-                    quorumNumerator,
-                    salt,
-                    {
-                        gasLimit: gasLimit,
-                    },
-                ),
-        );
-    } else {
-        txReceipt = await submitTxWait(
-            governorFactory
-                .connect(creator)
-                .createGovernor(
-                    tokenAddr,
-                    name,
-                    votingDelay,
-                    votingPeriod,
-                    proposalThreshold,
-                    quorumNumerator,
-                    salt,
-                ),
-        );
-    }
+    const txReceipt: ContractReceipt = await submitTxWait(
+        governorFactory
+            .connect(creator)
+            .createGovernor(
+                tokenAddr,
+                name,
+                votingDelay,
+                votingPeriod,
+                proposalThreshold,
+                quorumNumerator,
+                salt,
+                {
+                    gasPrice: gasPrice,
+                    gasLimit: gasLimit,
+                },
+            ),
+    );
 
     const governorAddr: string = parseEvent(txReceipt, governorFactory.interface)[0].args
         .instanceAddr;

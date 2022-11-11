@@ -13,7 +13,7 @@ import { ethers } from "hardhat";
 import { hexlify } from "@ethersproject/bytes";
 import { TransactionReceipt } from "@ethersproject/providers";
 
-import { REPORT_GAS } from "../hardhat.config";
+import { GAS_MODE } from "../hardhat.config";
 import { PromiseOrValue } from "../types/common";
 import { ZERO_HASH } from "./const";
 
@@ -33,8 +33,8 @@ export async function submitTxWait(
 ): Promise<ContractReceipt> {
     void expect(tx).to.not.be.reverted;
     const receipt = await (await tx).wait();
-    if (REPORT_GAS) {
-        console.log(`Gas used for ` + txName + `: ` + receipt.gasUsed.toString());
+    if (GAS_MODE) {
+        console.log(`Gas used for ${txName}: ${receipt.gasUsed.toString()}`);
     }
     expect(receipt.status).to.eq(1);
     return receipt;

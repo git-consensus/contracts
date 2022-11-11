@@ -1,8 +1,9 @@
 // This file contains most of the information a caller would need to know about contract interaction responses,
 // as well as constants that get re-used in deployment and test files.
 
-export const ZERO_ADDRESS = `0x0000000000000000000000000000000000000000`;
-export const ZERO_HASH = `0x0000000000000000000000000000000000000000000000000000000000000000`;
+export const GIGA: number = 10 ** 9;
+export const ZERO_ADDRESS: string = `0x0000000000000000000000000000000000000000`;
+export const ZERO_HASH: string = `0x0000000000000000000000000000000000000000000000000000000000000000`;
 
 // These some random params to make for the github.com/git-consensus/example onboarding with
 // a new Token and Governor clone. Uses standard naming conventions for them.
