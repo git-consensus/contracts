@@ -36,7 +36,7 @@ import {
     deployTokenFactory,
 } from "./deploy";
 import { saltToHex } from "./utils";
-import { GAS_MODE } from "../hardhat.config";
+import { explorerUrl, UrlType, GAS_MODE } from "../hardhat.config";
 
 // --- Provides a CLI to deploy the possible contracts ---
 
@@ -201,7 +201,13 @@ export async function createClones(
             printDistribution(owners, values);
         }
 
-        console.log(`Your predicted Token address ${etherscanAddress(network.name, tokenAddr)}\n`);
+        console.log(
+            `Your predicted Token address ${explorerUrl(
+                network.name,
+                UrlType.ADDRESS,
+                tokenAddr,
+            )}\n`,
+        );
 
         console.log(`Creating token...`);
 
@@ -263,7 +269,11 @@ export async function createClones(
         );
 
         console.log(
-            `Your predicted Governor address ${etherscanAddress(network.name, governorAddr)}`,
+            `Your predicted Governor address ${explorerUrl(
+                network.name,
+                UrlType.ADDRESS,
+                governorAddr,
+            )}`,
         );
 
         console.log(`Creating governor...`);
@@ -322,9 +332,15 @@ async function trackDeployment<T extends Contract>(
             const net = await contract.provider.getNetwork();
 
             console.log(`Deployer address: ${contract.deployTransaction.from}`);
-            console.log(`${name} address: ${etherscanAddress(net.name, contract.address)}`);
             console.log(
-                `${name} transaction: ${etherscanTx(net.name, contract.deployTransaction.hash)}`,
+                `${name} address: ${explorerUrl(net.name, UrlType.ADDRESS, contract.address)}`,
+            );
+            console.log(
+                `${name} transaction: ${explorerUrl(
+                    net.name,
+                    UrlType.TX,
+                    contract.deployTransaction.hash,
+                )}`,
             );
 
             if (
@@ -587,36 +603,6 @@ function printDistribution(owners: string[], values: BigNumberish[]): void {
         console.log(`${owners[i]}   | ${values[i].toString()}`);
     }
     console.log(`\n`);
-}
-
-// --- External link helpers ---
-
-// TODO: parameterize the path that follows *.io/, add rest of L2s, move function to hardhat config
-
-function etherscanAddress(net: string, addr: string): string {
-    if (net == `mainnet`) {
-        return `https://etherscan.io/address/${addr}`;
-    }
-    if (net == `arbitrum`) {
-        return `https://arbiscan.io/address/${addr}`;
-    }
-    if (net == `arbitrum-goerli`) {
-        return `https://goerli.arbiscan.io/address/${addr}`;
-    }
-    return `https://${net}.etherscan.io/address/${addr}`;
-}
-
-function etherscanTx(net: string, txHash: string): string {
-    if (net == `mainnet`) {
-        return `https://etherscan.io/tx/${txHash}`;
-    }
-    if (net == `arbitrum`) {
-        return `https://arbiscan.io/tx/${txHash}`;
-    }
-    if (net == `arbitrum-goerli`) {
-        return `https://goerli.arbiscan.io/tx/${txHash}`;
-    }
-    return `https://${net}.etherscan.io/tx/${txHash}`;
 }
 
 main().catch(error => {

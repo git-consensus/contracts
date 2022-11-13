@@ -1,4 +1,3 @@
-/* eslint-disable */
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "hardhat-gas-reporter";
@@ -63,6 +62,7 @@ const chainIds = {
     arbitrum: 42161,
     "arbitrum-goerli": 421613,
     avalanche: 43114,
+    "avalanche-fuji": 43113,
     "polygon-mainnet": 137,
     "polygon-mumbai": 80001,
     hardhat: 31337,
@@ -71,17 +71,29 @@ const chainIds = {
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;
     switch (chain) {
+        case `optimism`:
+            jsonRpcUrl = `https://mainnet.optimism.io`;
+            break;
+        case `avalanche`:
+            jsonRpcUrl = `https://api.avax.network/ext/bc/C/rpc`;
+            break;
+        case `avalanche-fuji`:
+            jsonRpcUrl = `https://api.avax-test.network/ext/bc/C/rpc`;
+            break;
+        case `bsc`:
+            jsonRpcUrl = `https://bsc-dataseed1.binance.org`;
+            break;
         case `arbitrum`:
             jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         case `arbitrum-goerli`:
             jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
-        case `avalanche`:
-            jsonRpcUrl = `https://api.avax.network/ext/bc/C/rpc`;
+        case `polygon-mainnet`:
+            jsonRpcUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
-        case `bsc`:
-            jsonRpcUrl = `https://bsc-dataseed1.binance.org`;
+        case `polygon-mumbai`:
+            jsonRpcUrl = `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         default:
             jsonRpcUrl = `https://${chain}.infura.io/v3/${process.env.INFURA_API_KEY}`;
@@ -95,6 +107,38 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
         chainId: chainIds[chain],
         url: jsonRpcUrl,
     };
+}
+
+export enum UrlType {
+    ADDRESS = `address`,
+    TX = `tx`,
+}
+
+export function explorerUrl(net: string, type: UrlType, param: string): string {
+    switch (net) {
+        case `mainnet`:
+            return `https://etherscan.io/${type}/${param}`;
+        case `goerli`:
+            return `https://goerli.etherscan.io/${type}/${param}`;
+        case `optimism`:
+            return `https://optimistic.etherscan.io/${type}/${param}`;
+        case `bsc`:
+            return `https://bscscan.com/${type}/${param}`;
+        case `arbitrum`:
+            return `https://arbiscan.io/${type}/${param}`;
+        case `arbitrum-goerli`:
+            return `https://goerli.arbiscan.io/${type}/${param}`;
+        case `avalanche`:
+            return `https://snowtrace.io/${type}/${param}`;
+        case `avalanche-fuji`:
+            return `https://testnet.snowtrace.io/${type}/${param}`;
+        case `polygon-mainnet`:
+            return `https://polygonscan.com/${type}/${param}`;
+        case `polygon-mumbai`:
+            return `https://mumbai.polygonscan.com/${type}/${param}`;
+        default:
+            return `https://${net}.etherscan.io/${type}/${param}`;
+    }
 }
 
 // try use forge config
@@ -156,9 +200,10 @@ const config: HardhatUserConfig = {
         },
         mainnet: getChainConfig(`mainnet`),
         goerli: getChainConfig(`goerli`),
-        arbitrum: getChainConfig("arbitrum"),
-        "arbitrum-goerli": getChainConfig("arbitrum-goerli"),
+        arbitrum: getChainConfig(`arbitrum`),
+        "arbitrum-goerli": getChainConfig(`arbitrum-goerli`),
         avalanche: getChainConfig(`avalanche`),
+        "avalanche-fuji": getChainConfig(`avalanche-fuji`),
         bsc: getChainConfig(`bsc`),
         optimism: getChainConfig(`optimism`),
         "polygon-mainnet": getChainConfig(`polygon-mainnet`),
@@ -178,6 +223,7 @@ const config: HardhatUserConfig = {
             arbitrum: process.env.ARBISCAN_API_KEY || ``,
             "arbitrum-goerli": process.env.ARBISCAN_API_KEY || ``,
             avalanche: process.env.SNOWTRACE_API_KEY || ``,
+            "avalanche-fuji": process.env.SNOWTRACE_API_KEY || ``,
             optimism: process.env.OPTIMISM_API_KEY || ``,
             bsc: process.env.BSCSCAN_API_KEY || ``,
             "polygon-mainnet": process.env.POLYGONSCAN_API_KEY || ``,
