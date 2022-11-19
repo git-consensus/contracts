@@ -64,6 +64,7 @@ const chainIds = {
     hardhat: 31337,
     mainnet: 1,
     optimism: 10,
+    "optimism-goerli": 420,
     "polygon-mainnet": 137,
     "polygon-mumbai": 80001,
 };
@@ -88,6 +89,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
             break;
         case `optimism`:
             jsonRpcUrl = `https://mainnet.optimism.io`;
+            break;
+        case `optimism-goerli`:
+            jsonRpcUrl = `https://opt-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         case `polygon-mainnet`:
             jsonRpcUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
@@ -132,6 +136,8 @@ export function explorerUrl(net: string, type: UrlType, param: string): string {
             return `https://etherscan.io/${type}/${param}`;
         case `optimism`:
             return `https://optimistic.etherscan.io/${type}/${param}`;
+        case `optimism-goerli`:
+            return `https://goerli-optimism.etherscan.io/${type}/${param}`;
         case `polygon-mainnet`:
             return `https://polygonscan.com/${type}/${param}`;
         case `polygon-mumbai`:
@@ -206,6 +212,7 @@ const config: HardhatUserConfig = {
         goerli: getChainConfig(`goerli`),
         mainnet: getChainConfig(`mainnet`),
         optimism: getChainConfig(`optimism`),
+        "optimism-goerli": getChainConfig(`optimism-goerli`),
         "polygon-mainnet": getChainConfig(`polygon-mainnet`),
         "polygon-mumbai": getChainConfig(`polygon-mumbai`),
     },
@@ -218,14 +225,15 @@ const config: HardhatUserConfig = {
     },
     etherscan: {
         apiKey: {
-            mainnet: process.env.ETHERSCAN_API_KEY || ``,
-            goerli: process.env.ETHERSCAN_API_KEY || ``,
             arbitrum: process.env.ARBISCAN_API_KEY || ``,
             "arbitrum-goerli": process.env.ARBISCAN_API_KEY || ``,
             avalanche: process.env.SNOWTRACE_API_KEY || ``,
             "avalanche-fuji": process.env.SNOWTRACE_API_KEY || ``,
-            optimism: process.env.OPTIMISM_API_KEY || ``,
             bsc: process.env.BSCSCAN_API_KEY || ``,
+            goerli: process.env.ETHERSCAN_API_KEY || ``,
+            mainnet: process.env.ETHERSCAN_API_KEY || ``,
+            optimism: process.env.OPTIMISM_API_KEY || ``,
+            "optimism-goerli": process.env.OPTIMISM_API_KEY || ``,
             "polygon-mainnet": process.env.POLYGONSCAN_API_KEY || ``,
             "polygon-mumbai": process.env.POLYGONSCAN_API_KEY || ``,
         },
