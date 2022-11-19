@@ -55,24 +55,27 @@ const GAS_LIMITS = {
 };
 
 const chainIds = {
-    mainnet: 1,
-    goerli: 5,
-    optimism: 10,
-    bsc: 56,
     arbitrum: 42161,
     "arbitrum-goerli": 421613,
     avalanche: 43114,
     "avalanche-fuji": 43113,
+    bsc: 56,
+    goerli: 5,
+    hardhat: 31337,
+    mainnet: 1,
+    optimism: 10,
     "polygon-mainnet": 137,
     "polygon-mumbai": 80001,
-    hardhat: 31337,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     let jsonRpcUrl: string;
     switch (chain) {
-        case `optimism`:
-            jsonRpcUrl = `https://mainnet.optimism.io`;
+        case `arbitrum`:
+            jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+            break;
+        case `arbitrum-goerli`:
+            jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             break;
         case `avalanche`:
             jsonRpcUrl = `https://api.avax.network/ext/bc/C/rpc`;
@@ -83,11 +86,8 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
         case `bsc`:
             jsonRpcUrl = `https://bsc-dataseed1.binance.org`;
             break;
-        case `arbitrum`:
-            jsonRpcUrl = `https://arb-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
-            break;
-        case `arbitrum-goerli`:
-            jsonRpcUrl = `https://arb-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+        case `optimism`:
+            jsonRpcUrl = `https://mainnet.optimism.io`;
             break;
         case `polygon-mainnet`:
             jsonRpcUrl = `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
@@ -116,14 +116,6 @@ export enum UrlType {
 
 export function explorerUrl(net: string, type: UrlType, param: string): string {
     switch (net) {
-        case `mainnet`:
-            return `https://etherscan.io/${type}/${param}`;
-        case `goerli`:
-            return `https://goerli.etherscan.io/${type}/${param}`;
-        case `optimism`:
-            return `https://optimistic.etherscan.io/${type}/${param}`;
-        case `bsc`:
-            return `https://bscscan.com/${type}/${param}`;
         case `arbitrum`:
             return `https://arbiscan.io/${type}/${param}`;
         case `arbitrum-goerli`:
@@ -132,6 +124,14 @@ export function explorerUrl(net: string, type: UrlType, param: string): string {
             return `https://snowtrace.io/${type}/${param}`;
         case `avalanche-fuji`:
             return `https://testnet.snowtrace.io/${type}/${param}`;
+        case `bsc`:
+            return `https://bscscan.com/${type}/${param}`;
+        case `goerli`:
+            return `https://goerli.etherscan.io/${type}/${param}`;
+        case `mainnet`:
+            return `https://etherscan.io/${type}/${param}`;
+        case `optimism`:
+            return `https://optimistic.etherscan.io/${type}/${param}`;
         case `polygon-mainnet`:
             return `https://polygonscan.com/${type}/${param}`;
         case `polygon-mumbai`:
@@ -198,13 +198,13 @@ const config: HardhatUserConfig = {
             blockGasLimit: GAS_LIMITS.hardhat.toNumber(),
             gas: GAS_LIMITS.hardhat.toNumber(), // https://github.com/nomiclabs/hardhat/issues/660#issuecomment-715897156
         },
-        mainnet: getChainConfig(`mainnet`),
-        goerli: getChainConfig(`goerli`),
         arbitrum: getChainConfig(`arbitrum`),
         "arbitrum-goerli": getChainConfig(`arbitrum-goerli`),
         avalanche: getChainConfig(`avalanche`),
         "avalanche-fuji": getChainConfig(`avalanche-fuji`),
         bsc: getChainConfig(`bsc`),
+        goerli: getChainConfig(`goerli`),
+        mainnet: getChainConfig(`mainnet`),
         optimism: getChainConfig(`optimism`),
         "polygon-mainnet": getChainConfig(`polygon-mainnet`),
         "polygon-mumbai": getChainConfig(`polygon-mumbai`),
