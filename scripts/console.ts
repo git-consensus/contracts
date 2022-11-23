@@ -4,16 +4,6 @@ import * as fs from "fs";
 import { ethers, network } from "hardhat";
 import * as path from "path";
 import { keyInSelect, keyInYNStrict, question } from "readline-sync";
-import {
-    ContributorAction,
-    Deployment,
-    DeploymentContract,
-    Deployments,
-    DevActionContract,
-    MaintainerActionContract,
-    Usage,
-} from "./console-types/types";
-
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { GovernorFactory, TokenFactory } from "../types";
@@ -37,27 +27,20 @@ import {
 } from "./deploy";
 import { saltToHex } from "./utils";
 import { explorerUrl, UrlType, GAS_MODE } from "../hardhat.config";
+import { Deployment, DeploymentContract, Deployments, GasOptions } from "./types";
+import { FeeData } from "@ethersproject/providers";
 
 // --- Provides a CLI to deploy the possible contracts ---
 
 // TODO: Hardware Wallet support:
 // https://docs.ethers.io/v5/api/other/hardware/
 
-// undefined gas amounts will be estimated at transaction creation time
-let gasPrice: BigNumber | undefined;
-let gasLimit: BigNumber | undefined;
-
-async function main(signer?: SignerWithAddress): Promise<void> {
+async function main(signer?: SignerWithAddress, gasOptions?: GasOptions): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
-    if (GAS_MODE) {
-        if (gasPrice == undefined) {
-            gasPrice = await askForGasPrice();
-        }
-        if (gasLimit == undefined) {
-            gasLimit = askForGasLimit();
-        }
+    if (GAS_MODE && gasOptions === undefined) {
+        gasOptions = await askForGasOptions();
     }
 
     switch (askForUsage()) {
@@ -65,60 +48,69 @@ async function main(signer?: SignerWithAddress): Promise<void> {
         case Usage.CONTRIBUTOR:
             switch (askForContributorAction()) {
                 default:
-                    void main(signer);
+                    void main(signer, gasOptions);
                     return;
             }
         case Usage.MAINTAINER:
             switch (askForCloneContracts()) {
                 case MaintainerActionContract.BOTH:
                     await createClones(signer, true, true);
-                    void main(signer);
+                    void main(signer, gasOptions);
                     return;
                 case MaintainerActionContract.TOKEN:
                     await createClones(signer, true, false);
-                    void main(signer);
+                    void main(signer, gasOptions);
                     return;
                 case MaintainerActionContract.GOVERNOR:
                     await createClones(signer, false, true);
-                    void main(signer);
+                    void main(signer, gasOptions);
                     return;
             }
         // eslint-disable-next-line no-fallthrough
         case Usage.DEV:
             switch (askForDevActionContract()) {
                 case DevActionContract.GIT_CONSENSUS:
-                    await gitConsensus(signer);
-                    void main(signer);
+                    await gitConsensus(signer, gasOptions);
+                    void main(signer, gasOptions);
                     return;
                 case DevActionContract.TOKEN_FACTORY:
-                    await tokenFactory(signer);
-                    void main(signer);
+                    await tokenFactory(signer, gasOptions);
+                    void main(signer, gasOptions);
                     return;
                 case DevActionContract.GOVERNOR_FACTORY:
-                    await governorFactory(signer);
-                    void main(signer);
+                    await governorFactory(signer, gasOptions);
+                    void main(signer, gasOptions);
                     return;
             }
     }
 }
 
-export async function gitConsensus(signer: SignerWithAddress): Promise<void> {
+export async function gitConsensus(
+    signer: SignerWithAddress,
+    gasOptions?: GasOptions,
+): Promise<void> {
     await trackDeployment(
-        () => deployGitConsensus(signer, gasPrice, gasLimit),
+        () => deployGitConsensus(signer, gasOptions),
         DevActionContract.GIT_CONSENSUS,
     );
 }
 
-export async function tokenFactory(signer: SignerWithAddress): Promise<void> {
+export async function tokenFactory(
+    signer: SignerWithAddress,
+    gasOptions?: GasOptions,
+): Promise<void> {
     await trackDeployment(
-        () => deployTokenFactory(signer, gasPrice, gasLimit),
+        () => deployTokenFactory(signer, gasOptions),
         DevActionContract.TOKEN_FACTORY,
     );
 }
 
-export async function governorFactory(signer: SignerWithAddress): Promise<void> {
+export async function governorFactory(
+    signer: SignerWithAddress,
+    gasOptions?: GasOptions,
+): Promise<void> {
     await trackDeployment(
-        () => deployGovernorFactory(signer, gasPrice, gasLimit),
+        () => deployGovernorFactory(signer, gasOptions),
         DevActionContract.GOVERNOR_FACTORY,
     );
 }
@@ -127,6 +119,7 @@ export async function createClones(
     signer: SignerWithAddress,
     withToken?: boolean,
     withGovernor?: boolean,
+    gasOptions?: GasOptions,
 ): Promise<string[]> {
     const defaultGitConsensusAddr = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
@@ -222,8 +215,7 @@ export async function createClones(
             owners,
             values,
             tokenSalt,
-            gasPrice,
-            gasLimit,
+            gasOptions,
         );
 
         console.log(
@@ -287,8 +279,7 @@ export async function createClones(
             proposalThreshold,
             quorumNumerator,
             govSalt,
-            gasPrice,
-            gasLimit,
+            gasOptions,
         );
 
         console.log(`\nYour Governor has been deployed with address ${governor.address}`);
@@ -454,6 +445,35 @@ function binarySearchByNetwork(deployments: Deployments, networkName: string): n
 // source of most of these are from Radicle:
 // https://github.com/radicle-dev/radicle-contracts/blob/7070d51fdd8f99790b8fb4e4c953351fd417839a/src/deploy-to-network.ts
 
+enum Usage {
+    CONTRIBUTOR = `CONTRIBUTOR - add or check a git commit/tag on-chain, Token interactions, or Governor interactions.`,
+    MAINTAINER = `MAINTAINER - onboard a project to Git Consensus Protocol.`,
+    DEV = `DEV - re-deploy GitConsensus, TokenFactory, or GovernorFactory contracts.`,
+}
+
+enum ContributorAction {
+    CONTRIBUTOR_COMMIT_CHECK = `check a git commit`,
+    CONTRIBUTOR_COMMIT_ADD = `add a git commit`,
+    CONTRIBUTOR_TAG_CHECK = `check a git tag (verify a release)`,
+    CONTRIBUTOR_TOKEN_BALANCE = `check voting power (token balance)`,
+    CONTRIBUTOR_TOKEN_DELEGATE = `delegate voting power to another address`,
+    CONTRIBUTOR_PROPOSE = `create a proposal`,
+    CONTRIBUTOR_VOTE = `vote on an active proposal`,
+    CONTRIBUTOR_EXECUTE = `execute a successful proposal (to add a release)`,
+}
+
+enum MaintainerActionContract {
+    BOTH = `Token and Governor`,
+    TOKEN = `Token only`,
+    GOVERNOR = `Governor only`,
+}
+
+enum DevActionContract {
+    GIT_CONSENSUS = `GitConsensus`,
+    TOKEN_FACTORY = `TokenFactory`,
+    GOVERNOR_FACTORY = `GovernorFactory`,
+}
+
 function askForUsage(): string {
     const usageOpts = [Usage.CONTRIBUTOR, Usage.MAINTAINER, Usage.DEV];
     const usageChoice = keyInSelect(usageOpts, `Please enter your intended usage`, {
@@ -534,23 +554,52 @@ async function askForSigner(): Promise<SignerWithAddress> {
     return deployer;
 }
 
-async function askForGasPrice(): Promise<BigNumber | undefined> {
-    const defaultPrice = await ethers.provider.getGasPrice();
-    const defaultPriceGwei = (defaultPrice.toNumber() / GIGA).toString();
+async function askForGasOptions(): Promise<GasOptions | undefined> {
+    const blockFeeData = await ethers.provider.getFeeData();
+    const maxFeePerGas = askForMaxFeePerGas(blockFeeData);
+    const maxPriorityFeePerGas = askForMaxPriorityFeePerGas(blockFeeData);
+    const gasLimit = askForGasLimit();
+
+    return {
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
+        maxFeePerGas: maxFeePerGas,
+        gasLimit: gasLimit,
+    };
+}
+
+function askForMaxFeePerGas(feeData: FeeData): BigNumber | undefined {
+    const defaultMaxFee = feeData.maxFeePerGas === null ? BigNumber.from(0) : feeData.maxFeePerGas;
+    const defaultMaxFeeStr = (defaultMaxFee.toNumber() / GIGA).toString();
     for (;;) {
-        const priceStr = askFor(`gas price in GWei`, defaultPriceGwei);
-        const price = parseFloat(priceStr);
-        if (Number.isFinite(price) && price >= 0) {
-            const priceWei = (price * GIGA).toFixed();
-            const priceBn = BigNumber.from(priceWei);
-            return priceBn.isZero() ? undefined : priceBn;
+        const gasFeeStr = askFor(`maxFeePerGas in GWei`, defaultMaxFeeStr);
+        const gasFee = parseFloat(gasFeeStr);
+        if (Number.isFinite(gasFee) && gasFee >= 0) {
+            const feeWei = (gasFee * GIGA).toFixed();
+            const feeBn = BigNumber.from(feeWei);
+            return feeBn.isZero() ? undefined : feeBn;
         }
-        printInvalidInput(`gas amount`);
+        printInvalidInput(`maxFeePerGas`);
+    }
+}
+
+function askForMaxPriorityFeePerGas(feeData: FeeData): BigNumber | undefined {
+    const defaultPriorityFee =
+        feeData.maxPriorityFeePerGas === null ? BigNumber.from(0) : feeData.maxPriorityFeePerGas;
+    const defaultPriorityFeeStr = (defaultPriorityFee.toNumber() / GIGA).toString();
+    for (;;) {
+        const priorityFeeStr = askFor(`maxPriorityFeePerGas in GWei`, defaultPriorityFeeStr);
+        const priorityFee = parseFloat(priorityFeeStr);
+        if (Number.isFinite(priorityFee) && priorityFee >= 0) {
+            const feeWei = (priorityFee * GIGA).toFixed();
+            const feeBn = BigNumber.from(feeWei);
+            return feeBn.isZero() ? undefined : feeBn;
+        }
+        printInvalidInput(`maxPriorityFeePerGas`);
     }
 }
 
 function askForGasLimit(): BigNumber | undefined {
-    const limitBn = BigNumber.from(askForNumber(`gas limit in Wei (0 for estimate)`, `0`));
+    const limitBn = BigNumber.from(askForNumber(`gasLimit in Wei (0 for estimate)`, `0`));
     return limitBn.isZero() ? undefined : limitBn;
 }
 
@@ -587,7 +636,7 @@ function askFor(query: string, defaultInput?: string, hideInput = false): string
         limitMessage: ``,
         defaultInput,
     };
-    return question(`Please enter ` + query + questionDefault + `:\n`, options);
+    return question(`Enter ` + query + questionDefault + `:\n`, options);
 }
 
 function printInvalidInput(inputType: string): void {

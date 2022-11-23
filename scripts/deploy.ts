@@ -17,6 +17,7 @@ import {
     TokenImpl__factory,
 } from "../types";
 import { deployWait, parseEvent, submitTxWait } from "./utils";
+import { GasOptions } from "./types";
 
 // --- Helper functions for deploying contracts ---
 
@@ -26,8 +27,7 @@ import { deployWait, parseEvent, submitTxWait } from "./utils";
 // deployGitConsensus deploys the GitConsensus contract.
 export async function deployGitConsensus(
     deployer: SignerWithAddress,
-    gasPrice?: BigNumberish,
-    gasLimit?: BigNumberish,
+    gasOptions?: GasOptions,
 ): Promise<GitConsensus> {
     const gitConsensus: GitConsensus__factory = await hre.ethers.getContractFactory(
         `GitConsensus`,
@@ -35,7 +35,11 @@ export async function deployGitConsensus(
     );
 
     const gitConsensusContract = await deployWait(
-        gitConsensus.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+        gitConsensus.deploy({
+            maxFeePerGas: gasOptions?.maxFeePerGas,
+            maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+            gasLimit: gasOptions?.gasLimit,
+        }),
     );
 
     if (VERBOSE) console.log(`GitConsensus: ${gitConsensusContract.address}`);
@@ -48,8 +52,7 @@ export async function deployGitConsensus(
 // a clone (gas efficent minimal-proxy) of the TokenImpl contract.
 export async function deployTokenFactory(
     deployer: SignerWithAddress,
-    gasPrice?: BigNumberish,
-    gasLimit?: BigNumberish,
+    gasOptions?: GasOptions,
 ): Promise<TokenFactory> {
     // Deploy token implementation contract
     const tokenImpl: TokenImpl__factory = await hre.ethers.getContractFactory(
@@ -57,7 +60,11 @@ export async function deployTokenFactory(
         deployer,
     );
     const tokenImplContract: TokenImpl = await deployWait(
-        tokenImpl.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+        tokenImpl.deploy({
+            maxFeePerGas: gasOptions?.maxFeePerGas,
+            maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+            gasLimit: gasOptions?.gasLimit,
+        }),
     );
     if (VERBOSE) console.log(`TokenImpl address: ${tokenImplContract.address}`);
     hre.tracer.nameTags[tokenImplContract.address] = `TokenImpl`;
@@ -68,7 +75,11 @@ export async function deployTokenFactory(
         deployer,
     );
     const tokenFactoryContract: TokenFactory = await deployWait(
-        tokenFactory.deploy(tokenImplContract.address, { gasPrice: gasPrice, gasLimit: gasLimit }),
+        tokenFactory.deploy(tokenImplContract.address, {
+            maxFeePerGas: gasOptions?.maxFeePerGas,
+            maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+            gasLimit: gasOptions?.gasLimit,
+        }),
     );
     if (VERBOSE) console.log(`TokenFactory address: ${tokenFactoryContract.address}`);
     hre.tracer.nameTags[tokenFactoryContract.address] = `TokenFactory`;
@@ -80,8 +91,7 @@ export async function deployTokenFactory(
 // a clone (gas efficent minimal-proxy) of the GovernorImpl contract.
 export async function deployGovernorFactory(
     deployer: SignerWithAddress,
-    gasPrice?: BigNumberish,
-    gasLimit?: BigNumberish,
+    gasOptions?: GasOptions,
 ): Promise<GovernorFactory> {
     // Deploy governor implementation contract
     const governorImpl: GovernorImpl__factory = await hre.ethers.getContractFactory(
@@ -89,7 +99,11 @@ export async function deployGovernorFactory(
         deployer,
     );
     const governorImplContract: GovernorImpl = await deployWait(
-        governorImpl.deploy({ gasPrice: gasPrice, gasLimit: gasLimit }),
+        governorImpl.deploy({
+            maxFeePerGas: gasOptions?.maxFeePerGas,
+            maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+            gasLimit: gasOptions?.gasLimit,
+        }),
     );
     if (VERBOSE) console.log(`GovernorImpl address: ${governorImplContract.address}`);
     hre.tracer.nameTags[governorImplContract.address] = `GovernorImpl`;
@@ -101,8 +115,9 @@ export async function deployGovernorFactory(
     );
     const governorFactoryContract: GovernorFactory = await deployWait(
         governorFactory.deploy(governorImplContract.address, {
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
+            maxFeePerGas: gasOptions?.maxFeePerGas,
+            maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+            gasLimit: gasOptions?.gasLimit,
         }),
     );
     if (VERBOSE) console.log(`GovernorFactory address: ${governorFactoryContract.address}`);
@@ -123,8 +138,7 @@ export async function createTokenClone(
     owners: string[],
     values: BigNumberish[],
     salt: BytesLike,
-    gasPrice?: BigNumberish,
-    gasLimit?: BigNumberish,
+    gasOptions?: GasOptions,
 ): Promise<TokenImpl> {
     const tokenFactory: TokenFactory = await ethers.getContractAt(`TokenFactory`, tokenFactoryAddr);
 
@@ -145,8 +159,9 @@ export async function createTokenClone(
                 values,
                 salt,
                 {
-                    gasPrice: gasPrice,
-                    gasLimit: gasLimit,
+                    maxFeePerGas: gasOptions?.maxFeePerGas,
+                    maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+                    gasLimit: gasOptions?.gasLimit,
                 },
             ),
     );
@@ -169,8 +184,7 @@ export async function createGovernorClone(
     proposalThreshold: number,
     quorumNumerator: number,
     salt: BytesLike,
-    gasPrice?: BigNumberish,
-    gasLimit?: BigNumberish,
+    gasOptions?: GasOptions,
 ): Promise<GovernorImpl> {
     const governorFactory: GovernorFactory = await ethers.getContractAt(
         `GovernorFactory`,
@@ -189,8 +203,9 @@ export async function createGovernorClone(
                 quorumNumerator,
                 salt,
                 {
-                    gasPrice: gasPrice,
-                    gasLimit: gasLimit,
+                    maxFeePerGas: gasOptions?.maxFeePerGas,
+                    maxPriorityFeePerGas: gasOptions?.maxPriorityFeePerGas,
+                    gasLimit: gasOptions?.gasLimit,
                 },
             ),
     );
