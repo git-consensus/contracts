@@ -35,12 +35,12 @@ import { FeeData } from "@ethersproject/providers";
 // TODO: Hardware Wallet support:
 // https://docs.ethers.io/v5/api/other/hardware/
 
-async function main(signer?: SignerWithAddress, gasOptions?: GasOptions): Promise<void> {
+async function main(signer?: SignerWithAddress, gasOpts?: GasOptions): Promise<void> {
     if (signer == undefined) {
         signer = await askForSigner();
     }
-    if (GAS_MODE && gasOptions === undefined) {
-        gasOptions = await askForGasOptions();
+    if (GAS_MODE && gasOpts === undefined) {
+        gasOpts = await askForGasOptions();
     }
 
     switch (askForUsage()) {
@@ -48,69 +48,63 @@ async function main(signer?: SignerWithAddress, gasOptions?: GasOptions): Promis
         case Usage.CONTRIBUTOR:
             switch (askForContributorAction()) {
                 default:
-                    void main(signer, gasOptions);
+                    void main(signer, gasOpts);
                     return;
             }
         case Usage.MAINTAINER:
             switch (askForCloneContracts()) {
                 case MaintainerActionContract.BOTH:
                     await createClones(signer, true, true);
-                    void main(signer, gasOptions);
+                    void main(signer, gasOpts);
                     return;
                 case MaintainerActionContract.TOKEN:
                     await createClones(signer, true, false);
-                    void main(signer, gasOptions);
+                    void main(signer, gasOpts);
                     return;
                 case MaintainerActionContract.GOVERNOR:
                     await createClones(signer, false, true);
-                    void main(signer, gasOptions);
+                    void main(signer, gasOpts);
                     return;
             }
         // eslint-disable-next-line no-fallthrough
         case Usage.DEV:
             switch (askForDevActionContract()) {
                 case DevActionContract.GIT_CONSENSUS:
-                    await gitConsensus(signer, gasOptions);
-                    void main(signer, gasOptions);
+                    await gitConsensus(signer, gasOpts);
+                    void main(signer, gasOpts);
                     return;
                 case DevActionContract.TOKEN_FACTORY:
-                    await tokenFactory(signer, gasOptions);
-                    void main(signer, gasOptions);
+                    await tokenFactory(signer, gasOpts);
+                    void main(signer, gasOpts);
                     return;
                 case DevActionContract.GOVERNOR_FACTORY:
-                    await governorFactory(signer, gasOptions);
-                    void main(signer, gasOptions);
+                    await governorFactory(signer, gasOpts);
+                    void main(signer, gasOpts);
                     return;
             }
     }
 }
 
-export async function gitConsensus(
-    signer: SignerWithAddress,
-    gasOptions?: GasOptions,
-): Promise<void> {
+export async function gitConsensus(signer: SignerWithAddress, gasOpts?: GasOptions): Promise<void> {
     await trackDeployment(
-        () => deployGitConsensus(signer, gasOptions),
+        () => deployGitConsensus(signer, gasOpts),
         DevActionContract.GIT_CONSENSUS,
     );
 }
 
-export async function tokenFactory(
-    signer: SignerWithAddress,
-    gasOptions?: GasOptions,
-): Promise<void> {
+export async function tokenFactory(signer: SignerWithAddress, gasOpts?: GasOptions): Promise<void> {
     await trackDeployment(
-        () => deployTokenFactory(signer, gasOptions),
+        () => deployTokenFactory(signer, gasOpts),
         DevActionContract.TOKEN_FACTORY,
     );
 }
 
 export async function governorFactory(
     signer: SignerWithAddress,
-    gasOptions?: GasOptions,
+    gasOpts?: GasOptions,
 ): Promise<void> {
     await trackDeployment(
-        () => deployGovernorFactory(signer, gasOptions),
+        () => deployGovernorFactory(signer, gasOpts),
         DevActionContract.GOVERNOR_FACTORY,
     );
 }
@@ -119,7 +113,7 @@ export async function createClones(
     signer: SignerWithAddress,
     withToken?: boolean,
     withGovernor?: boolean,
-    gasOptions?: GasOptions,
+    gasOpts?: GasOptions,
 ): Promise<string[]> {
     const defaultGitConsensusAddr = deployments.deployments
         .find((d: { network: string }) => d.network === network.name)
@@ -215,7 +209,7 @@ export async function createClones(
             owners,
             values,
             tokenSalt,
-            gasOptions,
+            gasOpts,
         );
 
         console.log(
@@ -279,7 +273,7 @@ export async function createClones(
             proposalThreshold,
             quorumNumerator,
             govSalt,
-            gasOptions,
+            gasOpts,
         );
 
         console.log(`\nYour Governor has been deployed with address ${governor.address}`);
